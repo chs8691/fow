@@ -1,0 +1,17 @@
+task- manage a fow's task 
+A task is the working unit, saved in a subdirectory of 02_PROCESS. 
+A task can be set active, so all task manipulating commands are done on this task. The complete task name has always the structure <folder>/<name>.    
+A task has a defined subfolder structure, that should not be changed, but additional subfolders can be added. Subfolders for a photo task:
+/jpg - original jpg files
+/raw - original raw files
+/final - task output, jpg files, that can be exported
+/work  - working directory, for instance for gimp files
+The name of the taskroot can be changed without side effect.
+
+Usage: task [<options>]
+task: Shows task status. Same as task --show. 
+Options:
+--create <name>, -c <name>: Creates a new task in the same folder of the actual task in 02_PROCESS/<folder_actual_task>. The task name may not exists.  
+--create <folder/task>, -c <folder/task>: Creates a new task in the particular subfolder of 02_PROCESS. A task has to be structured in a one-level folder path. For instance "weeklyPicture/<task>".   
+-a <task>, --activate <task>:  Set this task as the active one.
+-s, --show: Show a report about the actual task

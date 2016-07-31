@@ -4,16 +4,39 @@ import shutil
 import re
 import plump
 
-
-#TODO ninja zeigt symbols nur bei fehlerfreiem Coding --> print korrigieren
 #OPTIMIZE Config keys in Hilfe listen
 #FIXME config: wird beim Schreiben eines Eintrags die pickle datei \
 #     erzeugt, wird trotzdem settings.pickle not found ausgegeben
+#FIXME Task -a klappt nicht yum wechseln bei Verzeichnisumbenennung
 
 
 def task(_arg_struct):
     """
     Task manipulation.
+    Output example for 'task':
+        Original: 4 images
+            l-x-- myImage01.jpg
+            ----- myImage02.jpg
+            l---- myImage03.jpg
+            --x-- myImage04.raw
+        Final: 2 images
+            lcrlc myImage01.jpg
+            lc--- myImage03.jpg
+        Published status (only for final images):
+            Destination 'Flickr': 1 image, 1 missing
+                lcrlc myImage01.jpg
+            Destination 'PC desktop': 0 image, 2 missing
+            Destination 'Diskstation': 2 image
+                lcrlc myImage01.jpg
+                lc--- myImage03.jpg
+        Backup status (only for raw images): 0 raws, 2 missing
+
+    The table at the beginning of the line has three columns:
+        loc - Geo location in Exif of jpg file (l, if true)
+        cmt - comment in Exif of jpg (c, if true)
+        raw - Raw file exists (in /raw) (r, if true)
+        loc - Geo location in raw file (l, if true)
+        cmt - Comment in raw file (c, if true)
     """
 
     ##0: No param allowed, 1: param optional, 2: param obligatory
@@ -23,6 +46,8 @@ def task(_arg_struct):
     atom_create = dict(name='create', short='c', args=2)
     atom_activate = dict(name='activate', short='a', args=2)
     atom_show = dict(name='show', short='s', args=0)
+    atom_raw_import = dict(name='raw-import', short='r', args=0)
+    atom_missing_raws = dict(name='missing-raws', short='m', args=0)
     atom_none = dict(name='none', short='n', args=0)
 
     #print('_arg_struct=' + str(_arg_struct))
@@ -30,6 +55,8 @@ def task(_arg_struct):
         [dict(atom=atom_none, obligat=True)],
         [dict(atom=atom_create, obligat=True)],
         [dict(atom=atom_activate, obligat=True)],
+        [dict(atom=atom_raw_import, obligat=True)],
+        [dict(atom=atom_missing_raws, obligat=True)],
         [dict(atom=atom_show, obligat=True)]
         ]
 
@@ -42,40 +69,102 @@ def task(_arg_struct):
 
     #print('Params=' + str(arg_dict))
 
+    #--- Options for the actual task ---#
+
     #task --show
     if 'show' in args['names'] or 'none' in args['names']:
-        print('Actual task is ' + plump.getActualTask()['task'] + '.')
+        if plump.getActualTask() is None:
+            print('No actual task. ' +
+            'Use "task --create <task>" to create one.')
+        else:
+            print('Actual task is ' + plump.getActualTask()['task'] + '.')
+            if 'show' in args['names']:
+                plump.show_task_summary(plump.DIR_02 + '/'
+                    + plump.getActualTask()['task'])
+            else:
+                plump.show_task(plump.DIR_02 + '/'
+                    + plump.getActualTask()['task'])
         return
+
+    #task --raw-import
+    #task --missing-raws
+    if 'raw-import' in args['names'] or \
+        'missing-raws' in args['names']:
+        if plump.getActualTask() is None:
+            print('No actual task set, please specify the folder, too: ' +
+                '[' + plump.DIR_02 + '/]<folder>/<task>')
+            return
+
+        plump.move_corresponding_raws(
+            plump.DIR_02 + '/' + plump.getActualTask()['task']
+            + '/' + plump.DIR_JPG,
+            plump.DIR_01 + '/' + plump.DIR_RAW,
+            plump.DIR_02 + '/' + plump.getActualTask()['task']
+            + '/' + plump.DIR_RAW, 'missing-raws' in args['names'])
+        return
+
+
+    #--- Options to change the actual task ---#
+
+    #Extract folder and task name
+    if args['args'][0].count('/') > 2:
+        print('Path too long, use [[' + plump.DIR_02 + ']/<folder>/]]<task>')
+        return
+
+    #Dictionary with all task parts
+    path = dict(folder=None, task=None, ft=None, path=None)
+    if args['args'][0].count('/') == 2:
+        #print(args['args'][0])
+        if not args['args'][0].startswith(plump.DIR_02 + '/'):
+            print('Invalid path. Try [[' + plump.DIR_02 +
+                 '/]<folder>/]]<task>.')
+            return
+        else:
+            parts = args['args'][0].split('/')
+            path['folder'] = parts[-2]
+            path['task'] = parts[-1]
+    elif args['args'][0].count('/') == 1:
+        parts = args['args'][0].split('/')
+        path['folder'] = parts[-2]
+        path['task'] = parts[-1]
+    else:
+        path['task'] = args['args'][0]
+
+    #If only task is given, take the active folder
+    if path['folder'] is None:
+        if plump.getActualTask() is None:
+            print('No actual task set, please specify the folder, too: ' +
+                '[[' + plump.DIR_02 + '/]<folder>/]]<task>')
+            return
+        path['folder'] = plump.getActualTask()['folder']
+
+    #For conveniencly usage
+    path['ft'] = path['folder'] + '/' + path['task']
+    path['path'] = plump.DIR_02 + '/' + path['ft']
 
     #task --create <task>
     if 'create' in args['names']:
-        #<task> is just a name
-        if args['args'][0].count('/') == 0:
-            if plump.getActualTask() is None:
-                print('No actual task set. ' +
-                    'Use first "task --activate <task>" to activate an ' +
-                    'existing task or use "task --create <folder/name>" ' +
-                    ' to specify the task name and its direcory.')
-                return
-
-            else:
-                name = plump.getActualTask()['folder'] + '/' + args['args'][0]
-
-        #<task> contains a path
-        else:
-            name = args['args'][0]
-
-        if plump._exist_dir(name):
-            print('task ' + name + 'alread exists.' +
+        if os.path.exists(path['path']):
+            print('task ' + path['ft'] + ' already exists.' +
             ' Choose a different name to create a new task.')
             return
 
-        os.makedirs(plump.DIR_02 + '/' + name)
-        os.mkdir(plump.DIR_02 + '/' + name + '/' + plump.DIR_FINAL)
-        os.mkdir(plump.DIR_02 + '/' + name + '/' + plump.DIR_JPG)
-        os.mkdir(plump.DIR_02 + '/' + name + '/' + plump.DIR_RAW)
-        os.mkdir(plump.DIR_02 + '/' + name + '/' + plump.DIR_WORK)
-        plump.setConfig(plump.TASK, name)
+        os.makedirs(path['path'])
+        os.mkdir(path['path'] + '/' + plump.DIR_FINAL)
+        os.mkdir(path['path'] + '/' + plump.DIR_JPG)
+        os.mkdir(path['path'] + '/' + plump.DIR_RAW)
+        os.mkdir(path['path'] + '/' + plump.DIR_WORK)
+        plump.setConfig(plump.TASK, path['ft'])
+        return
+
+    if 'activate' in args['names']:
+        #print('path =' + str(path))
+        if not os.path.exists(path['path']):
+            print('task ' + path['ft'] + ' does not exist.' +
+            ' To create a new task use "task --create [<folder>/]<task>"')
+            return
+
+        plump.setConfig(plump.TASK, path['ft'])
 
 
 def backup(_arg_struct):
@@ -133,6 +222,87 @@ def backup(_arg_struct):
         + '. ' + path)
 
 
+def show(_arg_struct):
+    """
+    Processing step reporting
+    """
+
+    atom_short = dict(name='short', short='s', args=1)
+    atom_none = dict(name='none', short='n', args=1)
+
+    #atomNone must be mandatory for rules with more than one path
+    rules = [[dict(atom=atom_none, obligat=True)],
+             [dict(atom=atom_short, obligat=True)]]
+
+    if not plump.checkParams(_arg_struct, rules):
+        return
+
+    #Normalize for easy access: -t -> --test etc.
+    #args = {names=[<option1>,...], args=[<arg1>,...]}
+    args = plump.normalizeArgs(_arg_struct, rules)
+
+    #print(str(args))
+
+    if 'inbox' in args['args']:
+        if 'short' in args['names']:
+            plump.show_in_summary(plump.DIR_00)
+        else:
+            plump.show_in(plump.DIR_00)
+        return
+
+    if 'import' in args['args']:
+        if 'short' in args['names']:
+            plump.show_in_summary(plump.DIR_01)
+        else:
+            plump.show_in(plump.DIR_01)
+        return
+
+    if 'tasks' in args['args']:
+        if 'short' in args['names']:
+            plump.show_tasks_summary()
+        else:
+            plump.show_tasks()
+        return
+
+    if 'task' in args['args'] or len(args['args']) == 0:
+        if plump.getActualTask() is None:
+            print('No actual task. ' +
+            'Use "task --create <task>" to create one.')
+        else:
+            print('Actual task is ' + plump.getActualTask()['task'] + '.')
+            if 'short' in args['names']:
+                plump.show_task_summary(plump.DIR_02 + '/'
+                    + plump.getActualTask()['task'])
+            else:
+                plump.show_task(plump.DIR_02 + '/'
+                    + plump.getActualTask()['task'])
+        return
+
+
+def export(_arg_struct):
+    """
+    Copy finals to external destinations.
+    """
+
+    ##0: No param allowed, 1: param optional, 2: param obligatory
+    #if not checkArgs(_arg_dict,
+    #    {'-t': 0, '--test': 0, '-p': 2, '--path': 2}):
+    #    return
+    atom_activate = dict(name='activate', short='a', args=2)
+    atom_show = dict(name='show', short='s', args=0)
+    atom_none = dict(name='none', short='n', args=0)
+
+    #print('_arg_struct=' + str(_arg_struct))
+    rules = [
+        [dict(atom=atom_none, obligat=True)],
+        [dict(atom=atom_activate, obligat=True)],
+        [dict(atom=atom_show, obligat=True)]
+        ]
+
+    if not plump.checkParams(_arg_struct, rules):
+        return
+
+
 def config(_arg_struct):
     """
     Set or delete a config item
@@ -154,7 +324,7 @@ def config(_arg_struct):
 
     #Normalize for easy access: -t -> --test etc.
     #args = {names=[<option1>,...], args=[<arg1>,...]}
-    args = plump.plump.normalizeArgs(_arg_struct, rules)
+    args = plump.normalizeArgs(_arg_struct, rules)
 
     settings = plump.readConfig()
 
@@ -192,7 +362,7 @@ def init(_arg_struct):
         return
 
     #Normalize for easy access: -t -> --test etc.
-    args = plump.plump.normalizeArgs(_arg_struct, rules)
+    args = plump.normalizeArgs(_arg_struct, rules)
     #print('args=' + str(args))
 
     if not 'force' in args['names']:
@@ -253,6 +423,12 @@ def fow(args=None):
     elif cmds[0] == 'task':
         task(plump.toArgStruct(cmds[1:]))
 
+    elif cmds[0] == 'show':
+        show(plump.toArgStruct(cmds[1:]))
+
+    elif cmds[0] == 'export':
+        export(plump.toArgStruct(cmds[1:]))
+
     else:
         print('Unknown command. Use help to list all commands.')
 
@@ -272,7 +448,7 @@ def showHelp(_arg_struct):
         return
 
     #Normalize for easy access: -t -> --test etc.
-    args = plump.plump.normalizeArgs(_arg_struct, rules)
+    args = plump.normalizeArgs(_arg_struct, rules)
     #help
     if len(args['args']) == 0:
         #Get all help files in the help dir

@@ -1,0 +1,8 @@
+export - Copy final images to external destinations
+Usage: export [<options>] [<destination|path>] 
+export: List export information . Same as 'export --show'
+export my_export_destination. Copy to the logical destination 'my_export_destination'. The destination must exists. It can be set with the config command.
+
+Options:
+--show: Report about the already exported files.
+--path <path>, -p <path>: Export to the give path instead of using a logical destination

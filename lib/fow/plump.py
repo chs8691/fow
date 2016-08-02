@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 import pickle
 import os
-import shutil
-import re
-
+import sys
 
 DIR_00 = '00_Inbox'
 DIR_01 = '01_Import'
@@ -18,13 +16,50 @@ BACKUP_DIR = 'backupDir'
 GPX_DIR = 'gpxDir'
 TASK = 'task'
 
+# configuration file for this fow installation, read once with readFowConfig()
+fow_config = None
+
 
 def getHelpFileDir():
     """
     Returns the string path to the help files. In this directory, there has
     to be a file for every command.
     """
-    return 'helpFiles'
+    #return 'helpFiles'
+    #return 'man'
+    #return '/usr/share/man/man1'
+    return readFowConfig('HELP_FILE_DIR')
+
+
+def readFowConfig(_key):
+    """
+    Returns String with value of installation specific key value pairs.
+    First access will read file 'config' in the lib directory.
+    If file doesn't exists, exit(1) will be executed.
+    If key doesn't exists, empty string will be returned.
+    """
+    global fow_config
+    if fow_config is None:
+        fow_config = dict()
+        try:
+            with open(sys.path[0] + '/config', 'r') as config:
+                for each_line in config:
+                    if len(each_line) > 1 and not each_line[0] == '#' \
+                        and '=' in each_line:
+                        (key, value) = each_line.split('=', 1)
+                        if len(value) > 1 and value[-1] == '\n':
+                            value = value[0:-1]
+                        fow_config[key] = value
+        except IOError as e:
+            print(str(e))
+            exit(1)
+            return('')
+        #print(str(fow_config))
+
+    try:
+        return fow_config[_key]
+    except:
+        return ''
 
 
 def checkParams(_actual, _rules):
@@ -57,8 +92,8 @@ def checkParams(_actual, _rules):
         2: Argument has an obligatory parameter
     Prints message for first failed validation and returns with False.
     """
-    print('actual=' + str(_actual))
-    print('rules=' + str(_rules))
+    #print('actual=' + str(_actual))
+    #print('rules=' + str(_rules))
     message = 'Unexpected arguments.'
 
     ################################################

@@ -1,0 +1,1 @@
+sudo dpkg -i ../dist/fow_1.1-1_all.deb

@@ -1,0 +1,18 @@
+." Manpage for fow.config
+." Contact christian.schulzendorff@arcor.de to correct errors or typos.
+.TH FOW-SHOW 1 "31 July 2016" "Fow manual" "fow show"
+.SH NAME
+show \- reporting for processing steps 
+.SH DESCRIPTION
+Processing steps are stored in the subfolder 00_INBOX, 01_IMPORT and 02_PROCESS.With show, a summary or report can be printed.
+.SH SYNOPSIS	
+.TP
+show [inbox|import|task] [options]
+.TP
+show tasks [options]
+The first usage type reports of corresponding directory for inbox (00_INBOX), import (01_IMPORT) or for the actual task in 02_PROCESS/folder/task. Default is task.
+The second usage type reports of all existing tasks in 02_PROCESS.
+.SH OPTIONS
+.TP
+\-\-short, \-s
+Just a summary instead of reporting every image. 

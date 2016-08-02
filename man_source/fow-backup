@@ -1,0 +1,19 @@
+." Manpage for fow.backup
+." Contact christian.schulzendorff@arcor.de to correct errors or typos.
+.TH FOW-BACKUP 1 "31 July 2016" "Fow manual" "fow backup"
+.SH NAME
+backup \- save the fow to an external directory 
+.SH SYNOPSIS
+.TP
+backup [<options>] [<path>]
+.TP
+backup
+Saves fow to the external path. The past must be specified with 'config 
+backupDir'.
+.SH OPTIONS
+.TP
+--path <path>, -p <path>
+determines the destination path, deviating from the default path
+.TP
+--test, -t
+test run, simulates but does not transfer any files

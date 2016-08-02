@@ -1,0 +1,28 @@
+." Manpage for fow.config
+." Contact christian.schulzendorff@arcor.de to correct errors or typos.
+.TH FOW-CONFIG 1 "31 July 2016" "Fow manual" "fow config"
+.SH NAME
+config \- show and change settings of the fow. A setting is a key value pair.
+.SH SYNOPSIS
+config [<options>] [<key> [<value>]]
+config: List all items. Same as 'config \-\-list'
+.SH DESCRIPTION
+The command shows or changes settings of the fow. A setting is a key value pair.
+.SH OPTIONS 
+.TP
+\-l [<key>], \-\-list [<key>]
+lists all settings or setting for a specific key
+.TP
+\-s <key>=<value>, \-\-set <key>=<value>
+Set or create this item.
+.TP
+\-d <key>, \-\-delete <key>
+Delete the value, same as 'config <key> None'
+
+.".SH EXAMPLES
+.".SH SEE ALSO
+
+.SH BUGS
+No known bugs.
+.SH AUTHOR
+Christian Schulzendorff (christian.schulzendorff@arcor.de)

@@ -3,6 +3,7 @@ import os
 import shutil
 import re
 import plump
+import gzip
 
 #OPTIMIZE Config keys in Hilfe listen
 #FIXME config: wird beim Schreiben eines Eintrags die pickle datei \
@@ -409,7 +410,7 @@ def fow(args=None):
     cmds = args[1:]
 
     if cmds[0] == 'help':
-        showHelp(plump.toArgStruct(cmds[1:]))
+        show_man(plump.toArgStruct(cmds[1:]))
 
     elif cmds[0] == 'config':
         config(plump.toArgStruct(cmds[1:]))
@@ -483,6 +484,65 @@ def showHelp(_arg_struct):
                         out += each_line
                         #print(each_line, end='')
                     print(out[0:-1])
+            except:
+                print(args['args'][0] + ' is unknown. ' +
+                'Use help to see all commands.')
+
+
+def show_man(_arg_struct):
+    """
+    Show man page. For specific command help, there has to be one
+    file for each command with name fow-<command>. The first line of this
+    file must be the abstract of the command.
+    """
+    atomNone = dict(name='none', short='n', args=1)
+
+    #For commands with only one path atomNone must be non-obligatory!
+    rules = [[dict(atom=atomNone, obligat=False)]]
+
+    if not plump.checkParams(_arg_struct, rules):
+        return
+
+    ##Normalize for easy access: -t -> --test etc.
+    args = plump.normalizeArgs(_arg_struct, rules)
+    #help
+    if len(args['args']) == 0:
+
+        #Get all help files in the help dir, stored as man page
+        try:
+            pattern = re.compile('fow-\w+.1.gz')
+            #print(str(pattern))
+            #print(str(os.listdir(plump.getHelpFileDir())))
+            names = [f for f in os.listdir(plump.getHelpFileDir())
+                        if os.path.isfile(os.path.join(
+                        plump.getHelpFileDir(), f))
+                        and pattern.match(f)]
+            #print('names=' + str(names))
+            print(('fow commands:'))
+            out = ''
+            for f in names:
+                with gzip.open(os.path.join(
+                    plump.getHelpFileDir(), f), 'rt') as help_file:
+                    help_file.readline()
+                    help_file.readline()
+                    help_file.readline()
+                    help_file.readline()
+                    #print(help_file.readline())
+                    out = help_file.readline().replace('\-', '-')
+                    print(out[0:-1])
+        except:
+            print('Uuups, could not find the help files in directory "' +
+                plump.getHelpFileDir()
+                + '". Please, check your fow installation. There must be ' +
+                'the key HELP_FILE_DIR in the config file with the path ' +
+                'to the man dirs, e.g. ')
+            print('    HELP_FILE_DIR=/urs/share/man/man1')
+            return
+
+    #help <command>
+    elif len(args['args']) == 1:
+            try:
+                os.system('man ' + 'fow-' + args['args'][0])
             except:
                 print(args['args'][0] + ' is unknown. ' +
                 'Use help to see all commands.')

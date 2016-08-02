@@ -4,9 +4,9 @@
 .SH NAME
 export \- Copy final images to external destinations
 .SH SYNOPSIS	
-TP.
+.TP
 export [<options>] [<destination|path>] 
-TP.
+.TP
 export
 List export information . Same as 'export --show'
 .TP

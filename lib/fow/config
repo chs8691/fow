@@ -6,3 +6,6 @@
 HELP_FILE_DIR=man
 # Debian
 # HELP_FILE_DIR=/usr/share/man/man1
+#
+# Set MAN_DIRECT to True, if command man should be called with option -l
+MAN_DIRECT=True

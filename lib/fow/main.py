@@ -517,7 +517,7 @@ def show_man(_arg_struct):
                         if os.path.isfile(os.path.join(
                         plump.getHelpFileDir(), f))
                         and pattern.match(f)]
-            #print('names=' + str(names))
+            print('names=' + str(names))
             print(('fow commands:'))
             out = ''
             for f in names:
@@ -542,7 +542,12 @@ def show_man(_arg_struct):
     #help <command>
     elif len(args['args']) == 1:
             try:
-                os.system('man ' + 'fow-' + args['args'][0])
+                #For developing call man page local, without index db
+                if plump.readFowConfig('MAN_DIRECT'):
+                    os.system('man -l ' + plump.getHelpFileDir() +
+                    '/fow-' + args['args'][0] + '.1.gz')
+                else:
+                    os.system('man ' + 'fow-' + args['args'][0])
             except:
                 print(args['args'][0] + ' is unknown. ' +
                 'Use help to see all commands.')

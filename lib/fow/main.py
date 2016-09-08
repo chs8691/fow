@@ -4,11 +4,43 @@ import shutil
 import re
 import plump
 import gzip
+from argument_checker import check_params
 
 #OPTIMIZE Config keys in Hilfe listen
 #FIXME config: wird beim Schreiben eines Eintrags die pickle datei \
 #     erzeugt, wird trotzdem settings.pickle not found ausgegeben
-#FIXME Task -a klappt nicht yum wechseln bei Verzeichnisumbenennung
+#TODO Export noch nicht implementiert
+#TODO task soll verwaiste XMPs aufraeumen: task --xmp-cleanup|-x
+
+
+def export(_arg_struct):
+    """
+    Copy finals to external destinations.
+    """
+
+    ##0: No param allowed, 1: param optional, 2: param obligatory
+    #if not checkArgs(_arg_dict,
+    #    {'-t': 0, '--test': 0, '-p': 2, '--path': 2}):
+    #    return
+    atom_path = dict(name='path', short='p', args=2)
+    atom_force = dict(name='force', short='f', args=0)
+    atom_test = dict(name='test', short='t', args=0)
+    atom_none = dict(name='', short='', args=2)
+
+    #print('export() _arg_struct=' + str(_arg_struct))
+    rules = [
+        [dict(atom=atom_path, obligat=True),
+         dict(atom=atom_force, obligat=False),
+         dict(atom=atom_test, obligat=False)],
+        [dict(atom=atom_none, obligat=True),
+         dict(atom=atom_force, obligat=False),
+         dict(atom=atom_test, obligat=False)]
+        ]
+
+    if not check_params(_arg_struct, rules):
+        return
+
+    print('Comming soon')
 
 
 def task(_arg_struct):
@@ -40,6 +72,10 @@ def task(_arg_struct):
         cmt - Comment in raw file (c, if true)
     """
 
+    #Command needs an existing fow.
+    if not plump.is_fow():
+        return
+
     ##0: No param allowed, 1: param optional, 2: param obligatory
     #if not checkArgs(_arg_dict,
     #    {'-t': 0, '--test': 0, '-p': 2, '--path': 2}):
@@ -48,20 +84,26 @@ def task(_arg_struct):
     atom_activate = dict(name='activate', short='a', args=2)
     atom_show = dict(name='show', short='s', args=0)
     atom_raw_import = dict(name='raw-import', short='r', args=0)
-    atom_missing_raws = dict(name='missing-raws', short='m', args=0)
-    atom_none = dict(name='none', short='n', args=0)
+    atom_fill_final = dict(name='fill-final', short='f', args=0)
+    atom_test = dict(name='test', short='t', args=0)
+    atom_none = dict(name='', short='', args=0)
 
     #print('_arg_struct=' + str(_arg_struct))
     rules = [
         [dict(atom=atom_none, obligat=True)],
         [dict(atom=atom_create, obligat=True)],
         [dict(atom=atom_activate, obligat=True)],
-        [dict(atom=atom_raw_import, obligat=True)],
-        [dict(atom=atom_missing_raws, obligat=True)],
+
+        [dict(atom=atom_raw_import, obligat=True),
+            dict(atom=atom_test, obligat=False)],
+
+        [dict(atom=atom_fill_final, obligat=True),
+            dict(atom=atom_test, obligat=False)],
+
         [dict(atom=atom_show, obligat=True)]
         ]
 
-    if not plump.checkParams(_arg_struct, rules):
+    if not check_params(_arg_struct, rules):
         return
 
     #Normalize for easy access: -t -> --test etc.
@@ -80,30 +122,49 @@ def task(_arg_struct):
         else:
             print('Actual task is ' + plump.getActualTask()['task'] + '.')
             if 'show' in args['names']:
-                plump.show_task_summary(plump.DIR_02 + '/'
+                plump.show_task_summary(
+                    plump.get_path(plump.DIR_02) + '/'
                     + plump.getActualTask()['task'])
             else:
-                plump.show_task(plump.DIR_02 + '/'
+                plump.show_task(plump.get_path(plump.DIR_02) + '/'
                     + plump.getActualTask()['task'])
         return
 
     #task --raw-import
-    #task --missing-raws
+    #task --raw-import --test
     if 'raw-import' in args['names'] or \
         'missing-raws' in args['names']:
         if plump.getActualTask() is None:
             print('No actual task set, please specify the folder, too: ' +
-                '[' + plump.DIR_02 + '/]<folder>/<task>')
+                '[' + plump.get_path(plump.DIR_02) + '/]<folder>/<task>')
             return
 
         plump.move_corresponding_raws(
-            plump.DIR_02 + '/' + plump.getActualTask()['task']
+            plump.get_path(plump.DIR_02) + '/'
+            + plump.getActualTask()['task']
             + '/' + plump.DIR_JPG,
-            plump.DIR_01 + '/' + plump.DIR_RAW,
-            plump.DIR_02 + '/' + plump.getActualTask()['task']
-            + '/' + plump.DIR_RAW, 'missing-raws' in args['names'])
+            plump.get_path(plump.DIR_01) + '/' + plump.DIR_RAW,
+            plump.get_path(plump.DIR_02) + '/' + plump.getActualTask()['task']
+            + '/' + plump.DIR_RAW, 'test' in args['names'])
         return
 
+    #task --fill-final
+    #task --fill-final --test
+    if 'fill-final' in args['names']:
+        if plump.getActualTask() is None:
+            print('No actual task set, please specify the folder, too: ' +
+                '[' + plump.get_path(plump.DIR_02) + '/]<folder>/<task>')
+            return
+
+        plump.copy_missing_jpgs(
+            plump.get_path(plump.DIR_02) + '/' +
+            plump.getActualTask()['task']
+                + '/' + plump.DIR_JPG,
+            plump.get_path(plump.DIR_02) + '/' +
+            plump.getActualTask()['task']
+                + '/' + plump.DIR_FINAL,
+            'test' in args['names'])
+        return
 
     #--- Options to change the actual task ---#
 
@@ -141,7 +202,7 @@ def task(_arg_struct):
 
     #For conveniencly usage
     path['ft'] = path['folder'] + '/' + path['task']
-    path['path'] = plump.DIR_02 + '/' + path['ft']
+    path['path'] = plump.get_path(plump.DIR_02) + '/' + path['ft']
 
     #task --create <task>
     if 'create' in args['names']:
@@ -179,19 +240,21 @@ def backup(_arg_struct):
 
     atomTest = dict(name='test', short='t', args=0)
     atomPath = dict(name='path', short='p', args=2)
-    atomNone = dict(name='none', short='n', args=0)
+    atomNone = dict(name='', short='', args=0)
 
     #atomNone must be mandatory for rules with more than one path
-    rules = [[dict(atom=atomNone, obligat=True),
-                dict(atom=atomTest, obligat=False)],
-             [dict(atom=atomPath, obligat=True),
-                dict(atom=atomTest, obligat=False)]]
+    rules = [
+                [dict(atom=atomPath, obligat=True),
+                 dict(atom=atomTest, obligat=False)],
+                [dict(atom=atomNone, obligat=True)],
+                [dict(atom=atomTest, obligat=True)]
+             ]
 
-    if not plump.checkParams(_arg_struct, rules):
+    if not check_params(_arg_struct, rules):
         return
 
     #Normalize for easy access: -t -> --test etc.
-    args = plump.plump.normalizeArgs(_arg_struct, rules)
+    args = plump.normalizeArgs(_arg_struct, rules)
     #print('args=' + str(args))
 
     #backup --path <path>
@@ -220,7 +283,11 @@ def backup(_arg_struct):
 
     print('Starting backup to "' + os.path.abspath(path) + '".')
     os.system('rsync -rltv --delete --info=stats2' + option_test
-        + '. ' + path)
+        + plump.get_fow_root() + plump.DIR_FOW + ' '
+        + plump.get_fow_root() + plump.DIR_00 + ' '
+        + plump.get_fow_root() + plump.DIR_01 + ' '
+        + plump.get_fow_root() + plump.DIR_02 + ' '
+        + path)
 
 
 def show(_arg_struct):
@@ -229,13 +296,13 @@ def show(_arg_struct):
     """
 
     atom_short = dict(name='short', short='s', args=1)
-    atom_none = dict(name='none', short='n', args=1)
+    atom_none = dict(name='', short='', args=1)
 
     #atomNone must be mandatory for rules with more than one path
     rules = [[dict(atom=atom_none, obligat=True)],
              [dict(atom=atom_short, obligat=True)]]
 
-    if not plump.checkParams(_arg_struct, rules):
+    if not check_params(_arg_struct, rules):
         return
 
     #Normalize for easy access: -t -> --test etc.
@@ -246,16 +313,16 @@ def show(_arg_struct):
 
     if 'inbox' in args['args']:
         if 'short' in args['names']:
-            plump.show_in_summary(plump.DIR_00)
+            plump.show_in_summary(plump.get_path(plump.DIR_00))
         else:
-            plump.show_in(plump.DIR_00)
+            plump.show_in(plump.get_path(plump.DIR_00))
         return
 
     if 'import' in args['args']:
         if 'short' in args['names']:
-            plump.show_in_summary(plump.DIR_01)
+            plump.show_in_summary(plump.get_path(plump.DIR_01))
         else:
-            plump.show_in(plump.DIR_01)
+            plump.show_in(plump.get_path(plump.DIR_01))
         return
 
     if 'tasks' in args['args']:
@@ -272,35 +339,11 @@ def show(_arg_struct):
         else:
             print('Actual task is ' + plump.getActualTask()['task'] + '.')
             if 'short' in args['names']:
-                plump.show_task_summary(plump.DIR_02 + '/'
+                plump.show_task_summary(plump.get_path(plump.DIR_02) + '/'
                     + plump.getActualTask()['task'])
             else:
-                plump.show_task(plump.DIR_02 + '/'
+                plump.show_task(plump.get_path(plump.DIR_02) + '/'
                     + plump.getActualTask()['task'])
-        return
-
-
-def export(_arg_struct):
-    """
-    Copy finals to external destinations.
-    """
-
-    ##0: No param allowed, 1: param optional, 2: param obligatory
-    #if not checkArgs(_arg_dict,
-    #    {'-t': 0, '--test': 0, '-p': 2, '--path': 2}):
-    #    return
-    atom_activate = dict(name='activate', short='a', args=2)
-    atom_show = dict(name='show', short='s', args=0)
-    atom_none = dict(name='none', short='n', args=0)
-
-    #print('_arg_struct=' + str(_arg_struct))
-    rules = [
-        [dict(atom=atom_none, obligat=True)],
-        [dict(atom=atom_activate, obligat=True)],
-        [dict(atom=atom_show, obligat=True)]
-        ]
-
-    if not plump.checkParams(_arg_struct, rules):
         return
 
 
@@ -311,7 +354,7 @@ def config(_arg_struct):
 
     atom_delete = dict(name='delete', short='d', args=2)
     atom_list = dict(name='list', short='l', args=1)
-    atom_none = dict(name='none', short='n', args=0)
+    atom_none = dict(name='', short='', args=0)
     atom_set = dict(name='set', short='s', args=2)
 
     #atomNone must be mandatory for rules with more than one path
@@ -320,7 +363,7 @@ def config(_arg_struct):
              [dict(atom=atom_delete, obligat=True)],
              [dict(atom=atom_set, obligat=True)]]
 
-    if not plump.checkParams(_arg_struct, rules):
+    if not check_params(_arg_struct, rules):
         return
 
     #Normalize for easy access: -t -> --test etc.
@@ -353,13 +396,13 @@ def init(_arg_struct):
     """
 
     atomForce = dict(name='force', short='f', args=0)
-    atomNone = dict(name='none', short='n', args=0)
+    atomNone = dict(name='', short='', args=0)
 
     #Set atomNone as non-obligat, otherwise check will fail
     rules = [[dict(atom=atomNone, obligat=False),
                 dict(atom=atomForce, obligat=False)]]
 
-    if not plump.checkParams(_arg_struct, rules):
+    if not check_params(_arg_struct, rules):
         return
 
     #Normalize for easy access: -t -> --test etc.
@@ -440,12 +483,12 @@ def showHelp(_arg_struct):
     file for each command with name help_<command>.txt. The first line of this
     file must be the abstract of the command.
     """
-    atomNone = dict(name='none', short='n', args=1)
+    atomNone = dict(name='', short='', args=1)
 
     #For commands with only one path atomNone must be non-obligatory!
     rules = [[dict(atom=atomNone, obligat=False)]]
 
-    if not plump.checkParams(_arg_struct, rules):
+    if not check_params(_arg_struct, rules):
         return
 
     #Normalize for easy access: -t -> --test etc.
@@ -495,12 +538,12 @@ def show_man(_arg_struct):
     file for each command with name fow-<command>. The first line of this
     file must be the abstract of the command.
     """
-    atomNone = dict(name='none', short='n', args=1)
+    atomNone = dict(name='', short='', args=1)
 
     #For commands with only one path atomNone must be non-obligatory!
     rules = [[dict(atom=atomNone, obligat=False)]]
 
-    if not plump.checkParams(_arg_struct, rules):
+    if not check_params(_arg_struct, rules):
         return
 
     ##Normalize for easy access: -t -> --test etc.
@@ -511,13 +554,14 @@ def show_man(_arg_struct):
         #Get all help files in the help dir, stored as man page
         try:
             pattern = re.compile('fow-\w+.1.gz')
-            #print(str(pattern))
-            #print(str(os.listdir(plump.getHelpFileDir())))
+            #print('pattern=' + str(pattern))
+            #print('dir=' + str(plump.getHelpFileDir()))
+            #print('listdir=' + str(os.listdir(plump.getHelpFileDir())))
             names = [f for f in os.listdir(plump.getHelpFileDir())
                         if os.path.isfile(os.path.join(
                         plump.getHelpFileDir(), f))
                         and pattern.match(f)]
-            print('names=' + str(names))
+            #print('names=' + str(names))
             print(('fow commands:'))
             out = ''
             for f in names:
@@ -536,7 +580,7 @@ def show_man(_arg_struct):
                 + '". Please, check your fow installation. There must be ' +
                 'the key HELP_FILE_DIR in the config file with the path ' +
                 'to the man dirs, e.g. ')
-            print('    HELP_FILE_DIR=/urs/share/man/man1')
+            print('    HELP_FILE_DIR=/usr/share/man/man1')
             return
 
     #help <command>

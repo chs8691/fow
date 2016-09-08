@@ -3,8 +3,18 @@
 .TH FOW-TASK 1 "31 July 2016" "Fow manual" "fow task"
 .SH NAME
 task \- manage a fow's task 
-Usage: task [options]
-.SH DESCRITON
+.SH SYNAPSIS
+task --create|-c name
+
+task --activate|-a name
+
+task --raw-import|-r [--test|-t]
+
+task --fill-final|-f [--test|-t]
+
+task --short|-s
+
+.SH DESCRIPTON
 Reporting and editing a task and their objects.
 
 A task is the working unit, saved in a subdirectory of 02_PROCESS. 
@@ -34,5 +44,8 @@ Set this task as the active one.
 \-r, \-\-raw\-import
 Move corresponding raw files for all images in jpg of the actual task, taken from 01_Import. Source and destination subfolder is /raw. Existing raws in the destination folder are untouched. Action is independent of the final folder. 
 .TP
-\-\-missing\-raws, \-m
-Dry run to list the raws to be imported into the actual task. 
+\-f, \-fill\-final
+Copy all images from jpg to final, if the image is not already there. This can be used to complete the image set in final, for not touched images. The comparison for the image name is case sensitive, but not for the suffix. For instance final/IMG1.jpg and jpg/img1.jpg are different images, but final/IMG1.jpg and jpg/IMG1.JPG are handled as one image.
+.TP
+\-\-test, \-t
+Dry run, just print what would happens. Can be used for \-\-raw\-import and \-fill\-final.

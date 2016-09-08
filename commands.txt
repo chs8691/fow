@@ -1,0 +1,88 @@
+EXPORT
+------------------
+atomPath = dict(name='path', arg=2, obligat=True)
+atomEmpty = dict(name='path', arg=2, obligat=True)
+
+atomPath AND atomForce AND atomTest
+OR
+atomEmpty AND atomForce AND atomTest
+
+
+TASK
+------------------
+atomCreate = dict(name='create', arg=2, obligat=True)
+atomShort = dict(name='create', arg=2, obligat=False)
+
+atomShort
+OR
+atomCreate
+OR
+atomActivate
+OR
+atomRawImport AND atomTest
+OR
+atomFillFinal AND atomTest
+
+
+atomShort
+OR
+atomCreate 
+OR
+atomActivate
+OR
+(atomRawImport OR atomFillFinal) AND atomTest
+
+
+
+
+Composite Pattern:
+term = dict(terms, operator='AND')
+atom = dict(name, arg, obligat)
+Helper: 
+	Boolean isAtom(dict)
+	Boolean isTerm(dict)
+
+tree.set({name='short',arg=0})
+tree.or({name='', arg=0})
+tree.or({name='create', arg=2})
+tree.or({name='activate', arg=2})
+subtree1.set({name='test',arg=0})
+subtree1.or({name='', arg=0})
+subtree2.set({name='raw-import',arg=0})
+subtree2.or({name='fill-final', arg=0})
+subtree3.set(subtree2)
+subtree3.and(subtree1)
+tree.or(
+	new tree(subtree2)
+	.and(new tree(atomTest))
+			.or(atomEmpty)
+}
+
+Als Atom-Liste:
+---------------
+
+taskPaths = [
+	[atomShort]
+	[atomEmpty]
+	[atomCreate]
+	[atomActivate]
+	[atomRawImport, atomTest]
+	[atomRawImport]
+	[atomFillFinal, atomTest]
+	[atomFillFinal]
+]
+
+exportPaths = [
+	[atomPath]
+	[atomPath, atomForce]
+	[atomPath, atomTest]
+	[atomPath, atomForce, atomTest]
+	[atomNone]
+	[atomNone, atomForce]
+	[atomNone, atomTest]
+	[atomNone, atomForce, atomTest]
+
+]
+
+
+

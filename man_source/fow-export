@@ -1,18 +1,33 @@
 ." Manpage for fow.export
 ." Contact christian.schulzendorff@arcor.de to correct errors or typos.
-.TH FOW-EXPORT 1 "31 July 2016" "Fow manual" "fow export"
-.SH NAME
+.TH FOW-EXPORT 1 "22 August 2016" "Fow manual" "fow export"
+.SH "NAME"
 export \- Copy final images to external destinations
-.SH SYNOPSIS	
+.SH "SYNOPSIS"	
 .TP
-export [<options>] [<destination|path>] 
+export 
+[<options>] [<destination|path>] 
 .TP
 export
 List export information . Same as 'export --show'
 .TP
-export my_export_destination 
-Copy to the logical destination 'my_export_destination'. The destination must exists. It can be set with the config command.
-.SH OPTIONS
+export my_export_destination
+Copy all images in final of the actual task to the logical destination 'my_export_destination'. The destination must exists. It can be set with the config command.
+.TP
+export family/20160816 dest.local
+Copy all images in final of the task 'family/20160816' to the logical destination 'dest.local'. 
+.TP
+export family dest.local
+Copy all images in final of all tasks in the directory 'family' to the logical destination 'dest.local' in subdirectories, named like tasks.
+  
+.SH "OPTIONS"
 Options:
---show: Report about the already exported files.
---path <path>, -p <path>: Export to the give path instead of using a logical destination
+.TP
+\-\-force, \-f 
+Overwrite existing files in the destination.
+.TP
+\-\-test, \-t 
+Dry run. Just test the export and report the result. Nothing will be changed.
+.TP
+\-\-path <path>, \-p <path>
+Export to the give path instead of using a logical destination

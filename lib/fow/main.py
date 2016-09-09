@@ -32,12 +32,13 @@ def export(_arg_struct):
         [dict(atom=atom_path, obligat=True),
          dict(atom=atom_force, obligat=False),
          dict(atom=atom_test, obligat=False)],
+
         [dict(atom=atom_none, obligat=True),
          dict(atom=atom_force, obligat=False),
          dict(atom=atom_test, obligat=False)]
         ]
 
-    if not check_params(_arg_struct, rules):
+    if not check_params(_arg_struct, rules, 'export'):
         return
 
     print('Comming soon')
@@ -91,7 +92,9 @@ def task(_arg_struct):
     #print('_arg_struct=' + str(_arg_struct))
     rules = [
         [dict(atom=atom_none, obligat=True)],
+
         [dict(atom=atom_create, obligat=True)],
+
         [dict(atom=atom_activate, obligat=True)],
 
         [dict(atom=atom_raw_import, obligat=True),
@@ -103,7 +106,7 @@ def task(_arg_struct):
         [dict(atom=atom_show, obligat=True)]
         ]
 
-    if not check_params(_arg_struct, rules):
+    if not check_params(_arg_struct, rules, 'task'):
         return
 
     #Normalize for easy access: -t -> --test etc.
@@ -246,11 +249,12 @@ def backup(_arg_struct):
     rules = [
                 [dict(atom=atomPath, obligat=True),
                  dict(atom=atomTest, obligat=False)],
-                [dict(atom=atomNone, obligat=True)],
-                [dict(atom=atomTest, obligat=True)]
+
+                [dict(atom=atomNone, obligat=True),
+                 dict(atom=atomTest, obligat=False)]
              ]
 
-    if not check_params(_arg_struct, rules):
+    if not check_params(_arg_struct, rules, 'backup'):
         return
 
     #Normalize for easy access: -t -> --test etc.
@@ -300,9 +304,9 @@ def show(_arg_struct):
 
     #atomNone must be mandatory for rules with more than one path
     rules = [[dict(atom=atom_none, obligat=True)],
-             [dict(atom=atom_short, obligat=True)]]
+             [dict(atom=atom_short, obligat=False)]]
 
-    if not check_params(_arg_struct, rules):
+    if not check_params(_arg_struct, rules, 'show'):
         return
 
     #Normalize for easy access: -t -> --test etc.
@@ -359,11 +363,14 @@ def config(_arg_struct):
 
     #atomNone must be mandatory for rules with more than one path
     rules = [[dict(atom=atom_none, obligat=True)],
+
              [dict(atom=atom_list, obligat=True)],
+
              [dict(atom=atom_delete, obligat=True)],
+
              [dict(atom=atom_set, obligat=True)]]
 
-    if not check_params(_arg_struct, rules):
+    if not check_params(_arg_struct, rules, 'config'):
         return
 
     #Normalize for easy access: -t -> --test etc.
@@ -377,7 +384,7 @@ def config(_arg_struct):
         plump.writeConfig(settings)
         return
 
-    if 'list' in args['names'] or 'none' in args['names']:
+    if 'list' in args['names'] or len(args['names']) == 0:
         if len(args['args']) == 0:
             for key, value in list(settings.items()):
                 print((key + ' = ' + str(value)))
@@ -399,10 +406,10 @@ def init(_arg_struct):
     atomNone = dict(name='', short='', args=0)
 
     #Set atomNone as non-obligat, otherwise check will fail
-    rules = [[dict(atom=atomNone, obligat=False),
+    rules = [[dict(atom=atomNone, obligat=True),
                 dict(atom=atomForce, obligat=False)]]
 
-    if not check_params(_arg_struct, rules):
+    if not check_params(_arg_struct, rules, 'init'):
         return
 
     #Normalize for easy access: -t -> --test etc.
@@ -486,9 +493,9 @@ def showHelp(_arg_struct):
     atomNone = dict(name='', short='', args=1)
 
     #For commands with only one path atomNone must be non-obligatory!
-    rules = [[dict(atom=atomNone, obligat=False)]]
+    rules = [[dict(atom=atomNone, obligat=True)]]
 
-    if not check_params(_arg_struct, rules):
+    if not check_params(_arg_struct, rules, ''):
         return
 
     #Normalize for easy access: -t -> --test etc.
@@ -541,9 +548,9 @@ def show_man(_arg_struct):
     atomNone = dict(name='', short='', args=1)
 
     #For commands with only one path atomNone must be non-obligatory!
-    rules = [[dict(atom=atomNone, obligat=False)]]
+    rules = [[dict(atom=atomNone, obligat=True)]]
 
-    if not check_params(_arg_struct, rules):
+    if not check_params(_arg_struct, rules, ''):
         return
 
     ##Normalize for easy access: -t -> --test etc.

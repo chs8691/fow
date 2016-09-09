@@ -1,23 +1,54 @@
 ###############################################################################
 # Parameter checker and all its stuff
 # Use check_params(). Methods, startging with an underscore (_) are private.
+# Example: fow export --path /my/backup/path -t
+# actual
+# ------
+#    actual={
+#        'shorts': ['t'],
+#        'names': ['path'],
+#        'args': ['/my/backup/path']}
+#
+# rules
+# -----
+#    atom_path = dict(name='path', short='p', args=2)
+#    atom_force = dict(name='force', short='f', args=0)
+#    atom_test = dict(name='test', short='t', args=0)
+#    atom_none = dict(name='', short='', args=2)
+
+#    rules = [
+#        [dict(atom=atom_path, obligat=True),
+#         dict(atom=atom_force, obligat=False),
+#         dict(atom=atom_test, obligat=False)],
+
+#        [dict(atom=atom_none, obligat=True),
+#         dict(atom=atom_force, obligat=False),
+#         dict(atom=atom_test, obligat=False)]]
 ###############################################################################
 
 
-def check_params(actual, rules):
+def check_params(actual, rules, command):
     """
+    Check for the user input against the command-specific
+    rule. If a rule violation is found, a message will be printed, otherwise
+    the check is silent.
+    actual: dict with actual values, see header description
+    rules: rules, see header description
+    command: String with command under check, for message printing
+    Returns true, if actual is valid, otherwise false.
     """
-    #print('actual=' + str(actual))
-    #print('rules=' + str(rules))
+    print('actual=' + str(actual))
+    print('rules=' + str(rules))
+    see_msg = 'See "fow help ' + command + '".'
 
-    #First, check that every actual options is known (names and shorts)
+    #First, check that every actual option is known (names and shorts)
     #Regardless of particualar pathes. Just for printing a good message
     ret = _find_unknown_options(actual, rules)
     if not ret is None:
         if ret['type'] == 'name':
-            print('Unknown option --' + ret['option'] + ' for this command.')
+            print('Unknown option --' + ret['option'] + '. ' + see_msg)
         else:
-            print('Unknown option -' + ret['option'] + ' for this command.')
+            print('Unknown option -' + ret['option'] + '. ' + see_msg)
         return
     #else:
         #print('checkParams() findUnknownOption=' + str(ret))
@@ -25,19 +56,23 @@ def check_params(actual, rules):
     #All options are known; now find the path that match the options
     rule = _find_rule_by_options(actual, rules)
     if rule is None:
-        print('Missing obligatorie parameter(s), please check the options.')
-        return
-    #else:
-        #print('checkParams() Found rule=' + str(rule))
+        print('Missing obligatory parameter(s). ' + see_msg)
+        return False
+    else:
+        print('checkParams() Found rule=' + str(rule))
 
     #Check actual arguments againts this path
     cnt = _check_args(actual, rule)
     if cnt < 0:
-        print('Missing arguments. Check the options and its arguments.')
+        print('Missing arguments. ' + see_msg)
+        return False
     elif cnt > 0:
-        print('Too many arguments. Check the options and its arguments.')
+        print('Too many arguments. ' + see_msg)
+        return False
     #else:
         #print('checkParams() Arguments are ok.')
+
+    return True
 
 
 def _find_unknown_options(actual, rules):
@@ -129,17 +164,21 @@ def _has_valid_options(actual, rule):
     earlier step.
     """
     #check obligatories
+    #Be careful: A rule with a non-option returns true
     for node in rule:
         if node['obligat'] is True:
-            #print('node=' + str(node))
+            #print('_has_valid_options() node=' + str(node))
             if not _node_match_actual(actual, node):
                 return False
 
     #check optionals
-    if not _options_match_rule(actual['names'], rule, 'names') and \
-       not _options_match_rule(actual['shorts'], rule, 'shorts'):
+    print('_has_valid_options() rule=' + str(rule))
+    if not (_options_match_rule(actual['names'], rule, 'names') and
+            _options_match_rule(actual['shorts'], rule, 'shorts')):
+        print('_has_valid_options() _options_match_rule=' + 'False')
         return False
 
+    print('_has_valid_options() _options_match_rule=' + 'True')
     return True
 
 
@@ -168,6 +207,8 @@ def _check_args(actual, rule):
     Returns an integer < 0, if the actuals or to few.
     Returns an integer > 0, if the actuals or to many.
     """
+    print('_check_args() rule=' + str(rule))
+
     actualsNr = len(actual['args'])
     ruleMin = 0
     ruleMax = 0
@@ -178,6 +219,9 @@ def _check_args(actual, rule):
         elif node['atom']['args'] == 2:
             ruleMax += 1
             ruleMin += 1
+    print('_check_args() actualNr=' + str(actualsNr))
+    print('_check_args() ruleMin=' + str(ruleMin))
+    print('_check_args() ruleMax=' + str(ruleMax))
 
     if actualsNr < ruleMin:
         return actualsNr - ruleMin

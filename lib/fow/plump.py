@@ -2,6 +2,9 @@
 import pickle
 import os
 import sys
+import task
+import shutil
+import time
 
 DIR_00 = '00_Inbox'
 DIR_01 = '01_Import'
@@ -11,10 +14,12 @@ DIR_JPG = 'jpg'
 DIR_RAW = 'raw'
 DIR_FINAL = 'final'
 DIR_WORK = 'work'
-VERSION = '0.0.1'
+VERSION = '1.1.1'
 BACKUP_DIR = 'backupDir'
 GPX_DIR = 'gpxDir'
 TASK = 'task'
+#Groups all exports destinations together. The have to start with 'export.'
+EXPORT_PREFIX = 'export'
 
 #####################################################################
 # Conventions:
@@ -41,6 +46,119 @@ fow_config = None
     #return path.replace(get_fow_root(),'')
 
 
+def export_copy(analysis, src_dir, dest):
+    """
+    Copies files.
+    """
+    try:
+        for item in analysis:
+            #print(str(file))
+            shutil.copy2(src_dir + '/' + item['name'], dest)
+    except IOError as err:
+        print("I/O error: {0}".format(err))
+    except:
+        print("Unexpected error:", sys.exc_info()[0])
+
+
+def export_test(analysis, src_dir, dest):
+    """
+    Prints an export test run.
+    """
+    #print(str(analysis))
+    print('Destination: ' + dest)
+    print(str(len(analysis)) + ' files in ' + src_dir)
+
+    max_name_len = analysis_get_max_name_length(analysis)
+
+    for item in analysis:
+        time_str = ''
+        if item['exists']:
+            status = 'o '
+            time_str = time_readable(item['src_time']) + ' -> ' + \
+                time_readable(item['dst_time'])
+        else:
+            status = '+ '
+            time_str = time_readable(item['src_time'])
+        print(status + item['name'].ljust(max_name_len) +
+               ' ' + time_str)
+
+
+def analysis_get_max_name_length(analysis):
+    """
+    Returns max string lenght for 'name' in list of dicts.
+    """
+    names = []
+    for item in analysis:
+        names.append(item['name'])
+
+    return string_get_max_length(names)
+
+
+def string_get_max_length(list):
+    """
+    For the given list with strings, the lenght of the max. String will be
+    returned.
+    For instance:
+        string_get_max_length(['A', '123'])
+            return 3
+    """
+    maxlen = 0
+    for item in list:
+        if len(item) > maxlen:
+            maxlen = len(item)
+
+    return maxlen
+
+
+def export_analyse(_task, _dest):
+    """
+    Checks export to dest from given task.
+    task: dictionary with keys 'task' (foldername/taskname),
+                                'name' (task name),
+                                'folder' (folder name)
+    dest: String with absolut path
+    Returns list with dict() for every source file, for instance:
+        return [dict(name='image001.jpg', exists='true',
+                src_time=1474878288.2156258,
+                dst_time=1474878288.2156258)] or dst_time=None
+    """
+    src_dir = task.get_path(task.get_actual()['task']) + '/' + DIR_FINAL
+    files = list_jpg(src_dir)
+    #for file in files:
+        #print('export_analyse() file=' + str(file) + ' '
+            #+ time_readable(os.path.getatime(src_dir + '/' + file)))
+
+    ret = []
+    for file in files:
+        exists = os.path.exists(_dest + '/' + file)
+        if(exists):
+            dst_time = os.path.getatime(_dest + '/' + file)
+        else:
+            dst_time = None
+
+        ret.append(dict(
+            name=file,
+            exists=exists,
+            src_time=os.path.getatime(src_dir + '/' + file),
+            dst_time=dst_time
+            ))
+
+    #print('export_analyse() ret=' + str(ret))
+
+    return ret
+
+
+def time_readable(seconds):
+    """
+    Returns String with readable time for the given timestamp.
+    Example:
+        time_redable(1474878288.2156258)
+            return Mon, 26 Sep 2016 10:24:48
+    """
+    return time.strftime("%a, %d %b %Y %H:%M:%S",
+                time.localtime(seconds))
+
+
 def get_fow_root():
     """
     The root directory of a fow must have a .fow directory.
@@ -49,7 +167,6 @@ def get_fow_root():
     Or, if actual directory is not within a fow, None will be returned.
     """
     actual = os.getcwd()
-    root = None
     parts = [x for x in actual.split('/') if len(x) > 0]
     #print('parts=' + str(parts))
 
@@ -444,7 +561,7 @@ def show_tasks():
     """
     Reports infos about all tasks.
     """
-    actual = getActualTask()
+    actual = task.get_actual()
     for each_folder in os.listdir(get_path(DIR_02)):
         print(' ' + each_folder)
         for each_task in os.listdir(get_path(DIR_02) + '/' + each_folder):
@@ -572,21 +689,6 @@ def _exist_dir(dir_name):
         if dir == dir_name:
             return True
     return False
-
-
-def getActualTask():
-    """
-    Returns dictionary with keys 'task' (foldername/taskname),
-    'name' (task name), 'folder' (folder name)
-    of the actual task or None, if not set.
-    """
-    item = readConfig()[TASK]
-    if item is None or item == 'None':
-        return None
-    else:
-        (folder, name) = item.rsplit('/', 1)
-        task = {'task': item, 'name': name, 'folder': folder}
-        return task
 
 
 def toArgStruct(cmds):

@@ -37,8 +37,8 @@ def check_params(actual, rules, command):
     command: String with command under check, for message printing
     Returns true, if actual is valid, otherwise false.
     """
-    print('actual=' + str(actual))
-    print('rules=' + str(rules))
+    #print('actual=' + str(actual))
+    #print('rules=' + str(rules))
     see_msg = 'See "fow help ' + command + '".'
 
     #First, check that every actual option is known (names and shorts)
@@ -58,8 +58,8 @@ def check_params(actual, rules, command):
     if rule is None:
         print('Missing obligatory parameter(s). ' + see_msg)
         return False
-    else:
-        print('checkParams() Found rule=' + str(rule))
+    #else:
+        #print('checkParams() Found rule=' + str(rule))
 
     #Check actual arguments againts this path
     cnt = _check_args(actual, rule)
@@ -143,17 +143,25 @@ def _options_match_rule(items, rule, type):
     """
     Checks for items, if every item is valid for the give rule.
     Type must be either 'names' or 'shorts' and determines, what to check.
+    The None-Item will be ignored.
     Returns True, if all items are defined in the rule, otherwise False.
     """
+    #print('_options_match_rule() rule=' + str(rule))
+    #print('_options_match_rule() type=' + type)
+    #print('_options_match_rule() items=' + str(items))
     for item in items:
+        #print('_options_match_rule() item=' + str(item))
+
         found_node = False
-        for node in rule:
+        for node in [n for n in rule if len(n['atom']['name']) > 0]:
             if node['atom'][type] == item:
                 found_node = True
                 break
         if not found_node:
+            #print('_options_match_rule() found_node=' + str(found_node))
             return False
 
+    #print('_options_match_rule() return True')
     return True
 
 
@@ -172,13 +180,13 @@ def _has_valid_options(actual, rule):
                 return False
 
     #check optionals
-    print('_has_valid_options() rule=' + str(rule))
-    if not (_options_match_rule(actual['names'], rule, 'names') and
-            _options_match_rule(actual['shorts'], rule, 'shorts')):
-        print('_has_valid_options() _options_match_rule=' + 'False')
+    #print('_has_valid_options() rule=' + str(rule))
+    if not (_options_match_rule(actual['names'], rule, 'name') and
+            _options_match_rule(actual['shorts'], rule, 'short')):
+        #print('_has_valid_options() _options_match_rule=' + 'False')
         return False
 
-    print('_has_valid_options() _options_match_rule=' + 'True')
+    #print('_has_valid_options() _options_match_rule=' + 'True')
     return True
 
 
@@ -207,7 +215,7 @@ def _check_args(actual, rule):
     Returns an integer < 0, if the actuals or to few.
     Returns an integer > 0, if the actuals or to many.
     """
-    print('_check_args() rule=' + str(rule))
+    #print('_check_args() rule=' + str(rule))
 
     actualsNr = len(actual['args'])
     ruleMin = 0
@@ -219,9 +227,9 @@ def _check_args(actual, rule):
         elif node['atom']['args'] == 2:
             ruleMax += 1
             ruleMin += 1
-    print('_check_args() actualNr=' + str(actualsNr))
-    print('_check_args() ruleMin=' + str(ruleMin))
-    print('_check_args() ruleMax=' + str(ruleMax))
+    #print('_check_args() actualNr=' + str(actualsNr))
+    #print('_check_args() ruleMin=' + str(ruleMin))
+    #print('_check_args() ruleMax=' + str(ruleMax))
 
     if actualsNr < ruleMin:
         return actualsNr - ruleMin

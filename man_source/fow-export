@@ -2,32 +2,28 @@
 ." Contact christian.schulzendorff@arcor.de to correct errors or typos.
 .TH FOW-EXPORT 1 "22 August 2016" "Fow manual" "fow export"
 .SH "NAME"
-export \- Copy final images to external destinations
+export \- Copy final images to external destinations for the actual task
 .SH "SYNOPSIS"	
 .TP
-export 
-[<options>] [<destination|path>] 
-.TP
 export
-List export information . Same as 'export --show'
+[<options>] [<destination|path>]
 .TP
-export my_export_destination
-Copy all images in final of the actual task to the logical destination 'my_export_destination'. The destination must exists. It can be set with the config command.
+export destination
+Copy all images in final of the actual task to the logical destination 'export.destination'. The destination must exists. It can be set with the config command.
+Existing files will be overwritten. The destination must be set with the config command and must be prefixed with 'export.'. But the destination key may not have leading 'export.' when using this with export. For instance:
 .TP
-export family/20160816 dest.local
-Copy all images in final of the task 'family/20160816' to the logical destination 'dest.local'. 
+  fow config \-\-set export.local=/home/chris/exported_images
 .TP
-export family dest.local
-Copy all images in final of all tasks in the directory 'family' to the logical destination 'dest.local' in subdirectories, named like tasks.
-  
+fow export local
+
 .SH "OPTIONS"
 Options:
 .TP
-\-\-force, \-f 
+\-\-force, \-f
 Overwrite existing files in the destination.
 .TP
-\-\-test, \-t 
-Dry run. Just test the export and report the result. Nothing will be changed.
+\-\-test, \-t
+Dry run. Just test the export and report the result. In column one, list for image, if it will be overwritten (o), or (+) for a new image in the destination. Nothing will be changed. 
 .TP
 \-\-path <path>, \-p <path>
 Export to the give path instead of using a logical destination

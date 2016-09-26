@@ -4,6 +4,8 @@ import shutil
 import re
 import plump
 import gzip
+import task
+import sys
 from argument_checker import check_params
 
 #OPTIMIZE Config keys in Hilfe listen
@@ -11,6 +13,9 @@ from argument_checker import check_params
 #     erzeugt, wird trotzdem settings.pickle not found ausgegeben
 #TODO Export noch nicht implementiert
 #TODO task soll verwaiste XMPs aufraeumen: task --xmp-cleanup|-x
+#TODO fow config --delete can't delete wrong entries. fow --remove
+#TODO show in als kurzform fuer show import und show inbox
+#TODO Backup should use same config-notation like export: backup.mypath
 
 
 def export(_arg_struct):
@@ -41,10 +46,62 @@ def export(_arg_struct):
     if not check_params(_arg_struct, rules, 'export'):
         return
 
-    print('Comming soon')
+    #Normalize for easy access: -t -> --test etc.
+    args = plump.normalizeArgs(_arg_struct, rules)
+
+    # Get destination
+    if 'path' in args['names']:
+        dest = args['args'][0]
+    else:
+        try:
+            dest = plump.readConfig()[plump.EXPORT_PREFIX
+                + '.' + args['args'][0]]
+        except:
+            print('Destination value not defined. Create it with ' +
+                '"config -s export.' + args['args'][0] + '" first.')
+            return
+
+    if dest is None:
+        print('Destination not valid. See "help export".')
+        return
+
+    if not os.path.exists(dest):
+        print('Destination directory not reachable: ' + dest)
+        return
+
+    if not task.check_actual():
+        return
+
+    src_dir = task.get_actual()['task'] + '/' + plump.DIR_FINAL
+    src_path = task.get_path(src_dir)
+    files = plump.list_jpg(src_path)
+
+    #[dict(name='image001.jpg', exists='true')]
+    analysis = plump.export_analyse(task.get_actual(), dest)
+    if 'test' in args['names']:
+        plump.export_test(analysis, src_dir, dest)
+        return
+
+    #export --force
+    if 'force' in args['names']:
+        print(str(len(files)) + ' images in ' + task.get_actual()['task']
+            + '/' + plump.DIR_FINAL)
+        print('Destination: ' + dest)
+        plump.export_copy(analysis, src_path, dest)
+
+    #export
+    else:
+        exists = False
+        for item in analysis:
+            if item['exists']:
+                exists = True
+        if exists:
+            print('Files would be overwritten! ' +
+            'Use --test to list the file(s) ' +
+            'or use --force to overwrite the image(s). ')
 
 
-def task(_arg_struct):
+def cmd_task(_arg_struct):
     """
     Task manipulation.
     Output example for 'task':
@@ -118,53 +175,53 @@ def task(_arg_struct):
     #--- Options for the actual task ---#
 
     #task --show
-    if 'show' in args['names'] or 'none' in args['names']:
-        if plump.getActualTask() is None:
+    if 'show' in args['names'] or len(args['names']) == 0:
+        if task.get_actual() is None:
             print('No actual task. ' +
             'Use "task --create <task>" to create one.')
         else:
-            print('Actual task is ' + plump.getActualTask()['task'] + '.')
+            print('Actual task is ' + task.get_actual()['task'] + '.')
             if 'show' in args['names']:
                 plump.show_task_summary(
                     plump.get_path(plump.DIR_02) + '/'
-                    + plump.getActualTask()['task'])
+                    + task.get_actual()['task'])
             else:
                 plump.show_task(plump.get_path(plump.DIR_02) + '/'
-                    + plump.getActualTask()['task'])
+                    + task.get_actual()['task'])
         return
 
     #task --raw-import
     #task --raw-import --test
     if 'raw-import' in args['names'] or \
         'missing-raws' in args['names']:
-        if plump.getActualTask() is None:
+        if task.get_actual() is None:
             print('No actual task set, please specify the folder, too: ' +
                 '[' + plump.get_path(plump.DIR_02) + '/]<folder>/<task>')
             return
 
         plump.move_corresponding_raws(
             plump.get_path(plump.DIR_02) + '/'
-            + plump.getActualTask()['task']
+            + task.get_actual()['task']
             + '/' + plump.DIR_JPG,
             plump.get_path(plump.DIR_01) + '/' + plump.DIR_RAW,
-            plump.get_path(plump.DIR_02) + '/' + plump.getActualTask()['task']
+            plump.get_path(plump.DIR_02) + '/' + task.get_actual()['task']
             + '/' + plump.DIR_RAW, 'test' in args['names'])
         return
 
     #task --fill-final
     #task --fill-final --test
     if 'fill-final' in args['names']:
-        if plump.getActualTask() is None:
+        if task.get_actual() is None:
             print('No actual task set, please specify the folder, too: ' +
                 '[' + plump.get_path(plump.DIR_02) + '/]<folder>/<task>')
             return
 
         plump.copy_missing_jpgs(
             plump.get_path(plump.DIR_02) + '/' +
-            plump.getActualTask()['task']
+            task.get_actual()['task']
                 + '/' + plump.DIR_JPG,
             plump.get_path(plump.DIR_02) + '/' +
-            plump.getActualTask()['task']
+            task.get_actual()['task']
                 + '/' + plump.DIR_FINAL,
             'test' in args['names'])
         return
@@ -197,11 +254,11 @@ def task(_arg_struct):
 
     #If only task is given, take the active folder
     if path['folder'] is None:
-        if plump.getActualTask() is None:
+        if task.get_actual() is None:
             print('No actual task set, please specify the folder, too: ' +
                 '[[' + plump.DIR_02 + '/]<folder>/]]<task>')
             return
-        path['folder'] = plump.getActualTask()['folder']
+        path['folder'] = task.get_actual()['folder']
 
     #For conveniencly usage
     path['ft'] = path['folder'] + '/' + path['task']
@@ -337,17 +394,17 @@ def show(_arg_struct):
         return
 
     if 'task' in args['args'] or len(args['args']) == 0:
-        if plump.getActualTask() is None:
+        if task.get_actual() is None:
             print('No actual task. ' +
             'Use "task --create <task>" to create one.')
         else:
-            print('Actual task is ' + plump.getActualTask()['task'] + '.')
+            print('Actual task is ' + task.get_actual()['task'] + '.')
             if 'short' in args['names']:
                 plump.show_task_summary(plump.get_path(plump.DIR_02) + '/'
-                    + plump.getActualTask()['task'])
+                    + task.get_actual()['task'])
             else:
                 plump.show_task(plump.get_path(plump.DIR_02) + '/'
-                    + plump.getActualTask()['task'])
+                    + task.get_actual()['task'])
         return
 
 
@@ -472,7 +529,7 @@ def fow(args=None):
         backup(plump.toArgStruct(cmds[1:]))
 
     elif cmds[0] == 'task':
-        task(plump.toArgStruct(cmds[1:]))
+        cmd_task(plump.toArgStruct(cmds[1:]))
 
     elif cmds[0] == 'show':
         show(plump.toArgStruct(cmds[1:]))

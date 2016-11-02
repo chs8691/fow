@@ -5,6 +5,8 @@ import sys
 import task
 import shutil
 import time
+import re
+import subprocess
 
 DIR_00 = '00_Inbox'
 DIR_01 = '01_Import'
@@ -14,10 +16,14 @@ DIR_JPG = 'jpg'
 DIR_RAW = 'raw'
 DIR_FINAL = 'final'
 DIR_WORK = 'work'
-VERSION = '1.1.1'
-BACKUP_DIR = 'backupDir'
+VERSION = '1.1.2'
+BACKUP_PATH = 'backup.path'
 GPX_DIR = 'gpxDir'
 TASK = 'task'
+TYPE_RAW = 'raw'
+TYPE_JPG = 'jpg'
+TYPE_TIF = 'tif'
+
 #Groups all exports destinations together. The have to start with 'export.'
 EXPORT_PREFIX = 'export'
 
@@ -50,14 +56,20 @@ def export_copy(analysis, src_dir, dest):
     """
     Copies files.
     """
+    name = ''
     try:
         for item in analysis:
-            #print(str(file))
+            name = item['name']
             shutil.copy2(src_dir + '/' + item['name'], dest)
+            print('Copying ' + name + '. Done.')
     except IOError as err:
+        print('Copying ' + name + '. Error!')
         print("I/O error: {0}".format(err))
+        return
     except:
+        print('Copying ' + name + '. Error!')
         print("Unexpected error:", sys.exc_info()[0])
+        return
 
 
 def export_test(analysis, src_dir, dest):
@@ -314,7 +326,9 @@ def normalizeArgs(_actual, rules):
 
 def readConfig():
     """
-    Returns a dictionary with setting.pickle.
+    Returns a dictionary from setting.pickle.
+    Example:
+        return dict(task='w/kw05', export.pc='/media/diskstation/photo/w')
     """
     settings = dict()
     try:
@@ -323,6 +337,7 @@ def readConfig():
             settings = pickle.load(data)
     except:
         print('setting.pickle not found but will be created with next writing.')
+
     return settings
 
 
@@ -401,6 +416,34 @@ def move_corresponding_raws(jpg_dir, src_dir, dest_dir, dry_run):
             os.rename(src_dir + '/' + each_file, dest_dir + '/' + each_file)
 
 
+def path_get_subdir(path):
+    """
+    Returns the last segment of the path,
+     or "", if path has no segments.
+    Does not care, if last path segment is a file or a subdir.
+    """
+    if path.rfind('/', 1) == -1:
+        return ""
+
+    (parent, subdir) = path.rsplit('/', 1)
+
+    return subdir
+
+
+def path_get_parent(path):
+    """
+    Returns the path without the file or last sub directory,
+     or "", if path if path has no segments.
+    Does not care, if last path segment is a file or a subdir.
+    """
+    if path.rfind('/', 1) == -1:
+        return ""
+
+    (parent, subdir) = path.rsplit('/', 1)
+
+    return parent
+
+
 def filename_get_suffix(filename):
     """
     Returns the suffix of the give file without its optional suffix.
@@ -444,6 +487,30 @@ def get_files_as_dict(files):
     return ret
 
 
+def filename_get_type(filename):
+    """
+    Returns the type of a file. Supported types are:
+        RAW, JPG, TIF
+    Or, if other
+    """
+    suffixes = ['jpg', 'JPG']
+    for s in suffixes:
+        if filename_get_suffix(filename) == s:
+            return TYPE_JPG
+
+    suffixes = ['RAW', 'raw', 'RAF', 'raf', 'cr2', 'CR2']
+    for s in suffixes:
+        if filename_get_suffix(filename) == s:
+            return TYPE_RAW
+
+    suffixes = ['tif', 'TIF']
+    for s in suffixes:
+        if filename_get_suffix(filename) == s:
+            return TYPE_TIF
+
+    return None
+
+
 def list_jpg(path):
     """
     Like os.listdir, a list with jpg files will be returned.
@@ -464,13 +531,15 @@ def list_raw(path):
         if filename_get_suffix(f) == s]
 
 
-def get_status(path):
+def DEPRECATED_get_status(path):
     """
-    Returns a list of dictionaries with the status about a task in
-    sub folder 'path', based by the image name. Example for return:
-        return [dict(image='image1', final=False, jpg=True, raw=True )]
+    Returns a list (sorted by name) of dictionaries with the status about a
+    task in sub folder 'path', based by the image name. Example for return:
+        return [dict(image='image1', final=False, jpg=True, raw=True,
+                        title='Lonely man in the park' )]
         name: Image name without suffix
         final, jpg, raw: True, if a file of this image is this subfolder
+        title: title of the final image
     path must be a subdir
     """
     path_final = path + '/' + DIR_FINAL
@@ -507,12 +576,17 @@ def get_status(path):
 
     #Remove duplicate names
     images = set(images)
+    images = list(images)
+
+    #Return list has to bo sorted by file names
+    images.sort()
 
     stats = []
     for each_image in images:
         is_in_final = each_image in final_images
         is_in_jpg = each_image in jpg_images
         is_in_raw = each_image in raw_images
+
         stat = dict(image=each_image, final=is_in_final,
             jpg=is_in_jpg, raw=is_in_raw)
         stats.append(stat)
@@ -520,12 +594,199 @@ def get_status(path):
     return stats
 
 
+def get_status2(path):
+    """
+    Returns a list (sorted by name) of dictionaries with the status about a
+    task in sub folder 'path', based by the image name. Example for return:
+        return [dict(image='image1', final=False, jpg=True, raw=True,
+            location=dict(lat='54.318340N', lon='18.428409E')
+            title='Lonely man in the park' )]
+        name: Image name without suffix
+        final, jpg, raw: True, if a file of this image is this subfolder
+        title: title of the final image
+    path must be a subdir
+    """
+    path_final = path + '/' + DIR_FINAL
+    path_jpg = path + '/' + DIR_JPG
+    path_raw = path + '/' + DIR_RAW
+    dirs = os.listdir(path)
+
+    if DIR_FINAL in dirs:
+        final_files = os.listdir(path_final)
+    else:
+        final_files = []
+    if DIR_JPG in dirs:
+        jpg_files = list_jpg(path_jpg)
+    else:
+        jpg_files = []
+    if DIR_RAW in dirs:
+        raw_files = list_raw(path_raw)
+    else:
+        raw_files = []
+
+    images = []
+    final_images = []
+    jpg_images = []
+    raw_images = []
+    titles = dict()
+    locations = dict()
+
+    for each_file in jpg_files:
+        images.append(filename_get_name(each_file))
+        jpg_images.append(filename_get_name(each_file))
+        title = image_get_title(path + '/' + DIR_JPG + '/' + each_file)
+        titles[filename_get_name(each_file)] = title
+        location_dict = image_get_location(path + '/' + DIR_JPG + '/'
+            + each_file)
+        locations[filename_get_name(each_file)] = location_dict
+
+    for each_file in raw_files:
+        images.append(filename_get_name(each_file))
+        raw_images.append(filename_get_name(each_file))
+        #Up to now, we don't read side car files (xmp)
+        titles[filename_get_name(each_file)] = None
+
+    for each_file in final_files:
+        images.append(filename_get_name(each_file))
+        final_images.append(filename_get_name(each_file))
+        title = image_get_title(path + '/' + DIR_FINAL + '/' + each_file)
+        titles[filename_get_name(each_file)] = title
+        location_dict = image_get_location(path + '/' + DIR_JPG + '/'
+            + each_file)
+        locations[filename_get_name(each_file)] = location_dict
+
+    #Remove duplicate names
+    images = set(images)
+    images = list(images)
+
+    #Return list has to bo sorted by file names
+    images.sort()
+
+    stats = []
+    #print('get_status2: titles=' + str(titles))
+    #print('get_status2: images=' + str(images))
+    for each_image in images:
+        is_in_final = each_image in final_images
+        is_in_jpg = each_image in jpg_images
+        is_in_raw = each_image in raw_images
+
+        stat = dict(image=each_image, final=is_in_final,
+            jpg=is_in_jpg, raw=is_in_raw, title=titles[each_image],
+            location=locations[each_image])
+        stats.append(stat)
+
+    return stats
+
+
+def image_get_location(filename):
+    """
+    Returns the geo location as dictionary with two keys 'lat' and
+    'lon' of an image, if exists, otherwise  None.
+    Example
+        return dict(lan=1.0, lat=49,54.318340N)
+    """
+    lat_value = image_get_xmp_tag(filename, 'Xmp.exif.GPSLatitude')
+    if lat_value is None:
+        return None
+    (key, sep, lat_value) = str(lat_value).partition(',')
+
+    lon_value = image_get_xmp_tag(filename, 'Xmp.exif.GPSLongitude')
+    if lon_value is None:
+        return None
+    (key, sep, lon_value) = str(lon_value).partition(',')
+
+    #print('image_get_location() ' + filename + ' ' + str(lon_value))
+    return dict(lat=lat_value, lon=lon_value)
+
+
+def image_get_xmp_tag(filename, tagname):
+    """
+    Reads the xmp-exif data of the given file and returns the value as string.
+    Returns None, if not found.
+    """
+    try:
+        b = subprocess.check_output(
+                'exiv2 -PXt -g ' + tagname + ' ' + filename,
+                stderr=subprocess.STDOUT,
+                shell=True,
+                universal_newlines=True)
+    except subprocess.CalledProcessError:
+        #print('exiv2 failed for ' + filename)
+        return None
+
+    #print('image_get_title return=' + title)
+
+    return str(b)
+
+
+def image_get_title(filename):
+    """
+    Returns the title lsof an image, if exists, otherwise  None.
+    """
+    b = image_get_xmp_tag(filename, 'Xmp.dc.title')
+    if b is None:
+        return None
+
+    #Xmp.dc.title contains lang='x-default' My title of the image/n
+    (lang, sep, title) = str(b).partition(' ')
+
+    return title[0:-1]
+
+
+def get_images(path):
+    """
+    path: absolut path of an dictionory
+    Returns list with image-dictionary
+    """
+    ret = []
+    for each_file in os.listdir(path):
+        #print('get_images: ' + each_file)
+        ret.extend(get_image(path + '/' + each_file))
+
+    return ret
+
+
+def get_image(file_path):
+    """
+    file_path: absolut path of the image file
+    Returns dictionary with meta data of the file.
+        path: absolut path of the file   '/images'
+        file: file name                  'image01.JPG'
+        image: image name                'image01'
+        type: image type or None          TYPE_JPG
+        location: dictionary or None     'dict(lon='1.1', lat='2.2')
+        title: title or None             'Old man in the park'
+    Example:
+        return dict(path='/images', file='img01.jpg',
+            title='old man in the park',
+            location=dict(lon='1.1', lat='2.2'))
+    In error case, None will be returned.
+    """
+    if file_path is None:
+        return None
+
+    stat = os.stat(file_path)
+    if stat is None:
+        return None
+
+    meta = dict()
+    meta['path'] = path_get_parent(file_path)
+    meta['file'] = path_get_subdir(file_path)
+    meta['image'] = filename_get_name(file_path)
+    meta['type'] = filename_get_type(file_path)
+    meta['location'] = None
+    meta['title'] = None
+
+    print('get_image: ' + str(meta))
+    return meta
+
+
 def show_in_summary(path):
     """
     Reports a short summary about inbox or import (sub folder 'path').
     path must be a fow relative subdir
     """
-    stats = get_status(path)
+    stats = get_status2(path)
     dirs = os.listdir(path)
 
     if not DIR_JPG in dirs:
@@ -562,10 +823,14 @@ def show_tasks():
     Reports infos about all tasks.
     """
     actual = task.get_actual()
-    for each_folder in os.listdir(get_path(DIR_02)):
+    dir02 = os.listdir(get_path(DIR_02))
+    dir02.sort()
+    for each_folder in dir02:
         print(' ' + each_folder)
-        for each_task in os.listdir(get_path(DIR_02) + '/' + each_folder):
-            stats = get_status(get_path(DIR_02) + '/' + each_folder + '/'
+        tasks = os.listdir(get_path(DIR_02) + '/' + each_folder)
+        tasks.sort()
+        for each_task in tasks:
+            stats = get_status2(get_path(DIR_02) + '/' + each_folder + '/'
                 + each_task)
             jpgs = len([s for s in stats if s['jpg']])
             raws = len([s for s in stats if s['raw']])
@@ -603,7 +868,7 @@ def show_tasks_summary():
         finals = 0
         tasks = 0
         for each_task in os.listdir(get_path(DIR_02) + '/' + each_folder):
-            stats = get_status(get_path(DIR_02) + '/' + each_folder + '/'
+            stats = get_status2(get_path(DIR_02) + '/' + each_folder + '/'
                 + each_task)
             tasks += 1
             jpgs += len([s for s in stats if s['jpg']])
@@ -620,7 +885,7 @@ def show_in(path):
     Path must be relative subdir
     """
 
-    stats = get_status(path)
+    stats = get_status2(path)
 
     for each_stat in stats:
         if each_stat['jpg']:
@@ -639,7 +904,7 @@ def show_task_summary(path):
     """
     Reports a short summary about a task in sub folder 'path'.
     """
-    stats = get_status(path)
+    stats = get_status2(path)
     dirs = os.listdir(path)
 
     if not DIR_FINAL in dirs:
@@ -655,14 +920,20 @@ def show_task_summary(path):
         str(len([s for s in stats if s['final']])) + ' finals.')
 
 
-def show_task(path):
+def show_task(path, final_only):
     """
     Reports infos about a task in sub folder 'path'.
+    final_only: If True, just final directory is shown
     """
 
-    stats = get_status(path)
+    stats = get_status2(path)
+    #print('show_task() ' + str(stats))
+    name_col_len = 15
 
     for each_stat in stats:
+        #Column length for image name
+        if len(each_stat['image']) > name_col_len:
+            name_col_len = len(each_stat['image'])
         if each_stat['jpg']:
             jpg = 'j'
         else:
@@ -675,8 +946,21 @@ def show_task(path):
             raw = 'r'
         else:
             raw = '-'
+        if each_stat['title']:
+            title_flag = 't'
+            title = each_stat['title']
+        else:
+            title_flag = '-'
+            title = ''
+        if each_stat['location']:
+            location_flag = 'g'
+        else:
+            location_flag = '-'
 
-        print(jpg + raw + final + ' ' + each_stat['image'])
+        formatting = '{}{}{}{}{} {:<' + str(name_col_len) + '} {}'
+        if final_only is False or (final_only is True and final == 'f'):
+            print(formatting.format(jpg, raw, final, title_flag, location_flag,
+                each_stat['image'], title))
 
 
 def _exist_dir(dir_name):

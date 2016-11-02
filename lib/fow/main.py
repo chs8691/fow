@@ -5,17 +5,19 @@ import re
 import plump
 import gzip
 import task
-import sys
 from argument_checker import check_params
 
-#OPTIMIZE Config keys in Hilfe listen
-#FIXME config: wird beim Schreiben eines Eintrags die pickle datei \
-#     erzeugt, wird trotzdem settings.pickle not found ausgegeben
-#TODO Export noch nicht implementiert
+#DONE Export to local directories added
+#DONE fow config --delete erases now the property instead of setting it to 'None'
+#DONE show: new argument 'in' shows import and inbox
+#DONE Backup now uses same config-notation like export: backup.path
+#DONE show's output is now ordered by names
+#DONE task output is now ordered by names
+#DONE task: New option --long, task shows now only finals
+#DONE task now accepts ending '/' in the path
+#TODO fow exception when not within a fow. Error message instead
+#TODO task should list location and title information
 #TODO task soll verwaiste XMPs aufraeumen: task --xmp-cleanup|-x
-#TODO fow config --delete can't delete wrong entries. fow --remove
-#TODO show in als kurzform fuer show import und show inbox
-#TODO Backup should use same config-notation like export: backup.mypath
 
 
 def export(_arg_struct):
@@ -99,35 +101,16 @@ def export(_arg_struct):
             print('Files would be overwritten! ' +
             'Use --test to list the file(s) ' +
             'or use --force to overwrite the image(s). ')
+        else:
+            print(str(len(files)) + ' images in ' + task.get_actual()['task']
+                + '/' + plump.DIR_FINAL)
+            print('Destination: ' + dest)
+            plump.export_copy(analysis, src_path, dest)
 
 
 def cmd_task(_arg_struct):
     """
     Task manipulation.
-    Output example for 'task':
-        Original: 4 images
-            l-x-- myImage01.jpg
-            ----- myImage02.jpg
-            l---- myImage03.jpg
-            --x-- myImage04.raw
-        Final: 2 images
-            lcrlc myImage01.jpg
-            lc--- myImage03.jpg
-        Published status (only for final images):
-            Destination 'Flickr': 1 image, 1 missing
-                lcrlc myImage01.jpg
-            Destination 'PC desktop': 0 image, 2 missing
-            Destination 'Diskstation': 2 image
-                lcrlc myImage01.jpg
-                lc--- myImage03.jpg
-        Backup status (only for raw images): 0 raws, 2 missing
-
-    The table at the beginning of the line has three columns:
-        loc - Geo location in Exif of jpg file (l, if true)
-        cmt - comment in Exif of jpg (c, if true)
-        raw - Raw file exists (in /raw) (r, if true)
-        loc - Geo location in raw file (l, if true)
-        cmt - Comment in raw file (c, if true)
     """
 
     #Command needs an existing fow.
@@ -140,7 +123,8 @@ def cmd_task(_arg_struct):
     #    return
     atom_create = dict(name='create', short='c', args=2)
     atom_activate = dict(name='activate', short='a', args=2)
-    atom_show = dict(name='show', short='s', args=0)
+    atom_short = dict(name='short', short='s', args=0)
+    atom_long = dict(name='long', short='l', args=0)
     atom_raw_import = dict(name='raw-import', short='r', args=0)
     atom_fill_final = dict(name='fill-final', short='f', args=0)
     atom_test = dict(name='test', short='t', args=0)
@@ -160,7 +144,9 @@ def cmd_task(_arg_struct):
         [dict(atom=atom_fill_final, obligat=True),
             dict(atom=atom_test, obligat=False)],
 
-        [dict(atom=atom_show, obligat=True)]
+        [dict(atom=atom_short, obligat=True)],
+
+        [dict(atom=atom_long, obligat=True)]
         ]
 
     if not check_params(_arg_struct, rules, 'task'):
@@ -174,20 +160,27 @@ def cmd_task(_arg_struct):
 
     #--- Options for the actual task ---#
 
-    #task --show
-    if 'show' in args['names'] or len(args['names']) == 0:
+    #task --short
+    #task
+    #task --long
+    if 'short' in args['names'] or 'long' in args['names'] \
+        or len(args['names']) == 0:
         if task.get_actual() is None:
             print('No actual task. ' +
             'Use "task --create <task>" to create one.')
         else:
             print('Actual task is ' + task.get_actual()['task'] + '.')
-            if 'show' in args['names']:
+            if 'short' in args['names']:
                 plump.show_task_summary(
                     plump.get_path(plump.DIR_02) + '/'
                     + task.get_actual()['task'])
+            elif 'long' in args['names']:
+                plump.show_task(
+                    plump.get_path(plump.DIR_02) + '/'
+                    + task.get_actual()['task'], False)
             else:
                 plump.show_task(plump.get_path(plump.DIR_02) + '/'
-                    + task.get_actual()['task'])
+                    + task.get_actual()['task'], True)
         return
 
     #task --raw-import
@@ -227,6 +220,10 @@ def cmd_task(_arg_struct):
         return
 
     #--- Options to change the actual task ---#
+
+    #arg 0 is the path, Path may not end with '/'
+    if len(args['args'][0]) > 0 and args['args'][0][-1] == '/':
+        args['args'][0] = args['args'][0][0:-1]
 
     #Extract folder and task name
     if args['args'][0].count('/') > 2:
@@ -291,7 +288,7 @@ def cmd_task(_arg_struct):
 
 def backup(_arg_struct):
     """
-    Backup data to external file system. Imput is the argument structure.
+    Backup data to external file system. Input is the argument structure.
     """
     ##0: No param allowed, 1: param optional, 2: param obligatory
     #if not checkArgs(_arg_dict,
@@ -323,14 +320,14 @@ def backup(_arg_struct):
         path = args['args'][0]
     #backup
     else:
-        if not plump.BACKUP_DIR in plump.readConfig() or \
-            plump.readConfig()[plump.BACKUP_DIR] == 'None' or \
-            plump.readConfig()[plump.BACKUP_DIR] is None:
+        if not plump.BACKUP_PATH in plump.readConfig() or \
+            plump.readConfig()[plump.BACKUP_PATH] == 'None' or \
+            plump.readConfig()[plump.BACKUP_PATH] is None:
             print('Backup directory not set. Use "backup <path>" for this ' +
                 'call or set backup path with "config backupDir <path>".')
             return
         else:
-            path = plump.readConfig()[plump.BACKUP_DIR]
+            path = plump.readConfig()[plump.BACKUP_PATH]
 
     #backup --test
     if 'test' in args['names']:
@@ -386,6 +383,19 @@ def show(_arg_struct):
             plump.show_in(plump.get_path(plump.DIR_01))
         return
 
+    if 'in' in args['args']:
+        if 'short' in args['names']:
+            print('inbox:')
+            plump.show_in_summary(plump.get_path(plump.DIR_00))
+            print('import:')
+            plump.show_in_summary(plump.get_path(plump.DIR_01))
+        else:
+            print('inbox:')
+            plump.show_in(plump.get_path(plump.DIR_01))
+            print('import:')
+            plump.show_in(plump.get_path(plump.DIR_00))
+        return
+
     if 'tasks' in args['args']:
         if 'short' in args['names']:
             plump.show_tasks_summary()
@@ -408,7 +418,7 @@ def show(_arg_struct):
         return
 
 
-def config(_arg_struct):
+def cmd_config(_arg_struct):
     """
     Set or delete a config item
     """
@@ -437,13 +447,16 @@ def config(_arg_struct):
     settings = plump.readConfig()
 
     if 'delete' in args['names']:
-        settings[args['args'][0]] = 'None'
+        del settings[args['args'][0]]
+        #settings[args['args'][0]] = 'None'
         plump.writeConfig(settings)
         return
 
     if 'list' in args['names'] or len(args['names']) == 0:
         if len(args['args']) == 0:
-            for key, value in list(settings.items()):
+            items = list(settings.items())
+            items.sort()
+            for key, value in items:
                 print((key + ' = ' + str(value)))
         else:
             print((settings[args['args'][0]]))
@@ -500,7 +513,7 @@ def init(_arg_struct):
 
     #Define all settings and initialze them
     plump.writeConfig({plump.GPX_DIR: None,
-                plump.BACKUP_DIR: None,
+                plump.BACKUP_PATH: None,
                 plump.TASK: None})
 
 
@@ -520,7 +533,7 @@ def fow(args=None):
         show_man(plump.toArgStruct(cmds[1:]))
 
     elif cmds[0] == 'config':
-        config(plump.toArgStruct(cmds[1:]))
+       cmd_config(plump.toArgStruct(cmds[1:]))
 
     elif cmds[0] == 'init':
         init(plump.toArgStruct(cmds[1:]))

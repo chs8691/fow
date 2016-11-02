@@ -12,7 +12,7 @@ task --raw-import|-r [--test|-t]
 
 task --fill-final|-f [--test|-t]
 
-task --short|-s
+task [--short|-s|--long|-l]
 
 .SH DESCRIPTON
 Reporting and editing a task and their objects.
@@ -26,9 +26,33 @@ A task has a defined subfolder structure, that should not be changed, but additi
 /work  - working directory, for instance for gimp files
 The name of the taskroot can be changed without side effect.
 .SH SYNOPSIS	
-Usage reporting: task [--short|-s]
-task: Reports a list with all images of the actual task. 
-task --short, task -s: Reports a brief status of the actual task. 
+Usage reporting: task [--short|-s|--long|-l]
+.TP
+task: Reports a list with all final images of the actual task. 
+.TP
+task --long, task -l: Reports a list with all images of the actual task. 
+Columns:
+
+.TP
+task --short, task -s: Reports a brief status summary of the actual task.
+.P 
+j (or -) - Image in jpg folder
+.P
+r (or -) - Image in raw folder
+.P
+f (or -) - Image in final folder
+.P
+t (or -) - Final image has title. If no final image exists, title of jpg.
+.P
+g (or -) - Final image has geo location. If no final image exists, geo location of jpg.
+.P
+space
+.P
+Image name without suffix
+.P
+space
+.P
+Title, if exists
 
 .SH OPTIONS
 .TP

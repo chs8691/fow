@@ -6,6 +6,7 @@ config \- show and change settings of the fow. A setting is a key value pair.
 .SH SYNOPSIS
 config [<options>] [<key> [<value>]]
 config: List all items. Same as 'config \-\-list'
+config <key> None: Set value to 'None'
 .SH DESCRIPTION
 The command shows or changes settings of the fow. A setting is a key value pair.
 .SH OPTIONS 
@@ -17,7 +18,7 @@ lists all settings or setting for a specific key
 Set or create this item.
 .TP
 \-d <key>, \-\-delete <key>
-Delete the value, same as 'config <key> None'
+Delete this item.
 
 .".SH EXAMPLES
 .".SH SEE ALSO

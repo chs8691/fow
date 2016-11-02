@@ -8,8 +8,8 @@ backup \- save the fow to an external directory
 backup [<options>] [<path>]
 .TP
 backup
-Saves fow to the external path. The past must be specified with 'config 
-backupDir'.
+Saves fow to the external path. The past variable must be defined once with 'config -s 
+backup.path=<ABSOLUTE_PATH>'.
 .SH OPTIONS
 .TP
 --path <path>, -p <path>

@@ -1,0 +1,24 @@
+." Manpage for fow.rename
+." Contact christian.schulzendorff@arcor.de to correct errors or typos.
+.TH FOW-RENAME 1 "2 NOvember 2016" "Fow manual" "fow rename"
+.SH NAME
+rename \- Move and rename files from 00_Inbox to 01_Import. In addition, can change exif metadate like 'model'
+.SH SYNOPSIS
+.TP
+rename [options] Moves an renames every file.
+.TP
+.SH DESCRIPTION
+Images will be renamed by their exif information to %Y%m%d-%H%M%S-:basename: where basename is the old name. If there are no exif timestamp available, the file will just moved and not renamed. The files may not exists in the destination dirs. To overwrite existing files use the --force option.
+.SH OPTIONS 
+--force, -f Overwrite existing files without warning.
+.TP
+--test, -t Dry-run. Does nothin, just print output.
+.TP
+--verbose,-v Print out more information.
+.".SH EXAMPLES
+.".SH SEE ALSO
+
+.SH BUGS
+No known bugs.
+.SH AUTHOR
+Christian Schulzendorff (christian.schulzendorff@arcor.de)

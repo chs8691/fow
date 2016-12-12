@@ -5,7 +5,6 @@ import sys
 import task
 import shutil
 import time
-import re
 import subprocess
 
 DIR_00 = '00_Inbox'
@@ -37,7 +36,6 @@ EXPORT_PREFIX = 'export'
 # configuration file for this fow installation, read once with readFowConfig()
 fow_config = None
 
-
 #def get_subdir(path):
     #"""
     #Extracts subdir from the given path within a fow.
@@ -50,6 +48,151 @@ fow_config = None
         #return None
 
     #return path.replace(get_fow_root(),'')
+
+
+def rename_analyse(src_path, dest_path):
+    """
+    Analyses for renaming command for all image files in the given path.
+    Returns a list with a dict for every file. List can be empty.
+    Supported image file types are: jpg, raw; it will be
+    always search for every image type. Other files will be untouched
+    (XMP, tiff).
+    Example with explanations:
+    dict=(src_path=src_path, dest_path=dest_path, files=
+        [dict=(
+            subdir='RAW'
+            old_name='img001.raf',                 #file name in src_path
+            new_name='20161131-123456-img001.raf', #new image name
+            exists=True),                      #False, if no file name conflict
+                                                   #in dest_path
+            dict=(...), ...
+        ]
+    """
+    ret = []
+
+    subdir = DIR_JPG
+    for each in list_jpg(src_path + '/' + subdir):
+        #print(str(image_get_time(path)))
+        old_name = each
+        time_str = image_get_time(src_path + '/' + subdir + '/' + each)
+        if time_str is None:
+            new_name = old_name
+        else:
+            new_name = time_str + '-' + old_name
+
+        if os.path.exists(dest_path + '/' + subdir + '/' + new_name):
+            exists = True
+        else:
+            exists = False
+
+        ret.append(dict(subdir=subdir, old_name=old_name, new_name=new_name,
+            exists=exists))
+
+    subdir = DIR_RAW
+    for each in list_raw(src_path + '/' + subdir):
+        #print(str(image_get_time(path)))
+        old_name = each
+        time_str = image_get_time(src_path + '/' + subdir + '/' + each)
+        if time_str is None:
+            new_name = old_name
+        else:
+            new_name = time_str + '-' + old_name
+
+        if os.path.exists(dest_path + '/' + subdir + '/' + new_name):
+            exists = True
+        else:
+            exists = False
+
+        ret.append(dict(subdir=subdir, old_name=old_name, new_name=new_name,
+            exists=exists))
+
+    return dict(src_path=src_path, dest_path=dest_path, files=ret)
+
+
+def rename_do(analysis, verbose, force):
+    """
+    Rename execution.
+    """
+
+    errs = [each for each in analysis['files'] if each['exists'] is True]
+    if len(errs) > 0:
+        if not force:
+            print(('{0} file(s) would be overwritten! Remove them or use '
+                + '--force to overwrite file(s). '
+                + 'Use rename -t -v to list conflicts.').format(len(errs)))
+            return
+
+    cntMoved = 0
+    cntOverwritten = 0
+
+    for each in analysis['files']:
+        try:
+            os.rename(analysis['src_path'] + '/' + each['subdir'] + '/'
+                + each['old_name'],
+                analysis['dest_path'] + '/' + each['subdir'] + '/'
+                + each['new_name'])
+            cntMoved += 1
+            if verbose:
+                if each['exists']:
+                    status = '! OVR '
+                    cntOverwritten += 1
+                else:
+                    status = '  OK  '
+                print(status + each['subdir'] + ' ' + each['old_name']
+                    + ' --> ' + each['new_name'])
+
+        except OSError as e:
+            print(str(e))
+            status = '! NOK '
+            #print(status + each['subdir'] + ' ' + each['old_name']
+                #+ ' --> ' + each['new_name'])
+            print('{0}/{1} file(s) moved.'.format(cntMoved,
+                len(analysis['files'])))
+            return
+
+    if cntOverwritten > 0:
+        print('{0} file(s) moved, which {1} were overwritten.'
+            .format(cntMoved, cntOverwritten))
+    else:
+        print('{0} file(s) moved.'.format(cntMoved))
+
+
+def rename_test(analysis, verbose, force):
+    """
+    Dry run of rename command.
+    verbose - boolean
+    """
+    cntOk = 0
+    cntNok = 0
+    for each in analysis['files']:
+        if not each['exists']:
+            cntOk += 1
+            if verbose:
+                status = '  OK  '
+                print(status + each['subdir'] + ' ' + each['old_name']
+                    + ' --> ' + each['new_name'])
+        else:
+            cntNok += 1
+            if verbose:
+                if force:
+                    status = '! OVR '
+                    print(status + each['subdir'] + '/' + each['new_name']
+                        + ' exists')
+                else:
+                    status = '! NOK '
+                    print(status + each['subdir'] + ' '
+                    + 'File already exists: ' + each['new_name'])
+
+    if cntNok > 0:
+        if force:
+            print(("{0}/{1} file(s) already exists an will be overwritten!")
+                .format(cntNok, len(analysis['files'])))
+        else:
+            print(("{0}/{1} file(s) already exists. Remove them first from " +
+                "destination or overwrite file(s) by using --force.")
+                .format(cntNok, len(analysis['files'])))
+    else:
+        print("{0} files will be moved and renamed.".format(cntOk))
 
 
 def export_copy(analysis, src_dir, dest):
@@ -645,6 +788,9 @@ def get_status2(path):
         raw_images.append(filename_get_name(each_file))
         #Up to now, we don't read side car files (xmp)
         titles[filename_get_name(each_file)] = None
+        location_dict = image_get_location(path + '/' + DIR_RAW + '/'
+            + each_file)
+        locations[filename_get_name(each_file)] = location_dict
 
     for each_file in final_files:
         images.append(filename_get_name(each_file))
@@ -665,6 +811,7 @@ def get_status2(path):
     stats = []
     #print('get_status2: titles=' + str(titles))
     #print('get_status2: images=' + str(images))
+    #print('get_status2: locations=' + str(locations))
     for each_image in images:
         is_in_final = each_image in final_images
         is_in_jpg = each_image in jpg_images
@@ -682,6 +829,7 @@ def image_get_location(filename):
     """
     Returns the geo location as dictionary with two keys 'lat' and
     'lon' of an image, if exists, otherwise  None.
+    Up to now, sidecar files (XMP) are not supported.
     Example
         return dict(lan=1.0, lat=49,54.318340N)
     """
@@ -719,9 +867,46 @@ def image_get_xmp_tag(filename, tagname):
     return str(b)
 
 
+def image_get_time(filename):
+    """
+    Reads the exif date and time of the given file and returns the value as
+    string in format yyyymmtt-hhmmss
+    Returns None, if not found.
+    Example:
+        return '20161231-235959'
+    """
+    #print('image_get_time() filename=' + filename)
+    try:
+        b = subprocess.check_output(
+               # 'exiv2 -K Exif.Photo.DateTimeOriginal -Pt '
+                'exiv2 -Pt -g xif.Photo.DateTimeOriginal '
+                + filename,
+                stderr=subprocess.STDOUT,
+                shell=True,
+                universal_newlines=True)
+    #except subprocess.CalledProcessError as err:
+    except subprocess.CalledProcessError:
+        #print(str(err))
+        return None
+    #print('image_get_time(): ' + str(b))
+
+    parts = str(b).split(' ')
+    if parts is None:
+        return None
+
+    if len(parts) < 2:
+        return None
+
+    ret = parts[0] + '-' + parts[1]
+    ret = ret.replace(':', '')
+    ret = ret.replace('\n', '')
+
+    return ret
+
+
 def image_get_title(filename):
     """
-    Returns the title lsof an image, if exists, otherwise  None.
+    Returns the title of an image, if exists, otherwise  None.
     """
     b = image_get_xmp_tag(filename, 'Xmp.dc.title')
     if b is None:
@@ -815,7 +1000,7 @@ def get_path(subdir):
     if len(subdir) > 1 and subdir[-1] == '/':
         subdir = subdir[0:-1]
 
-    return get_fow_root() + '/' + subdir
+    return get_fow_root() + subdir
 
 
 def show_tasks():

@@ -18,9 +18,62 @@ from argument_checker import check_params
 #TODO fow exception when not within a fow. Error message instead
 #TODO task should list location and title information
 #TODO task soll verwaiste XMPs aufraeumen: task --xmp-cleanup|-x
+#TODO renaming with exiv2 rename * -r %Y%m%d-%H%M%S-:basename:
+#TODO cd dir and list dir functions: fow cd [--task|--inbox|..] [--final|jpg|...]
+#TODO Jump into task dir with fow jump taks and junp to root dir
+# http://www.fujix-forum.com/threads/in-camera-raw-processing.62573/ sagt:
+# exiftool -Model="X-E2" *.RAF -> Umgeht Weiabgleichsfehler
+# exiftool -Make="Fujifilm" DSCF3958.RAF -> dann zieht zwar die
+# Objektivkorrektur korrekt, der Weissabgleichfehler kommt aber wieder!
 
 
-def export(_arg_struct):
+def cmd_rename(_arg_struct):
+    """
+    Move an rename in files.
+    """
+
+    ##0: No param allowed, 1: param optional, 2: param obligatory
+    #if not checkArgs(_arg_dict,
+    #    {'-t': 0, '--test': 0, '-p': 2, '--path': 2}):
+    #    return
+    atom_none = dict(name='', short='', args=0)
+    atom_force = dict(name='force', short='f', args=0)
+    atom_test = dict(name='test', short='t', args=0)
+    atom_verbose = dict(name='verbose', short='v', args=0)
+
+    #print('export() _arg_struct=' + str(_arg_struct))
+    rules = [
+        [dict(atom=atom_none, obligat=True),
+         dict(atom=atom_force, obligat=False),
+         dict(atom=atom_test, obligat=False),
+         dict(atom=atom_verbose, obligat=False)]
+        ]
+
+    if not check_params(_arg_struct, rules, 'rename'):
+        return
+
+    #Normalize for easy access: -t -> --test etc.
+    args = plump.normalizeArgs(_arg_struct, rules)
+
+    analysis = plump.rename_analyse(plump.get_path(plump.DIR_00),
+        plump.get_path(plump.DIR_01))
+    #print('rename() analysis=' + str(analysis))
+
+    # --verbose option
+    verbose = 'verbose' in args['names']
+    force = 'force' in args['names']
+
+    #rename --test
+    if 'test' in args['names']:
+        plump.rename_test(analysis, verbose, force)
+        return
+
+    #rename
+    else:
+        plump.rename_do(analysis, verbose, force)
+
+
+def cmd_export(_arg_struct):
     """
     Copy finals to external destinations.
     """
@@ -286,7 +339,7 @@ def cmd_task(_arg_struct):
         plump.setConfig(plump.TASK, path['ft'])
 
 
-def backup(_arg_struct):
+def cmd_backup(_arg_struct):
     """
     Backup data to external file system. Input is the argument structure.
     """
@@ -348,7 +401,7 @@ def backup(_arg_struct):
         + path)
 
 
-def show(_arg_struct):
+def cmd_show(_arg_struct):
     """
     Processing step reporting
     """
@@ -391,9 +444,9 @@ def show(_arg_struct):
             plump.show_in_summary(plump.get_path(plump.DIR_01))
         else:
             print('inbox:')
-            plump.show_in(plump.get_path(plump.DIR_01))
-            print('import:')
             plump.show_in(plump.get_path(plump.DIR_00))
+            print('import:')
+            plump.show_in(plump.get_path(plump.DIR_01))
         return
 
     if 'tasks' in args['args']:
@@ -467,7 +520,7 @@ def cmd_config(_arg_struct):
         plump.writeConfig(settings)
 
 
-def init(_arg_struct):
+def cmd_init(_arg_struct):
     """
     Initializes the fow. Call this once.
     """
@@ -530,25 +583,28 @@ def fow(args=None):
     cmds = args[1:]
 
     if cmds[0] == 'help':
-        show_man(plump.toArgStruct(cmds[1:]))
+        cmd_help(plump.toArgStruct(cmds[1:]))
 
     elif cmds[0] == 'config':
-       cmd_config(plump.toArgStruct(cmds[1:]))
+        cmd_config(plump.toArgStruct(cmds[1:]))
 
     elif cmds[0] == 'init':
-        init(plump.toArgStruct(cmds[1:]))
+        cmd_init(plump.toArgStruct(cmds[1:]))
 
     elif cmds[0] == 'backup':
-        backup(plump.toArgStruct(cmds[1:]))
+        cmd_backup(plump.toArgStruct(cmds[1:]))
 
     elif cmds[0] == 'task':
         cmd_task(plump.toArgStruct(cmds[1:]))
 
     elif cmds[0] == 'show':
-        show(plump.toArgStruct(cmds[1:]))
+        cmd_show(plump.toArgStruct(cmds[1:]))
 
     elif cmds[0] == 'export':
-        export(plump.toArgStruct(cmds[1:]))
+        cmd_export(plump.toArgStruct(cmds[1:]))
+
+    elif cmds[0] == 'rename':
+        cmd_rename(plump.toArgStruct(cmds[1:]))
 
     else:
         print('Unknown command. Use help to list all commands.')
@@ -609,7 +665,7 @@ def showHelp(_arg_struct):
                 'Use help to see all commands.')
 
 
-def show_man(_arg_struct):
+def cmd_help(_arg_struct):
     """
     Show man page. For specific command help, there has to be one
     file for each command with name fow-<command>. The first line of this

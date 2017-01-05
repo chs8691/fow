@@ -1,0 +1,21 @@
+." Manpage for fow.xe2hack
+." Contact christian.schulzendorff@arcor.de to correct errors or typos.
+.TH FOW-XE2HACK 1 "14 December 2016" "Fow manual" "fow xe2hack"
+.SH NAME
+xe2hack \- Changes for X-E2S cameras the exif value of model to 'X-E2'. 
+.SH SYNOPSIS
+.TP
+xe2hack - Change model of XE2S files 01_inbox/raw
+.TP
+.SH DESCRIPTION
+Changes exif model value for RAW files in 01_inbox/raw. Only for images, with model 'XE2-S'. This is useful for program Darktable 2.0.7, which doesn't support XE2-S cameras.
+.SH OPTIONS 
+--test, -t Dry-run, just print out
+--revert, -r Change the model from 'X-E2' to 'X-E2S'
+.".SH EXAMPLES
+.".SH SEE ALSO
+
+.SH BUGS
+No known bugs.
+.SH AUTHOR
+Christian Schulzendorff (christian.schulzendorff@arcor.de)

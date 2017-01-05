@@ -50,6 +50,77 @@ fow_config = None
     #return path.replace(get_fow_root(),'')
 
 
+def xe2hack_analyse(path, from_model, to_model):
+    """
+    Analyses for xe2hack command for all RAW files in the given path.
+    Returns a list with a dict for every file. List can be empty.
+    revert: Set true to revert naming (X-E2S to XE2)
+    Example with explanations:
+    dict=(path=path, from_model='X-E2S', to_model='X-E2', files=
+        [dict=(
+            subdir='RAW'
+            file_name='img001.raf'),               #file name of X-E2 image
+            dict=(...), ...
+        ])
+    """
+    ret = []
+
+    subdir = DIR_RAW
+    for each in list_raw(path + '/' + subdir):
+        file_path = path + '/' + subdir + '/' + each
+        #print(file_path + '=' + str(image_get_model(file_path)))
+        file_name = each
+        model = image_get_model(file_path)
+        if model == from_model:
+            ret.append(dict(subdir=subdir, file_name=file_name))
+
+    return dict(path=path, from_model=from_model, to_model=to_model,
+        files=ret)
+
+
+def xe2hack_do(analysis):
+    """
+    Rename execution.
+    """
+    print('Root path is: {0}'.format(analysis['path']))
+    print('Changing model from "{0}" to "{1}":'.format(
+        analysis['from_model'], analysis['to_model']))
+    for each in analysis['files']:
+        try:
+            b = subprocess.check_output(
+                    'exiftool -Model="{0}" {1}/{2}/{3}'.format(
+                        analysis['to_model'],
+                    each['path'], each['subdir'], each['file_name']),
+                    stderr=subprocess.STDOUT,
+                    shell=True,
+                    universal_newlines=True)
+        #except subprocess.CalledProcessError as err:
+        except subprocess.CalledProcessError:
+            #print(str(err))
+            return None
+
+
+
+        print('{0} {1}'.format(each['subdir'], each['file_name']))
+
+
+
+    print('{0} file(s) changed.'.format(len(analysis['files'])))
+
+
+def xe2hack_test(analysis):
+    """
+    Dry run of rename command.
+    verbose - boolean
+    """
+    print('Dry-run. Root path is: {0}'.format(analysis['path']))
+    print('Changing model from "{0}" to "{1}":'.format(
+        analysis['from_model'], analysis['to_model']))
+    for each in analysis['files']:
+        print('{0} {1}'.format(each['subdir'], each['file_name']))
+    print('{0} file(s) would be changed.'.format(len(analysis['files'])))
+
+
 def rename_analyse(src_path, dest_path):
     """
     Analyses for renaming command for all image files in the given path.
@@ -797,7 +868,7 @@ def get_status2(path):
         final_images.append(filename_get_name(each_file))
         title = image_get_title(path + '/' + DIR_FINAL + '/' + each_file)
         titles[filename_get_name(each_file)] = title
-        location_dict = image_get_location(path + '/' + DIR_JPG + '/'
+        location_dict = image_get_location(path + '/' + DIR_FINAL + '/'
             + each_file)
         locations[filename_get_name(each_file)] = location_dict
 
@@ -827,24 +898,83 @@ def get_status2(path):
 
 def image_get_location(filename):
     """
-    Returns the geo location as dictionary with two keys 'lat' and
-    'lon' of an image, if exists, otherwise  None.
+    Returns the human readable geo location as dictionary with two keys lat
+    and lon of an image, if exists, otherwise None.
+    Location must be stored in Exif.GPSInfo.GPSLatitude and
+    Exif.GPSInfo.GPSLatitudeRef. Key Xmp.exif.GPSLatitude
+    is not supported. Height not supported.
     Up to now, sidecar files (XMP) are not supported.
     Example
         return dict(lan=1.0, lat=49,54.318340N)
     """
-    lat_value = image_get_xmp_tag(filename, 'Xmp.exif.GPSLatitude')
+    #lat_value = image_get_tag(filename, 'Xmp.exif.GPSLatitude')
+    lat_value = image_get_gps_tag(filename, 'Exif.GPSInfo.GPSLatitude')
+    #print('image_get_location() lat ' + filename + ' ' + str(lat_value))
     if lat_value is None:
         return None
+
     (key, sep, lat_value) = str(lat_value).partition(',')
 
-    lon_value = image_get_xmp_tag(filename, 'Xmp.exif.GPSLongitude')
+    lon_value = image_get_gps_tag(filename, 'Exif.GPSInfo.GPSLongitude')
+    #print('image_get_location() lon ' + filename + ' ' + str(lon_value))
     if lon_value is None:
         return None
+
     (key, sep, lon_value) = str(lon_value).partition(',')
 
-    #print('image_get_location() ' + filename + ' ' + str(lon_value))
-    return dict(lat=lat_value, lon=lon_value)
+    ret = dict(lat=lat_value.replace('\n', ''),
+        lon=lon_value.replace('\n', ''))
+    #print('image_get_location() ' + filename + ' ' + str(ret))
+
+    return ret
+
+
+def image_get_gps_tag(filename, tagname):
+    """
+    Reads the GPS data of the given file and returns the value as string.
+    Returns None, if not found.
+    Adds both tags tagname and tagnameRef together: e.g. returns values space
+    separated values from GPSLatitudeRef and GPSLatitude
+    For example:
+        image_get_gps_tag('img01.jpg', 'GPSLatitude')
+        return 'Norden 50deg 7.46417'
+    """
+    cmd = 'exiv2 -pt -K {} {}'.format(tagname, filename)
+    try:
+        b = subprocess.check_output(
+                cmd,
+                stderr=subprocess.STDOUT,
+                shell=True,
+                universal_newlines=True)
+    except subprocess.CalledProcessError:
+        #print('image_get_gps_tag() exiv2 failed for {}'.format(cmd))
+        return None
+
+    parts = str(b).split(' ')
+    if len(parts) < 3:
+        return None
+
+    value1 = '{} {}'.format(parts[-3], parts[-2])
+
+    cmd = 'exiv2 -pt -K {}Ref {}'.format(tagname, filename)
+    try:
+        b = subprocess.check_output(
+                cmd,
+                stderr=subprocess.STDOUT,
+                shell=True,
+                universal_newlines=True)
+    except subprocess.CalledProcessError:
+        #print('image_get_gps_tag() exiv2 failed for {}'.format(cmd))
+        return None
+
+    parts = str(b).split(' ')
+    if len(parts) < 3:
+        return None
+
+    value2 = '{} {}'.format(value1, parts[-2])
+
+    #print('image_get_gps_tag return=' + str(value2))
+    return str(value2)
 
 
 def image_get_xmp_tag(filename, tagname):
@@ -854,7 +984,7 @@ def image_get_xmp_tag(filename, tagname):
     """
     try:
         b = subprocess.check_output(
-                'exiv2 -PXt -g ' + tagname + ' ' + filename,
+                'exiv2 -PXt -K ' + tagname + ' ' + filename,
                 stderr=subprocess.STDOUT,
                 shell=True,
                 universal_newlines=True)
@@ -899,6 +1029,40 @@ def image_get_time(filename):
 
     ret = parts[0] + '-' + parts[1]
     ret = ret.replace(':', '')
+    ret = ret.replace('\n', '')
+
+    return ret
+
+
+def image_get_model(filename):
+    """
+    Reads the exif model of the given file and returns the value as string
+    Returns None, if not found.
+    Example:
+        return 'X-E2S'
+    """
+    #print('image_get_time() filename=' + filename)
+    try:
+        b = subprocess.check_output(
+                'exiftool -model '
+                + filename,
+                stderr=subprocess.STDOUT,
+                shell=True,
+                universal_newlines=True)
+    #except subprocess.CalledProcessError as err:
+    except subprocess.CalledProcessError:
+        #print(str(err))
+        return None
+    #print('image_get_time(): ' + str(b))
+
+    parts = str(b).split(': ')
+    if parts is None:
+        return None
+
+    if len(parts) < 2:
+        return None
+
+    ret = parts[1]
     ret = ret.replace('\n', '')
 
     return ret
@@ -1116,6 +1280,7 @@ def show_task(path, final_only):
     name_col_len = 15
 
     for each_stat in stats:
+        #print('show_task() ' + str(each_stat))
         #Column length for image name
         if len(each_stat['image']) > name_col_len:
             name_col_len = len(each_stat['image'])
@@ -1137,10 +1302,12 @@ def show_task(path, final_only):
         else:
             title_flag = '-'
             title = ''
-        if each_stat['location']:
-            location_flag = 'g'
-        else:
+        if each_stat['location'] is None:
             location_flag = '-'
+        else:
+            location_flag = 'g'
+
+        #print('show_task() ' + str(location_flag))
 
         formatting = '{}{}{}{}{} {:<' + str(name_col_len) + '} {}'
         if final_only is False or (final_only is True and final == 'f'):

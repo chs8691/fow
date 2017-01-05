@@ -2,7 +2,7 @@
 ." Contact christian.schulzendorff@arcor.de to correct errors or typos.
 .TH FOW-RENAME 1 "2 NOvember 2016" "Fow manual" "fow rename"
 .SH NAME
-rename \- Move and rename files from 00_Inbox to 01_Import. In addition, can change exif metadate like 'model'
+rename \- Move and rename files from 00_Inbox to 01_Import. 
 .SH SYNOPSIS
 .TP
 rename [options] Moves an renames every file.

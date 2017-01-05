@@ -21,10 +21,61 @@ from argument_checker import check_params
 #TODO renaming with exiv2 rename * -r %Y%m%d-%H%M%S-:basename:
 #TODO cd dir and list dir functions: fow cd [--task|--inbox|..] [--final|jpg|...]
 #TODO Jump into task dir with fow jump taks and junp to root dir
+#TODO Rename f[r Videos
+#TODO Import nach 00 von F: und External/Nexus
 # http://www.fujix-forum.com/threads/in-camera-raw-processing.62573/ sagt:
 # exiftool -Model="X-E2" *.RAF -> Umgeht Weiabgleichsfehler
 # exiftool -Make="Fujifilm" DSCF3958.RAF -> dann zieht zwar die
 # Objektivkorrektur korrekt, der Weissabgleichfehler kommt aber wieder!
+# exiftool -model dcff3797.raw -> Zeigt model an
+# g wird angezeigt, obwohl keine Info vorhanden (aus RAW erstelles final)
+
+
+def cmd_xe2hack(_arg_struct):
+    """
+    Change exif model for raw files in 01_import
+    """
+
+    ##0: No param allowed, 1: param optional, 2: param obligatory
+    #if not checkArgs(_arg_dict,
+    #    {'-t': 0, '--test': 0, '-p': 2, '--path': 2}):
+    #    return
+    atom_none = dict(name='', short='', args=0)
+    atom_revert = dict(name='revert', short='r', args=0)
+    atom_test = dict(name='test', short='t', args=0)
+
+    #print('export() _arg_struct=' + str(_arg_struct))
+    rules = [
+        [dict(atom=atom_none, obligat=True),
+         dict(atom=atom_revert, obligat=False),
+         dict(atom=atom_test, obligat=False)]
+        ]
+
+    if not check_params(_arg_struct, rules, 'x2ehack'):
+        return
+
+    #Normalize for easy access: -t -> --test etc.
+    args = plump.normalizeArgs(_arg_struct, rules)
+
+    if 'revert' in args['names']:
+        from_model = 'X-E2'
+        to_model = 'X-E2S'
+    else:
+        from_model = 'X-E2S'
+        to_model = 'X-E2'
+
+    analysis = plump.xe2hack_analyse(plump.get_path(plump.DIR_01),
+    from_model, to_model)
+    #print('rename() analysis=' + str(analysis))
+
+    # --test
+    if 'test' in args['names']:
+        plump.xe2hack_test(analysis)
+        return
+
+    #rename
+    else:
+        plump.xe2hack_do(analysis)
 
 
 def cmd_rename(_arg_struct):
@@ -606,6 +657,9 @@ def fow(args=None):
     elif cmds[0] == 'rename':
         cmd_rename(plump.toArgStruct(cmds[1:]))
 
+    elif cmds[0] == 'xe2hack':
+        cmd_xe2hack(plump.toArgStruct(cmds[1:]))
+
     else:
         print('Unknown command. Use help to list all commands.')
 
@@ -694,6 +748,7 @@ def cmd_help(_arg_struct):
                         if os.path.isfile(os.path.join(
                         plump.getHelpFileDir(), f))
                         and pattern.match(f)]
+            names.sort()
             #print('names=' + str(names))
             print(('fow commands:'))
             out = ''

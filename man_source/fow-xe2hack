@@ -11,6 +11,7 @@ xe2hack - Change model of XE2S files 01_inbox/raw
 Changes exif model value for RAW files in 01_inbox/raw. Only for images, with model 'XE2-S'. This is useful for program Darktable 2.0.7, which doesn't support XE2-S cameras.
 .SH OPTIONS 
 --test, -t Dry-run, just print out
+.TP
 --revert, -r Change the model from 'X-E2' to 'X-E2S'
 .".SH EXAMPLES
 .".SH SEE ALSO

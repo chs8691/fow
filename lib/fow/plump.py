@@ -83,14 +83,16 @@ def xe2hack_do(analysis):
     Rename execution.
     """
     print('Root path is: {0}'.format(analysis['path']))
-    print('Changing model from "{0}" to "{1}":'.format(
-        analysis['from_model'], analysis['to_model']))
+    print('Changing model from "{0}" to "{1}":'
+        .format(analysis['from_model'], analysis['to_model']))
     for each in analysis['files']:
-        try:
-            b = subprocess.check_output(
-                    'exiftool -Model="{0}" {1}/{2}/{3}'.format(
+        cmd = 'exiftool -Model="{0}" {1}/{2}/{3}'.format(
                         analysis['to_model'],
-                    each['path'], each['subdir'], each['file_name']),
+                    analysis['path'], each['subdir'], each['file_name'])
+        #print('xe2hack_do(): cmd={0}'.format(cmd))
+        try:
+            subprocess.check_output(
+                    cmd,
                     stderr=subprocess.STDOUT,
                     shell=True,
                     universal_newlines=True)
@@ -99,11 +101,7 @@ def xe2hack_do(analysis):
             #print(str(err))
             return None
 
-
-
         print('{0} {1}'.format(each['subdir'], each['file_name']))
-
-
 
     print('{0} file(s) changed.'.format(len(analysis['files'])))
 

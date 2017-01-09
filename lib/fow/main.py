@@ -15,20 +15,21 @@ from argument_checker import check_params
 #DONE task output is now ordered by names
 #DONE task: New option --long, task shows now only finals
 #DONE task now accepts ending '/' in the path
-#TODO fow exception when not within a fow. Error message instead
-#TODO task should list location and title information
-#TODO task soll verwaiste XMPs aufraeumen: task --xmp-cleanup|-x
-#TODO renaming with exiv2 rename * -r %Y%m%d-%H%M%S-:basename:
-#TODO cd dir and list dir functions: fow cd [--task|--inbox|..] [--final|jpg|...]
-#TODO Jump into task dir with fow jump taks and junp to root dir
-#TODO Rename f[r Videos
-#TODO Import nach 00 von F: und External/Nexus
+#DONE task should list location and title information
 # http://www.fujix-forum.com/threads/in-camera-raw-processing.62573/ sagt:
 # exiftool -Model="X-E2" *.RAF -> Umgeht Weiabgleichsfehler
 # exiftool -Make="Fujifilm" DSCF3958.RAF -> dann zieht zwar die
 # Objektivkorrektur korrekt, der Weissabgleichfehler kommt aber wieder!
 # exiftool -model dcff3797.raw -> Zeigt model an
 # g wird angezeigt, obwohl keine Info vorhanden (aus RAW erstelles final)
+#TODO renaming with exiv2 rename * -r %Y%m%d-%H%M%S-:basename:
+#TODO Zum nachsten/vorherigen task wechseln mit task -n bzw. task -p
+#TODO Rename f[r Videos
+#TODO cd dir and list dir functions: fow cd [--task|--inbox|..] [--final|jpg|...]
+#TODO Jump into task dir with fow jump taks and junp to root dir
+#TODO task soll verwaiste XMPs aufraeumen: task --xmp-cleanup|-x
+#TODO Import nach 00 von F: und External/Nexus
+#TODO fow exception when not within a fow. Error message instead
 
 
 def cmd_xe2hack(_arg_struct):

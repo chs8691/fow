@@ -4,13 +4,18 @@
 .SH NAME
 task \- manage a fow's task 
 .SH SYNAPSIS
-task --create|-c name
 
 task --activate|-a name
 
-task --raw-import|-r [--test|-t]
+task --create|-c name
 
 task --fill-final|-f [--test|-t]
+
+task -- next|-n
+
+task --previous|-p 
+
+task --raw-import|-r [--test|-t]
 
 task [--short|-s|--long|-l]
 
@@ -64,6 +69,12 @@ Creates a new task in the particular subfolder of 02_PROCESS. A task has to be s
 .TP
 \-a <task>, \-\-activate <task>
 Set this task as the active one.
+.TP
+\-n, \-\-next
+Set the next task to the active one (All tasks can be listed with 'show tasks').
+.TP
+\-p, \-\-previous
+Set the previous task to the active one (all tasks can be listed with 'show tasks').
 .TP
 \-r, \-\-raw\-import
 Move corresponding raw files for all images in jpg of the actual task, taken from 01_Import. Source and destination subfolder is /raw. Existing raws in the destination folder are untouched. Action is independent of the final folder. 

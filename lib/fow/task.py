@@ -11,13 +11,17 @@ def get_actual():
     'name' (task name), 'folder' (folder name)
     of the actual task or None, if not set.
     """
-    item = plump.readConfig()[plump.TASK]
-    if item is None or item == 'None':
+    try:
+        settings = plump.readConfig()
+        item = settings[plump.TASK]
+        if item is None or item == 'None':
+            return None
+        else:
+            (folder, name) = item.rsplit('/', 1)
+            task = {'task': item, 'name': name, 'folder': folder}
+            return task
+    except:
         return None
-    else:
-        (folder, name) = item.rsplit('/', 1)
-        task = {'task': item, 'name': name, 'folder': folder}
-        return task
 
 
 def get_path(_task):

@@ -22,15 +22,16 @@ from argument_checker import check_params
 # Objektivkorrektur korrekt, der Weissabgleichfehler kommt aber wieder!
 # exiftool -model dcff3797.raw -> Zeigt model an
 # g wird angezeigt, obwohl keine Info vorhanden (aus RAW erstelles final)
-#TODO renaming with exiv2 rename * -r %Y%m%d-%H%M%S-:basename:
-#TODO Zum nachsten/vorherigen task wechseln mit task -n bzw. task -p
+#DONE renaming with exiv2 rename * -r %Y%m%d-%H%M%S-:basename:
+#DONE Zum nachsten/vorherigen task wechseln mit task -n bzw. task -p
+#DONE xe2hack erstellt original-Dateien. Unterbinden
 #TODO Rename f[r Videos
 #TODO cd dir and list dir functions: fow cd [--task|--inbox|..] [--final|jpg|...]
 #TODO Jump into task dir with fow jump taks and junp to root dir
 #TODO task soll verwaiste XMPs aufraeumen: task --xmp-cleanup|-x
 #TODO Import nach 00 von F: und External/Nexus
-#TODO fow exception when not within a fow. Error message instead
-
+#TODO Add GPS data from external location to jpg files in 01
+#TODO Add GPS data from external location to raw files in 01
 
 def cmd_xe2hack(_arg_struct):
     """
@@ -228,6 +229,8 @@ def cmd_task(_arg_struct):
     #    return
     atom_create = dict(name='create', short='c', args=2)
     atom_activate = dict(name='activate', short='a', args=2)
+    atom_next = dict(name='next', short='n', args=0)
+    atom_previous = dict(name='previous', short='p', args=0)
     atom_short = dict(name='short', short='s', args=0)
     atom_long = dict(name='long', short='l', args=0)
     atom_raw_import = dict(name='raw-import', short='r', args=0)
@@ -242,6 +245,10 @@ def cmd_task(_arg_struct):
         [dict(atom=atom_create, obligat=True)],
 
         [dict(atom=atom_activate, obligat=True)],
+
+        [dict(atom=atom_next, obligat=True)],
+
+        [dict(atom=atom_previous, obligat=True)],
 
         [dict(atom=atom_raw_import, obligat=True),
             dict(atom=atom_test, obligat=False)],
@@ -322,6 +329,36 @@ def cmd_task(_arg_struct):
             task.get_actual()['task']
                 + '/' + plump.DIR_FINAL,
             'test' in args['names'])
+        return
+
+    #task --next
+    #task --previous
+    if 'next' in args['names'] or 'previous' in args['names']:
+        if 'previous' in args['names']:
+            offset = -1
+        else:
+            offset = 1
+        old_triple = plump.get_task_triple(offset)
+        if old_triple is None:
+            print('No actual task found.')
+            return
+
+        if old_triple['p_task'] is None:
+            print('Seems to be only one task. Switching not possible.')
+            return
+
+        plump.setConfig(plump.TASK,
+            '{0}/{1}'.format(old_triple['a_task']['subdir'],
+            old_triple['a_task']['task']))
+
+        new_triple = plump.get_task_triple(0)
+
+        print('   {0}/{1}'.format(str(new_triple['p_task']['subdir']),
+            str(new_triple['p_task']['task'])))
+        print('*  {0}/{1}'.format(str(new_triple['a_task']['subdir']),
+            str(new_triple['a_task']['task'])))
+        print('   {0}/{1}'.format(str(new_triple['n_task']['subdir']),
+            str(new_triple['n_task']['task'])))
         return
 
     #--- Options to change the actual task ---#
@@ -519,7 +556,7 @@ def cmd_show(_arg_struct):
                     + task.get_actual()['task'])
             else:
                 plump.show_task(plump.get_path(plump.DIR_02) + '/'
-                    + task.get_actual()['task'])
+                    + task.get_actual()['task'], False)
         return
 
 

@@ -36,18 +36,95 @@ EXPORT_PREFIX = 'export'
 # configuration file for this fow installation, read once with readFowConfig()
 fow_config = None
 
-#def get_subdir(path):
-    #"""
-    #Extracts subdir from the given path within a fow.
-    #Returns None, if path is not within a fow.
-    #Example:
-    #get_subdir('/home/chris/myfow/02_Progress/weekly')
-        #return '02_Progress/weekly'
-    #"""
-    #if get_fow_root() is None:
-        #return None
 
-    #return path.replace(get_fow_root(),'')
+def get_task_triple(offset):
+    """
+    Returns dict with three tasks active, previous, next.
+    Offset: offset value the actual task. For instance, offset=-1 would return
+    the tasks -2, -1 and 0 relative to the active task.
+    Actual: the active task or, if offset<> 0, the relative task. If
+    there is no task active, the first task will be returned.
+    If there is just one task, this one will be returned
+    Returns None, if there are no tasks.
+    next and previous are set to None, if there is only one task
+    The task list is seen as a ring list, the task 'last+1' will be set to
+    task 0 and, on the otherhand, the task -1 will be set to last task.
+
+    Example:
+        return dict=(
+        a_task=dict(subdir='family',task='holidays',active=true),
+        p_task=dict(subdir='family',task='birthday',active=False),
+        n_task=dict(subdir='weekly',task='20160101',active=False))
+
+    """
+    tasks = []
+
+    dir02 = os.listdir(get_path(DIR_02))
+    dir02.sort()
+    active = task.get_actual()
+
+    for each_folder in dir02:
+        task_dirs = os.listdir(get_path(DIR_02) + '/' + each_folder)
+        task_dirs.sort()
+        for each_task in task_dirs:
+            if active['folder'] == each_folder and \
+                active['name'] == each_task:
+                is_active = True
+            else:
+                is_active = False
+
+            tasks.append(dict(subdir=each_folder, task=each_task,
+                active=is_active))
+
+    #print('get_next_task() ' + str(tasks))
+
+     #Just one or none task
+    if len(tasks) == 0:
+        return None
+    elif len(tasks) == 1:
+        return dict(a_task=tasks[0], n_task=None, p_task=None)
+
+     # Find active item
+    max_i = len(tasks) - 1
+
+    active_i = -1
+    for i in range(0, max_i + 1):
+        #print('i={0}'.format(i))
+        if tasks[i]['active']:
+            active_i = i
+            break
+    #print('active_i={0}, offset={1}'.format(active_i, offset))
+
+    i_active = active_i + offset
+    i1 = i_active - 1
+    i2 = i_active + 1
+    #if(backwards):
+        #i_active = active_i - 1
+        #i1 = active_i - 2
+        #i2 = active_i
+    #else:
+        #i_active = active_i + 1
+        #i1 = active_i
+        #i2 = active_i + 2
+    #print('get_next_task() p={0} a={1} n={2}'.format(i1, i_active, i2))
+
+    #Handle out of ranges
+    if i_active < 0:
+        i_active = max_i + i_active + 1
+    elif i_active >= max_i:
+        i_active = i_active - max_i - 1
+    if i1 < 0:
+        i1 = max_i + i1 + 1
+    elif i1 >= max_i:
+        i1 = i1 - max_i - 1
+    if i2 < 0:
+        i2 = max_i - i2 + 1
+    elif i2 >= max_i:
+        i2 = i2 - max_i - 1
+
+    #print('get_next_task() p={0} a={1} n={2}'.format(i1, i_active, i2))
+    return dict(a_task=tasks[i_active], p_task=tasks[i1],
+        n_task=tasks[i2])
 
 
 def xe2hack_analyse(path, from_model, to_model):
@@ -86,7 +163,7 @@ def xe2hack_do(analysis):
     print('Changing model from "{0}" to "{1}":'
         .format(analysis['from_model'], analysis['to_model']))
     for each in analysis['files']:
-        cmd = 'exiftool -Model="{0}" {1}/{2}/{3}'.format(
+        cmd = 'exiftool -overwrite_original -Model="{0}" {1}/{2}/{3}'.format(
                         analysis['to_model'],
                     analysis['path'], each['subdir'], each['file_name'])
         #print('xe2hack_do(): cmd={0}'.format(cmd))
@@ -398,8 +475,8 @@ def get_fow_root():
     tpath = '/'
     for i in range(0, len(parts)):
         tpath = tpath + parts[i] + '/'
-        paths.append(tpath)
     #print(str(paths))
+        paths.append(tpath)
 
     for i in range(0, len(paths) - 1):
         #print(paths[len(paths) - 1 - i])
@@ -539,6 +616,7 @@ def normalizeArgs(_actual, rules):
 def readConfig():
     """
     Returns a dictionary from setting.pickle.
+    Returns None, if setting not found
     Example:
         return dict(task='w/kw05', export.pc='/media/diskstation/photo/w')
     """
@@ -549,6 +627,7 @@ def readConfig():
             settings = pickle.load(data)
     except:
         print('setting.pickle not found but will be created with next writing.')
+        return None
 
     return settings
 

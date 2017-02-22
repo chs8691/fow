@@ -5,4 +5,4 @@ rsync -rltv --delete --info=FLIST0,STATS0,BACKUP1 lib/fow/argument_checker.py ..
 rsync -rltv --delete --info=FLIST0,STATS0,BACKUP1 lib/fow/task.py ../dist/debian/usr/lib/fow/
 rsync -rltv --delete --info=FLIST0,STATS0,BACKUP1 man/ ../dist/debian/usr/share/man/man1/
 dpkg-deb --build ../dist/debian/
-mv ../dist/debian.deb ../dist/fow_1.1.2_all.deb
+mv ../dist/debian.deb ../dist/fow_1.1.3_all.deb

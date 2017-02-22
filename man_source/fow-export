@@ -6,7 +6,7 @@ export \- Copy final images to external destinations for the actual task
 .SH "SYNOPSIS"	
 .TP
 export
-[<options>] [<destination|path>]
+[<options>] <destination|path>
 .TP
 export destination
 Copy all images in final of the actual task to the logical destination 'export.destination'. The destination must exists. It can be set with the config command.

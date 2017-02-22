@@ -1,0 +1,36 @@
+." Manpage for fow.load
+." Contact christian.schulzendorff@arcor.de to correct errors or typos.
+.TH FOW-LOAD "28 January 2016" "Fow manual" "fow load"
+.SH "NAME"
+load \- Loads images from external destinations into 00_Inbox.  
+.SH "SYNOPSIS"	
+.TP
+load
+[<options>] <destination|path>
+.TP
+load destination
+Copy all images from the logical destination 'load.<destination>'. The destination must exists. It can be set with the config command.
+Existing files in 00_Inbox will not be overwritten, but can be forced with option -f. The destination must be set with the config command and must be prefixed with 'load.'. But the destination key may not have leading 'load.' when using this with load. For instance:
+.TP
+  fow config \-\-set load.f=/media/f
+.TP
+  fow load f
+
+.SH "OPTIONS"
+Options:
+.TP
+\-\-force, \-f
+Overwrite existing files in the destination.
+.TP
+\-\-test, \-t
+Dry run. Just test the load and report the result. In column one, list for image, if it will be overwritten (o), or (+) for a new image in the destination. Nothing will be changed. 
+.TP
+\-\-path <path>, \-p <path>
+Load to the give path instead of using a logical destination
+.TP
+\-\-move \-m 
+Moves the images instead of copy them.
+.TP
+\-\-verbose, \-v 
+Prints more information.
+

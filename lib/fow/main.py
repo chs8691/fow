@@ -25,13 +25,39 @@ from argument_checker import check_params
 #DONE renaming with exiv2 rename * -r %Y%m%d-%H%M%S-:basename:
 #DONE Zum nachsten/vorherigen task wechseln mit task -n bzw. task -p
 #DONE xe2hack erstellt original-Dateien. Unterbinden
+#DONE Import nach 00 von F: und External/Nexu
 #TODO Rename f[r Videos
 #TODO cd dir and list dir functions: fow cd [--task|--inbox|..] [--final|jpg|...]
 #TODO Jump into task dir with fow jump taks and junp to root dir
 #TODO task soll verwaiste XMPs aufraeumen: task --xmp-cleanup|-x
-#TODO Import nach 00 von F: und External/Nexus
 #TODO Add GPS data from external location to jpg files in 01
-#TODO Add GPS data from external location to raw files in 01
+#TODO show tasks ist sehr langsam
+
+#Habe ich nicht hinbekommen, dass in der Shell cd gemacht wird
+#def cmd_cd(_arg_struct):
+    #"""
+    #Change directory
+    #"""
+
+    ###0: No param allowed, 1: param optional, 2: param obligatory
+    ##if not checkArgs(_arg_dict,
+    ##    {'-t': 0, '--test': 0, '-p': 2, '--path': 2}):
+    ##    return
+    #atom_none = dict(name='', short='', args=1)
+
+    ##print('export() _arg_struct=' + str(_arg_struct))
+    #rules = [
+        #[dict(atom=atom_none, obligat=True)]
+        #]
+
+    #if not check_params(_arg_struct, rules, 'cd'):
+        #return
+
+    ##Normalize for easy access: -t -> --test etc.
+    #args = plump.normalizeArgs(_arg_struct, rules)
+
+    #plump.cd_do(args)
+
 
 def cmd_xe2hack(_arg_struct):
     """
@@ -124,6 +150,86 @@ def cmd_rename(_arg_struct):
     #rename
     else:
         plump.rename_do(analysis, verbose, force)
+
+
+def cmd_load(_arg_struct):
+    """
+    Copy or moves files from external destinations.
+    """
+
+    ##0: No param allowed, 1: param optional, 2: param obligatory
+    #if not checkArgs(_arg_dict,
+    #    {'-t': 0, '--test': 0, '-p': 2, '--path': 2}):
+    #    return
+    atom_path = dict(name='path', short='p', args=2)
+    atom_move = dict(name='move', short='m', args=0)
+    atom_force = dict(name='force', short='f', args=0)
+    atom_verbose = dict(name='verbose', short='v', args=0)
+    atom_test = dict(name='test', short='t', args=0)
+    atom_none = dict(name='', short='', args=2)
+
+    #print('export() _arg_struct=' + str(_arg_struct))
+    rules = [
+        [dict(atom=atom_path, obligat=True),
+         dict(atom=atom_force, obligat=False),
+         dict(atom=atom_verbose, obligat=False),
+         dict(atom=atom_move, obligat=False),
+         dict(atom=atom_test, obligat=False)],
+
+        [dict(atom=atom_none, obligat=True),
+         dict(atom=atom_force, obligat=False),
+         dict(atom=atom_verbose, obligat=False),
+         dict(atom=atom_move, obligat=False),
+         dict(atom=atom_test, obligat=False)]
+        ]
+
+    if not check_params(_arg_struct, rules, 'load'):
+        return
+
+    #Normalize for easy access: -t -> --test etc.
+    args = plump.normalizeArgs(_arg_struct, rules)
+
+    # Get srcination
+    if 'path' in args['names']:
+        src = args['args'][0]
+    else:
+        try:
+            src = plump.readConfig()['{0}.{1}'.format(
+                plump.LOAD_PREFIX, args['args'][0])]
+        except:
+            print('Source value not defined. Create it with ' +
+                '"config -s load.' + args['args'][0] + '=<sourceDir>" first.')
+            return
+
+    if src is None:
+        print('Source not valid. See "help load".')
+        return
+
+    if not os.path.exists(src):
+        print('Source directory not reachable: ' + src)
+        return
+
+    if not task.check_actual():
+        return
+
+    dest = '{0}{1}'.format(plump.get_fow_root(), plump.DIR_00)
+
+    # Get additional options
+    options = dict(verbose='verbose' in args['names'],
+        move='move' in args['names'],
+        force='force' in args['names'])
+
+    #[dict(name='image001.jpg', exists='true')]
+    analysis = plump.load_analyse(src, dest)
+    if 'test' in args['names']:
+        plump.load_test(analysis, src, dest, options)
+        return
+
+    #load
+    else:
+        plump.load_do(analysis, src, dest, options)
+
+    return
 
 
 def cmd_export(_arg_struct):
@@ -692,11 +798,17 @@ def fow(args=None):
     elif cmds[0] == 'export':
         cmd_export(plump.toArgStruct(cmds[1:]))
 
+    elif cmds[0] == 'load':
+        cmd_load(plump.toArgStruct(cmds[1:]))
+
     elif cmds[0] == 'rename':
         cmd_rename(plump.toArgStruct(cmds[1:]))
 
     elif cmds[0] == 'xe2hack':
         cmd_xe2hack(plump.toArgStruct(cmds[1:]))
+
+    #elif cmds[0] == 'cd':
+        #cmd_cd(plump.toArgStruct(cmds[1:]))
 
     else:
         print('Unknown command. Use help to list all commands.')

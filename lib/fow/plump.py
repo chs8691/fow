@@ -11,11 +11,12 @@ DIR_00 = '00_Inbox'
 DIR_01 = '01_Import'
 DIR_02 = '02_Progress'
 DIR_FOW = '.fow'
+DIR_VIDEO = 'video'
 DIR_JPG = 'jpg'
 DIR_RAW = 'raw'
 DIR_FINAL = 'final'
 DIR_WORK = 'work'
-VERSION = '1.1.2'
+VERSION = '1.1.3'
 BACKUP_PATH = 'backup.path'
 GPX_DIR = 'gpxDir'
 TASK = 'task'
@@ -25,6 +26,8 @@ TYPE_TIF = 'tif'
 
 #Groups all exports destinations together. The have to start with 'export.'
 EXPORT_PREFIX = 'export'
+#Groups all load destinations together. The have to start with 'load.'
+LOAD_PREFIX = 'load'
 
 #####################################################################
 # Conventions:
@@ -35,6 +38,61 @@ EXPORT_PREFIX = 'export'
 
 # configuration file for this fow installation, read once with readFowConfig()
 fow_config = None
+
+
+#def cd_do(_args):
+    #"""
+    #cd execution.
+    #"""
+    ##print('cd_do: args={0}'.format(str(_args)))
+    #args = _args['args']
+
+    #if len(args) == 0:
+        #print('no args')
+        #sys_cd(get_fow_root())
+        #print('no args')
+    #elif args[0] == 't' or args[0] == 'task':
+        #print('cd task')
+    #elif args[0] == '0'or args[0] == 'inbox':
+        #print('cd 0')
+    #elif args[0] == '1'or args[0] == 'import':
+        #print('cd 1')
+    #else:
+        #print('Unknown destination. See help cd for more infos.')
+
+    #return
+
+#Das geht alles nicht. Funktion nicht machen!!
+#def sys_cd(path):
+    #"""
+    #system execution for cd.
+    #"""
+    #print('cwd={0}'.format(os.getcwd()))
+    #os.system('cd {0}'.format(path))
+    #print(os.getcwd())
+    #return
+
+    ##prevdir = os.getcwd()
+    #cmd = '{0}'.format(os.path.expanduser(path))
+    #print('syst_cd: {0}'.format(str(cmd)))
+    #os.chdir('/')
+    #try:
+        #print('yield...')
+        #yield
+        #print(os.getcwd())
+    #finally:
+        #print('finally')
+        #os.chdir(prevdir)
+    ##try:
+        #subprocess.check_output(
+                #cmd,
+                #stderr=subprocess.STDOUT,
+                #shell=True,
+                #universal_newlines=True)
+    #except subprocess.CalledProcessError as err:
+    ##except subprocess.CalledProcessError:
+        #print(str(err))
+        #return None
 
 
 def get_task_triple(offset):
@@ -200,7 +258,7 @@ def rename_analyse(src_path, dest_path):
     """
     Analyses for renaming command for all image files in the given path.
     Returns a list with a dict for every file. List can be empty.
-    Supported image file types are: jpg, raw; it will be
+    Supported image file types are: jpg, raw and videos; it will be
     always search for every image type. Other files will be untouched
     (XMP, tiff).
     Example with explanations:
@@ -236,6 +294,24 @@ def rename_analyse(src_path, dest_path):
 
     subdir = DIR_RAW
     for each in list_raw(src_path + '/' + subdir):
+        #print(str(image_get_time(path)))
+        old_name = each
+        time_str = image_get_time(src_path + '/' + subdir + '/' + each)
+        if time_str is None:
+            new_name = old_name
+        else:
+            new_name = time_str + '-' + old_name
+
+        if os.path.exists(dest_path + '/' + subdir + '/' + new_name):
+            exists = True
+        else:
+            exists = False
+
+        ret.append(dict(subdir=subdir, old_name=old_name, new_name=new_name,
+            exists=exists))
+
+    subdir = DIR_VIDEO
+    for each in list_video(src_path + '/' + subdir):
         #print(str(image_get_time(path)))
         old_name = each
         time_str = image_get_time(src_path + '/' + subdir + '/' + each)
@@ -369,7 +445,7 @@ def export_test(analysis, src_dir, dest):
     print('Destination: ' + dest)
     print(str(len(analysis)) + ' files in ' + src_dir)
 
-    max_name_len = analysis_get_max_name_length(analysis)
+    max_name_len = dictlist_get_max_length(analysis, 'name')
 
     for item in analysis:
         time_str = ''
@@ -384,15 +460,295 @@ def export_test(analysis, src_dir, dest):
                ' ' + time_str)
 
 
-def analysis_get_max_name_length(analysis):
+def dictlist_get_max_length(analysis, fieldname):
     """
     Returns max string lenght for 'name' in list of dicts.
     """
     names = []
     for item in analysis:
-        names.append(item['name'])
+        names.append(item[fieldname])
 
     return string_get_max_length(names)
+
+
+def load_analyse(_src, _dest_root):
+    """
+    Checks load from external source tree to 00_Import sub directories
+    jpg, raw and video.
+    _src - absolut path to external root directory
+    _dest - root directory for destination's sub
+    Returns dict for every source file type jpg, raw and video.
+    Every dict has a list with an dict for every file with fields
+        file - file name
+        path - absolut path of the source file
+        time - timestamp of the source file
+        exist - True, if file exists in destination directory
+        desttime - None, if exist is None. Otherwise timestamp of dest file
+
+    For instance:
+    { 'jpg'  : [
+            { 'file'    : 'img34.jpg',
+              'path'    : 'loadtest/DCIM/0001'
+              'time'    : 1485803027.9297857
+              'exist'   : False
+              'desttime': False}', ...],
+      'raw'  : [...],
+      'video': [...]
+    }
+    """
+    #print('load_analyse() _src={0}'.format(_src))
+
+    dest_jpg = '{0}/{1}'.format(_dest_root, DIR_JPG)
+    dest_raw = '{0}/{1}'.format(_dest_root, DIR_RAW)
+    dest_video = '{0}/{1}'.format(_dest_root, DIR_VIDEO)
+    files_jpg = list_jpg(dest_jpg)
+    files_raw = list_raw(dest_raw)
+    files_video = list_video(dest_video)
+
+    values = dict(jpg=[], raw=[], video=[])
+    scan_tree(_src, values)
+    #print('load_analyse() files_video={0}'.format(str(files_video)))
+
+    #Add existing info
+    for each_value in values['jpg']:
+        #print('each_value {0}'.format(str(each_value)))
+        each_value['exist'] = False
+        each_value['desttime'] = None
+        for each in [e for e in files_jpg if each_value['file'] == e]:
+            each_value['exist'] = True
+            each_value['desttime'] = os.path.getatime('{0}/{1}'.format(
+                dest_jpg, each))
+
+    for each_value in values['raw']:
+        #print('each_value {0}'.format(str(each_value)))
+        each_value['exist'] = False
+        each_value['desttime'] = None
+        for each in [e for e in files_raw if each_value['file'] == e]:
+            each_value['exist'] = True
+            each_value['desttime'] = os.path.getatime('{0}/{1}'.format(
+                dest_raw, each))
+
+    for each_value in values['video']:
+        #print('each_value {0}'.format(str(each_value)))
+        each_value['exist'] = False
+        each_value['desttime'] = None
+        for each in [e for e in files_video if each_value['file'] == e]:
+            each_value['exist'] = True
+            each_value['desttime'] = os.path.getatime('{0}/{1}'.format(
+                dest_video, each))
+
+    #print('values {0}'.format(str(values)))
+
+    return values
+
+
+def load_do(analysis, src, dest, options):
+    """
+    Executes command load.
+    """
+    #print('load_do() analysis={0}'.format(str(analysis)))
+    #print('load_do() options={0}'.format(str(options)))
+    #print('load_do() dest={0}'.format(str(dest)))
+    done = 0
+    error = 0
+    overwritten = 0
+    ignored = 0
+    if options['move']:
+        verb_past = 'moved'
+        verb_present = 'move'
+    else:
+        verb_past = 'copied'
+        verb_present = 'copy'
+
+    ret = load_execute(analysis['jpg'], DIR_JPG, dest, options, verb_present)
+    done += ret['done']
+    error += ret['error']
+    overwritten += ret['overwritten']
+    ignored += ret['ignored']
+
+    ret = load_execute(analysis['raw'], DIR_RAW, dest, options, verb_present)
+    done += ret['done']
+    error += ret['error']
+    overwritten += ret['overwritten']
+    ignored += ret['ignored']
+
+    ret = load_execute(analysis['video'], DIR_VIDEO, dest, options,
+        verb_present)
+    done += ret['done']
+    error += ret['error']
+    overwritten += ret['overwritten']
+    ignored += ret['ignored']
+
+    if options['force']:
+        if error:
+            print(('{0}/{1} files {2} ({3} overwritten),' +
+                ' but {4} errors occurred.')
+                .format(done, done + error, verb_past, overwritten, error))
+        elif done > 0:
+            print('All {0} files {1} ({2} files overwritten).'
+                .format(done + error, verb_past, overwritten))
+        else:
+            print('No files to {0}, nothing done.'
+                .format(verb_present))
+    else:
+        if error:
+            print('{0}/{1} files {2} ({3} ignored, but {4} errors occurred.'
+                .format(done, done + error, verb_past, ignored, error))
+        elif done > 0:
+            print('All {0} files {1} ({2} existing files ignored).'
+                .format(done + error, verb_past, ignored))
+        elif ignored > 0:
+            print('No files to {0}, but {1} existing files were ignored.'
+                .format(verb_present, ignored))
+        else:
+            print('No files to {0}, nothing done.'
+                .format(verb_present))
+
+
+def load_execute(analysis, subdir, dest, options, verb_present):
+    """
+    Executes the load (copy or move), for a specific kind of image files
+    (jpg, raw of videos).
+    analysis: one part of the analyse dict; jpg, raw od video
+    subdir: e.g. DIR_JPG
+    dest: destination path
+    verb_present: text 'move' or 'copy' for printing error
+    Returns dictionary with statistic.
+    Example
+    return dict(done=1, overwritten=0, error=0, ignored=1)
+    """
+    ret = dict(done=0, overwritten=0, error=0, ignored=0)
+    for each in analysis:
+        source = '{0}/{1}'.format(each['path'], each['file'])
+        destination = '{0}/{1}/{2}'.format(dest, subdir, each['file'])
+        if not each['exist'] or options['force']:
+            try:
+                if options['move']:
+                    os.rename(source, destination)
+                else:
+                    shutil.copy2(source, destination)
+                ret['done'] += 1
+                if each['exist']:
+                    ret['overwritten'] += 1
+
+            except:
+                print('Failed to {0} file {1}'
+                    .format(verb_present, str(each['file'])))
+                ret['error'] += 1
+        else:
+            ret['ignored'] += 1
+
+    return ret
+
+
+def load_test(analysis, src, dest, options):
+    """
+    Prints an load test run.
+    """
+    if options['move']:
+        kind = 'moved'
+    else:
+        kind = 'copied'
+
+    print('Dry run, no files will be {0}.'.format(kind))
+    print('Source     : {0}'.format(str(src)))
+    print('Destination: {0}'.format(str(dest)))
+
+    max_name_len = get_max_name_length(analysis, 'jpg', 'file')
+    max_name_len2 = get_max_name_length(analysis, 'raw', 'file')
+    max_name_len3 = get_max_name_length(analysis, 'video', 'file')
+    if max_name_len2 > max_name_len:
+        max_name_len = max_name_len2
+    if max_name_len3 > max_name_len:
+        max_name_len = max_name_len3
+
+    #max_name_len = 30
+    if options['verbose']:
+        load_test_print(analysis['jpg'], max_name_len, 'JPG')
+        load_test_print(analysis['raw'], max_name_len, 'RAW')
+        load_test_print(analysis['video'], max_name_len, 'MOV')
+
+    cntExists = len([i for i in analysis['jpg'] if i['exist']])
+    cntExists += len([i for i in analysis['raw'] if i['exist']])
+    cntExists += len([i for i in analysis['video'] if i['exist']])
+
+    if options['move']:
+        kind = 'moved'
+    else:
+        kind = 'copied'
+
+    print(('Dry run. {0} JPGs, {1} RAWs and {2} videos in source ' +
+        'directory {3} are ready to be {4}.').format(
+        str(len(analysis['jpg'])), str(len(analysis['raw'])),
+        str(len(analysis['video'])), src, kind))
+
+    if cntExists > 0:
+        if options['force']:
+            print(('{0} files already exist and will be overwritten.')
+                .format(cntExists))
+        else:
+            print(('{0} files already exist. Use option --force to ' +
+                'overwrite them.').format(cntExists))
+
+
+def load_test_print(files, max_name_len, type):
+    """
+    Prints info for the load analyse list of, e.g. for jpgs.
+    """
+    for item in files:
+        time_str = ''
+        if item['exist']:
+            status = 'o'
+            time_str = time_readable(item['time']) + ' -> ' + \
+                time_readable(item['desttime'])
+        else:
+            status = ' '
+            time_str = time_readable(item['time'])
+
+        print('{0} {1} {2} {3}'.format(status, type,
+            item['file'].ljust(max_name_len), time_str))
+
+    return
+
+
+def get_max_name_length(analysis, keyname, fieldname):
+    """
+    Returns max string lenght of all items in the dict with list of dicts.
+    """
+    names = []
+    for item in analysis[keyname]:
+        names.append(item[fieldname])
+
+    return string_get_max_length(names)
+
+
+def scan_tree(path, values):
+    """
+    Reads directory tree search image files recursive.
+    Expands dict with a list for 'jpg', 'raw' and 'video'.
+    path: absolut path
+    values: dict to be expanded
+    Example:
+        values= dict(jpg=[dict(path='/img/sub' file='img01.jpg'), ...],
+            raw=[dict(path='/img/sub' file='img01.raf'), ...],
+            video=[dict(path='/img/sub' file='mov01.mp4'), ...])
+    """
+    #print('scan_tree() dir={0}'.format(str(path)))
+    dirs = [d for d in os.listdir(path) if os.path.isdir('{0}/{1}'
+        .format(path, d))]
+
+    for f in list_jpg(path):
+        atime = os.path.getatime('{0}/{1}'.format(path, f))
+        values['jpg'].append(dict(path=path, file=f, time=atime))
+    for f in list_raw(path):
+        atime = os.path.getatime('{0}/{1}'.format(path, f))
+        values['raw'].append(dict(path=path, file=f, time=atime))
+    for f in list_video(path):
+        atime = os.path.getatime('{0}/{1}'.format(path, f))
+        values['video'].append(dict(path=path, file=f, time=atime))
+
+    for d in dirs:
+        scan_tree('{0}/{1}'.format(path, d), values)
 
 
 def string_get_max_length(list):
@@ -805,7 +1161,7 @@ def filename_get_type(filename):
 def list_jpg(path):
     """
     Like os.listdir, a list with jpg files will be returned.
-    Supported suffixes are jpg, JPG.
+    Supported suffixes: jpg, JPG.
     """
     suffixes = ['jpg', 'JPG']
     return [f for f in os.listdir(path) for s in suffixes
@@ -815,9 +1171,19 @@ def list_jpg(path):
 def list_raw(path):
     """
     Like os.listdir, a list with raw files will be returned.
-    Supported suffixes are jpg, JPG.
+    Supported suffixes: 'RAW', 'raw', 'RAF', 'raf', 'cr2', 'CR2'.
     """
     suffixes = ['RAW', 'raw', 'RAF', 'raf', 'cr2', 'CR2']
+    return [f for f in os.listdir(path) for s in suffixes
+        if filename_get_suffix(f) == s]
+
+
+def list_video(path):
+    """
+    Like os.listdir, a list with video files will be returned.
+    Supported suffixes: 'MOV', 'mov', 'MP4', 'mp4'.
+    """
+    suffixes = ['MOV', 'mov', 'MP4', 'mp4']
     return [f for f in os.listdir(path) for s in suffixes
         if filename_get_suffix(f) == s]
 

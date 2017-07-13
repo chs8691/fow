@@ -1,8 +1,0 @@
-config - Show and change settings of the fow. A setting is a key value pair.
-Usage: config [<options>] [<key> [<value>]]
-config: List all items. Same as 'config --list'
-
-Options:
--l [<key>], --list [<key>]: Lists all settings or setting for a specific key
--s <key>=<value>, --set <key>=<value>: Set or create this item.
--d <key>, --delete <key>: Delete the value, same as 'config <key> None'

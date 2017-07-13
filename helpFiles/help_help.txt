@@ -1,3 +1,0 @@
-help - This help. Use "help <command>" for a specific command help
-Usage: help [<command>]
-

@@ -1,5 +1,0 @@
-init - Creates new fow in the actual directory
-Usage: init [<options>]
-config: creates fow, if it doesn't exists
-Options:
--f, --force: Delete existing fow directories before creating new one

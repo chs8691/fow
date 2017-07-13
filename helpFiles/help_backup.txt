@@ -1,7 +1,0 @@
-backup - save the fow to an external directory 
-Usage: backup [<options>] [<path>]
-backup: Saves fow to the external path. The past must be specified with 'config 
-backupDir'.
-Options:
---path <path>, -p <path>: determines the destination path, deviating from the default path
---test, -t: test run, simulates but does not transfer any files

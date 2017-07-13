@@ -1,9 +1,0 @@
-show - reporting for processing steps 
-Processing steps are stored in the subfolder 00_INBOX, 01_IMPORT and 02_PROCESS.With show, a summary or report can be printed.
-
-Usage: show [inbox|import|task] [options]
-       show tasks [options]
-The first usage type reports of corresponding directory for inbox (00_INBOX), import (01_IMPORT) or for the actual task in 02_PROCESS/folder/task. Default is task.
-The second usage type reports of all existing tasks in 02_PROCESS.
-Options:
---short, -s: Just a summary instead of reporting every image. 

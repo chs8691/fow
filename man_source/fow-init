@@ -5,7 +5,7 @@
 init \- Creates new fow in the actual directory
 .SH SYNOPSIS
 init [<options>]
-creates fow, if it doesn't exists
+creates fow, if it doesn't exists.
 .SH OPTIONS	
 .TP
 -f, --force

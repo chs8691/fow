@@ -1,0 +1,8 @@
+# System specific configuration. This file was created with an editor.
+#
+# HELP_FILE_DIR Path to the man pages. Obligatory value.
+#     All help files must be in the same directory. 
+# Developer's installation 
+#HELP_FILE_DIR=man
+# Debian
+HELP_FILE_DIR=/usr/share/man/man1

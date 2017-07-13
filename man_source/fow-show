@@ -7,12 +7,31 @@ show \- reporting for processing steps
 Processing steps are stored in the subfolder 00_INBOX, 01_IMPORT and 02_PROCESS.With show, a summary or report can be printed.
 .SH SYNOPSIS	
 .TP
-show [in|inbox|import|task] [options]
+show [in|inbox|import] [options]
+Report images in corresponding directory for inbox (00_INBOX), import (01_IMPORT) or both together ('in').
+Without an option, every image will be listed with it's name in the second column. The fist columns shows character based information for the image:
+j: File in jpg-folder
+r: File in raw-folder
+v: File in video-folder
+t: Image a Text
+g: Image has geo locations
+If there is a text, it will be shown after the image name (third column).
+For the --short, just a single line summary will be show.
+
 .TP
 show tasks [options]
-The first usage type reports of corresponding directory for inbox (00_INBOX), import (01_IMPORT) or both together ('in') or for the actual task in 02_PROCESS/folder/task. Default is task. 
-The second usage type reports of all existing tasks in 02_PROCESS.
+Reports of all existing tasks in 02_PROCESS.
+Without an option, every image will be listed with it's name in the second column. The fist columns shows character based information for the image:
+f: File in final-folder
+j: File in jpg-folder
+r: File in raw-folder
+v: File in video-folder
+t: Image a Text
+g: Image has geo locations
+If there is a text, it will be shown after the image name (third column).
+For the --short, just a single line summary will be show.
+
 .SH OPTIONS
 .TP
 \-\-short, \-s
-Just a summary instead of reporting every image. 
+Just a summary instead of reporting every image.

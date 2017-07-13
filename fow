@@ -1,2 +1,0 @@
-#!/bin/bash
-~/Documents/egh/fow/ninja/lib/fow/fow.py "$@"

@@ -114,8 +114,6 @@ def do(analysis, verbose):
     cntWithTracks = 0
     cntWithoutTracks = 0
     cntOverwrite = 0
-    cntDone = 0
-    cntFailed = 0
 
     print('Path to images: {}'.format(analysis['image_path']))
     print('Path to tracks: {}'.format(analysis['track_path']))
@@ -146,20 +144,16 @@ def do(analysis, verbose):
             status = ' '
 
         for each_track in each['tracks']:
-            #TODO Abfangen, wenn track geschrieben wurde
             ret = image_write_gps(
                 '{}/{}'.format(analysis['image_path'], each['image_name']),
                 '{}/{}'.format(analysis['track_path'], each_track))
-            formatting = '{:<3} {} {:<' + str(name_col_len) + '} {} {}'
-            if ret:
-                if verbose:
-                    print(formatting.format("", status, each['image_name'], has_gps, str(each['tracks'])))
-                cntDone += 1
-            else:
-                print(formatting.format("ERR", status, each['image_name'], has_gps, str(each['tracks'])))
-                cntFailed += 1
+        # TODO mach es
 
-    print(('{} images processed, {} with potentially track files, {} without track files. ' +
+        formatting = '{} {:<' + str(name_col_len) + '} {} {}'
+        if verbose:
+            print(formatting.format(status, each['image_name'], has_gps, str(each['tracks'])))
+
+    print(('{} images, {} with potentially track files, {} without track files. ' +
            '{} with existing gps information (would be overwritten).')
           .format(len(analysis['files']), cntWithTracks, cntWithoutTracks, cntOverwrite))
 

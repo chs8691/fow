@@ -11,8 +11,7 @@ def in_summary(path):
     path must be a fow relative subdir
     """
     stats = get_short_status(path)
-    # dirs = os.listdir(path)
-    dirs = [f.name for f in os.scandir(path) if f.is_dir()]
+    dirs = os.listdir(path)
 
     if not DIR_JPG in dirs:
         print('Subdirectory missing: ' + DIR_JPG)
@@ -22,7 +21,7 @@ def in_summary(path):
         print('Subdirectory missing: ' + DIR_VIDEO)
 
     print('Files in subdirs: ' +
-          str(len([s for s in stats if s['jpsg']])) + ' jpgs, ' +
+          str(len([s for s in stats if s['jpg']])) + ' jpgs, ' +
           str(len([s for s in stats if s['raw']])) + ' raws, ' +
           str(len([s for s in stats if s['video']])) + ' videos.')
 
@@ -77,13 +76,12 @@ def tasks_summary():
     """
     Reports short infos about all tasks.
     """
-    for each_folder in [f.name for f in os.scandir(get_path(DIR_02)) if f.is_dir()]:
+    for each_folder in os.listdir(get_path(DIR_02)):
         jpgs = 0
         raws = 0
         finals = 0
         tasks = 0
-        # for each_task in os.listdir(get_path(DIR_02) + '/' + each_folder):
-        for each_task in [f.name for f in os.scandir(get_path(DIR_02) + '/' + each_folder) if f.is_dir()]:
+        for each_task in os.listdir(get_path(DIR_02) + '/' + each_folder):
             stats = get_short_status(get_path(DIR_02) + '/' + each_folder + '/'
                                      + each_task)
             tasks += 1
@@ -100,14 +98,11 @@ def tasks():
     Reports infos about all tasks.
     """
     actual = task.get_actual()
-    # dir02 = os.listdir(get_path(DIR_02))
-    dir02 = [f.name for f in os.scandir(get_path(DIR_02)) if f.is_dir()]
+    dir02 = os.listdir(get_path(DIR_02))
     dir02.sort()
     for each_folder in dir02:
         print(' ' + each_folder)
-        # tasks = os.listdir(get_path(DIR_02) + '/' + each_folder)
-        tasks = [f.name for f in os.scandir(get_path(DIR_02) + '/' + each_folder) if f.is_dir()]
-
+        tasks = os.listdir(get_path(DIR_02) + '/' + each_folder)
         tasks.sort()
         for each_task in tasks:
             stats = get_short_status(get_path(DIR_02) + '/' + each_folder + '/'

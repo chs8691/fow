@@ -3,4 +3,5 @@ __*
 test
 __*/
 .~*
-.swp
+.swpy
+*.pyc

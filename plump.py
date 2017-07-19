@@ -117,8 +117,9 @@ def scan_tree(path, values):
             video=[dict(path='/img/sub' file='mov01.mp4'), ...])
     """
     # print('scan_tree() dir={0}'.format(str(path)))
-    dirs = [d for d in os.listdir(path) if os.path.isdir('{0}/{1}'
-                                                         .format(path, d))]
+    # dirs = [d for d in os.listdir(path) if os.path.isdir('{0}/{1}'
+    #                                                      .format(path, d))]
+    dirs = [d.name for d in os.scandir(path) if d.is_dir()]
 
     for f in list_jpg(path):
         atime = os.path.getatime('{0}/{1}'.format(path, f))
@@ -683,47 +684,22 @@ def image_write_gps(image_path, gpx_path):
     Update the gps exifs of the image by the given track file.
     Returns True, if gps found in track file, otherwise false
     """
-    ret = []
-        # TODO hier gehts weiter
-    for each in file_names:
 
-        cmd = 'exiftool -T -filename -gpslatitude -gpslongitude -title -createdate {}/{}'.format(path, each)
-        #     print('images_get_exifs() cmd={}'.format(cmd))
-        try:
-            b = subprocess.check_output(
-                cmd,
-                shell=True,
-                universal_newlines=True)
-            cmd_ret = str(b)
-            cmd_ret = cmd_ret[0:len(cmd_ret) - 1]
-            # print('images_get_exifs() value={}'.format(str(cmd_ret)))
-        except subprocess.CalledProcessError as e:
-            ret.append(dict(name=each, title=None, gps=None, createdate=None))
-            # print(str(e))
-            continue
+    cmd = 'exiftool -geotag {0} {1}'.format(gpx_path, image_path)
+    #     print('images_get_exifs() cmd={}'.format(cmd))
+    try:
+        b = subprocess.check_output(
+            cmd,
+            shell=True,
+            universal_newlines=True)
+        cmd_ret = str(b)
+        cmd_ret = cmd_ret[0:len(cmd_ret) - 1]
+        print('image_write_gps() value={}'.format(str(cmd_ret)))
+    except subprocess.CalledProcessError as e:
+        print(str(e))
+        return False
 
-        values = cmd_ret.split('\t')
-        # print('images_get_exifs() value_list={}'.format(str(values)))
-
-        # Not really nice and error prone but null values are set to '-', so we have to change this
-        if values[4] == '-':
-            createdate = None
-        else:
-            createdate = values[4]
-
-        if values[3] == '-':
-            title = None
-        else:
-            title = values[3]
-
-        if values[1] == '-' and values[2] == '-':
-            gps = None
-        else:
-            gps = dict(lat=values[1], lon=values[2])
-
-        ret.append(dict(name=values[0], title=title, gps=gps, createdate=createdate))
-
-    return ret
+    return True
 
 
 def images_get_exifs(path, file_names):

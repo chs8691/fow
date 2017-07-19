@@ -1,8 +1,15 @@
-rsync -rltv --delete --info=FLIST0,STATS0,BACKUP1 main.py dist/debian/usr/lib/fow/
-rsync -rltv --delete --info=FLIST0,STATS0,BACKUP1 fow.py dist/debian/usr/lib/fow/
-rsync -rltv --delete --info=FLIST0,STATS0,BACKUP1 plump.py dist/debian/usr/lib/fow/
 rsync -rltv --delete --info=FLIST0,STATS0,BACKUP1 argument_checker.py dist/debian/usr/lib/fow/
+rsync -rltv --delete --info=FLIST0,STATS0,BACKUP1 config.py dist/debian/usr/lib/fow/
+rsync -rltv --delete --info=FLIST0,STATS0,BACKUP1 export.py dist/debian/usr/lib/fow/
+rsync -rltv --delete --info=FLIST0,STATS0,BACKUP1 fow.py dist/debian/usr/lib/fow/
+rsync -rltv --delete --info=FLIST0,STATS0,BACKUP1 fow_gps.py dist/debian/usr/lib/fow/
+rsync -rltv --delete --info=FLIST0,STATS0,BACKUP1 load.py dist/debian/usr/lib/fow/
+rsync -rltv --delete --info=FLIST0,STATS0,BACKUP1 main.py dist/debian/usr/lib/fow/
+rsync -rltv --delete --info=FLIST0,STATS0,BACKUP1 plump.py dist/debian/usr/lib/fow/
+rsync -rltv --delete --info=FLIST0,STATS0,BACKUP1 rename.py dist/debian/usr/lib/fow/
+rsync -rltv --delete --info=FLIST0,STATS0,BACKUP1 show.py dist/debian/usr/lib/fow/
 rsync -rltv --delete --info=FLIST0,STATS0,BACKUP1 task.py dist/debian/usr/lib/fow/
+rsync -rltv --delete --info=FLIST0,STATS0,BACKUP1 xe2hack.py dist/debian/usr/lib/fow/
 rsync -rltv --delete --info=FLIST0,STATS0,BACKUP1 man/ dist/debian/usr/share/man/man1/
 dpkg-deb --build dist/debian/
 mv dist/debian.deb dist/fow_1.1.5_all.deb

@@ -4,7 +4,7 @@ import os
 import re
 import shutil
 
-import config
+
 import export
 import load
 import plump
@@ -12,6 +12,7 @@ import rename
 import show
 import task
 import fow_gps
+import config
 
 import xe2hack
 from argument_checker import check_params

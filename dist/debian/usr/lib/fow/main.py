@@ -4,7 +4,6 @@ import os
 import re
 import shutil
 
-
 import export
 import load
 import plump
@@ -16,7 +15,6 @@ import config
 
 import xe2hack
 from argument_checker import check_params
-
 
 
 def cmd_xe2hack(_arg_struct):
@@ -75,16 +73,23 @@ def cmd_gps(_arg_struct):
     atom_none = dict(name='', short='', args=1)
     atom_path = dict(name='path', short='p', args=2)
     atom_test = dict(name='test', short='t', args=0)
+    atom_force = dict(name='force', short='f', args=0)
     atom_verbose = dict(name='verbose', short='v', args=0)
 
     # print('export() _arg_struct=' + str(_arg_struct))
     rules = [
         [dict(atom=atom_none, obligat=True),
-         dict(atom=atom_test, obligat=False),
+         dict(atom=atom_force, obligat=False),
          dict(atom=atom_verbose, obligat=False)],
-         [dict(atom=atom_path, obligat=True),
-          dict(atom=atom_test, obligat=False),
-          dict(atom=atom_verbose, obligat=False)]
+        [dict(atom=atom_path, obligat=True),
+         dict(atom=atom_force, obligat=False),
+         dict(atom=atom_verbose, obligat=False)],
+        [dict(atom=atom_none, obligat=True),
+         dict(atom=atom_test, obligat=True),
+         dict(atom=atom_verbose, obligat=False)],
+        [dict(atom=atom_path, obligat=True),
+         dict(atom=atom_test, obligat=True),
+         dict(atom=atom_verbose, obligat=False)],
     ]
 
     if not check_params(_arg_struct, rules, 'gps'):
@@ -124,9 +129,9 @@ def cmd_gps(_arg_struct):
               .format(plump.GPS_TRACK_PATH))
         return
     elif not os.path.exists(track_path):
-            print(("Invalid path to track files: '{0}'. May the directory is temporary not available or you have to" +
-                  " change it with 'config -s {1}=/your/tracks/path'").format(str(track_path), plump.GPS_TRACK_PATH))
-            return
+        print(("Invalid path to track files: '{0}'. May the directory is temporary not available or you have to" +
+               " change it with 'config -s {1}=/your/tracks/path'").format(str(track_path), plump.GPS_TRACK_PATH))
+        return
 
     # Now we have both valid path
     # print("cmp_gps() images={0}, tracks={1}".format(str(image_path), str(track_path)))
@@ -147,7 +152,7 @@ def cmd_gps(_arg_struct):
 
     # gps
     else:
-        fow_gps.do(analysis, verbose)
+        fow_gps.do(analysis, True, verbose)
 
 
 def cmd_rename(_arg_struct):

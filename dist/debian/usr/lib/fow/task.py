@@ -113,7 +113,9 @@ def get_task_triple(offset):
     """
     tasks = []
 
-    dir02 = os.listdir(get_path(DIR_02))
+    dir02 = [f.name for f in os.scandir(get_path(DIR_02)) if f.is_dir()]
+    # dir02 = os.listdir(get_path(DIR_02))
+
     dir02.sort()
     active = get_actual()
 

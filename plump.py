@@ -3,6 +3,7 @@ import os
 import shutil
 import subprocess
 import time
+import sys
 
 DIR_00 = '00_Inbox'
 DIR_01 = '01_Import'
@@ -685,18 +686,19 @@ def image_write_gps(image_path, gpx_path):
     Returns True, if gps found in track file, otherwise false
     """
 
-    cmd = 'exiftool -geotag {0} {1}'.format(gpx_path, image_path)
+    cmd = 'exiftool -geotag {0} {1} -overwrite_original'.format(gpx_path, image_path)
     #     print('images_get_exifs() cmd={}'.format(cmd))
     try:
         b = subprocess.check_output(
             cmd,
             shell=True,
-            universal_newlines=True)
+            stderr=subprocess.STDOUT,
+            universal_newlines=False)
         cmd_ret = str(b)
         cmd_ret = cmd_ret[0:len(cmd_ret) - 1]
-        print('image_write_gps() value={}'.format(str(cmd_ret)))
+        # print('image_write_gps() value={}'.format(str(cmd_ret)))
     except subprocess.CalledProcessError as e:
-        print(str(e))
+        # print(str(e))
         return False
 
     return True
@@ -714,7 +716,11 @@ def images_get_exifs(path, file_names):
         ... ]
     """
     ret = []
+    print('Reading images', end='')
     for each in file_names:
+        print('.', end='')
+        sys.stdout.flush()
+
 
         cmd = 'exiftool -T -filename -gpslatitude -gpslongitude -title -createdate {}/{}'.format(path, each)
         #     print('images_get_exifs() cmd={}'.format(cmd))
@@ -752,7 +758,57 @@ def images_get_exifs(path, file_names):
 
         ret.append(dict(name=values[0], title=title, gps=gps, createdate=createdate))
 
+    print('Done.')
+    sys.stdout.flush()
+
     return ret
+
+
+def image_get_exifs(path, file_name):
+    """
+    Returns a dictionary with all supported exif information for the give file. Non existing attributes will return
+    value None.
+    file_name: file name without a path
+    path: Path to the file
+    Example
+        return
+        dict(name='img01.jpg', gps=dict(lan=1.0, lat=49,54.318340N), title='A huge tree',
+            createdate='2017:06:19 08:16:11')
+    """
+    cmd = 'exiftool -T -filename -gpslatitude -gpslongitude -title -createdate {}/{}'.format(path, file_name)
+    #     print('images_get_exifs() cmd={}'.format(cmd))
+    try:
+        b = subprocess.check_output(
+            cmd,
+            shell=True,
+            universal_newlines=True)
+        cmd_ret = str(b)
+        cmd_ret = cmd_ret[0:len(cmd_ret) - 1]
+        # print('images_get_exifs() value={}'.format(str(cmd_ret)))
+    except subprocess.CalledProcessError as e:
+        return dict(name=each, title=None, gps=None, createdate=None)
+        # print(str(e))
+
+    values = cmd_ret.split('\t')
+    # print('images_get_exifs() value_list={}'.format(str(values)))
+
+    # Not really nice and error prone but null values are set to '-', so we have to change this
+    if values[4] == '-':
+        createdate = None
+    else:
+        createdate = values[4]
+
+    if values[3] == '-':
+        title = None
+    else:
+        title = values[3]
+
+    if values[1] == '-' and values[2] == '-':
+        gps = None
+    else:
+        gps = dict(lat=values[1], lon=values[2])
+
+    return dict(name=values[0], title=title, gps=gps, createdate=createdate)
 
 
 def image_get_xmp_tag(filename, tagname):

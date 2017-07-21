@@ -2,7 +2,9 @@ import os
 
 import re
 
-from plump import list_raw, list_video, list_jpg, images_get_exifs, image_write_gps
+import sys
+
+from plump import list_raw, list_video, list_jpg, images_get_exifs, image_get_exifs, image_write_gps
 
 
 def analyse(track_path, image_path):
@@ -107,15 +109,13 @@ def test(analysis, verbose):
           .format(len(analysis['files']), cntWithTracks, cntWithoutTracks, cntOverwrite))
 
 
-def do(analysis, verbose):
+def do(analysis, force, verbose):
     """
     Rename execution.
     """
-    cntWithTracks = 0
-    cntWithoutTracks = 0
-    cntOverwrite = 0
-    cntDone = 0
-    cntFailed = 0
+    cntSet = 0
+    cntOverwritten = 0
+    cntNothingDone = 0
 
     print('Path to images: {}'.format(analysis['image_path']))
     print('Path to tracks: {}'.format(analysis['track_path']))
@@ -126,40 +126,57 @@ def do(analysis, verbose):
         if len(each['image_name']) > name_col_len:
             name_col_len = len(each['image_name'])
 
+    if not verbose:
+        print('Processing images', end='')
     for each in analysis['files']:
+        if not verbose:
+            print('.', end='')
+            sys.stdout.flush()
+        action = ' '
+        gpx_name = ''
         if each['image_gps'] is None:
             has_gps = ' '
         else:
             has_gps = 'g'
-        if len(each['tracks']) == 0:
-            cntWithoutTracks += 1
-        else:
-            cntWithTracks += 1
+        if not force:
+            cntNothingDone += 1
+            continue
 
-        if len(each['tracks']) > 0:
-            if not each['image_gps'] is None:
-                cntOverwrite += 1
-                status = 'o'
-            else:
-                status = '+'
-        else:
-            status = ' '
-
+        gps_new = None
         for each_track in each['tracks']:
-            #TODO Abfangen, wenn track geschrieben wurde
-            ret = image_write_gps(
+
+            image_write_gps(
                 '{}/{}'.format(analysis['image_path'], each['image_name']),
                 '{}/{}'.format(analysis['track_path'], each_track))
-            formatting = '{:<3} {} {:<' + str(name_col_len) + '} {} {}'
-            if ret:
-                if verbose:
-                    print(formatting.format("", status, each['image_name'], has_gps, str(each['tracks'])))
-                cntDone += 1
-            else:
-                print(formatting.format("ERR", status, each['image_name'], has_gps, str(each['tracks'])))
-                cntFailed += 1
+            gps_new = image_get_exifs(analysis['image_path'], each['image_name'])['gps']
 
-    print(('{} images processed, {} with potentially track files, {} without track files. ' +
-           '{} with existing gps information (would be overwritten).')
-          .format(len(analysis['files']), cntWithTracks, cntWithoutTracks, cntOverwrite))
+            # Exit criteria: gps set
+            if gps_new is not None:
+                if gps_new == each['image_gps']:
+                    # Same gps, try again
+                    continue
+                has_gps = 'g'
+                gpx_name = each_track
+                if each['image_gps'] is None:
+                    action = '+'
+                else:
+                    action = '*'
+                    cntOverwritten += 1
+                break
+
+        if action == ' ':
+            cntNothingDone += 1
+        else:
+            cntSet += 1
+
+        if verbose:
+            # +g img001.jpg 20160321.gpx
+            formatting = '{}{} {:<' + str(name_col_len) + '} {}'
+            print(formatting.format(action, has_gps, each['image_name'], gpx_name))
+
+    if not verbose:
+        print('Done.')
+
+    print('{} images processed, {} gps data set (where {} existing gps data were changed)'
+          .format(len(analysis['files']), cntSet, cntOverwritten))
 

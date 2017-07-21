@@ -29,5 +29,8 @@ all gpx files with string 2017-12-31 in its file name will be filtered.
 --test, -t
 Dry run, simulates but does not update any image files.
 .TP
+--force, -f
+Overwrite existing gps information. If not set, images with existing gps data will be ignored.
+.TP
 --verbose, -v
 Prints information for every image. Otherwise just a summary is printed.

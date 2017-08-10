@@ -4,7 +4,7 @@ import re
 
 import sys
 
-from plump import list_raw, list_video, list_jpg, images_get_exifs, image_get_exifs, image_write_gps
+from plump import list_raw, list_video, list_jpg, images_get_exifs, image_get_exifs, image_write_gps, progress_prepare
 
 
 def analyse(track_path, image_path):
@@ -25,7 +25,7 @@ def analyse(track_path, image_path):
             dict=(...), ...
         ]
     """
-    ret = dict(track_path=track_path, image_path=image_path,files=[])
+    ret = dict(track_path=track_path, image_path=image_path, files=[])
 
     images = list_video(image_path)
     images.extend(list_jpg(image_path))
@@ -111,11 +111,11 @@ def test(analysis, verbose):
 
 def do(analysis, force, verbose):
     """
-    Rename execution.
+    Cpmmand gps execution.
     """
-    cntSet = 0
-    cntOverwritten = 0
-    cntNothingDone = 0
+    cnt_set = 0
+    cnt_overwritten = 0
+    cnt_nothing_done = 0
 
     print('Path to images: {}'.format(analysis['image_path']))
     print('Path to tracks: {}'.format(analysis['track_path']))
@@ -127,10 +127,15 @@ def do(analysis, force, verbose):
             name_col_len = len(each['image_name'])
 
     if not verbose:
-        print('Processing images', end='')
+        # print('Processing images', end='')
+        index = 0
+        progress = progress_prepare(len(analysis['files']), 'Processing', analysis['image_path'])
+
     for each in analysis['files']:
         if not verbose:
-            print('.', end='')
+            # print('.', end='')
+            index += 1
+            sys.stdout.write(progress['back'] + progress['formatting'].format(str(index)))
             sys.stdout.flush()
         action = ' '
         gpx_name = ''
@@ -139,12 +144,11 @@ def do(analysis, force, verbose):
         else:
             has_gps = 'g'
         if not force:
-            cntNothingDone += 1
+            cnt_nothing_done += 1
             continue
 
         gps_new = None
         for each_track in each['tracks']:
-
             image_write_gps(
                 '{}/{}'.format(analysis['image_path'], each['image_name']),
                 '{}/{}'.format(analysis['track_path'], each_track))
@@ -161,13 +165,13 @@ def do(analysis, force, verbose):
                     action = '+'
                 else:
                     action = '*'
-                    cntOverwritten += 1
+                    cnt_overwritten += 1
                 break
 
         if action == ' ':
-            cntNothingDone += 1
+            cnt_nothing_done += 1
         else:
-            cntSet += 1
+            cnt_set += 1
 
         if verbose:
             # +g img001.jpg 20160321.gpx
@@ -175,8 +179,9 @@ def do(analysis, force, verbose):
             print(formatting.format(action, has_gps, each['image_name'], gpx_name))
 
     if not verbose:
-        print('Done.')
+        # print('Done.')
+        sys.stdout.write('\n')
 
     print('{} images processed, {} gps data set (where {} existing gps data were changed)'
-          .format(len(analysis['files']), cntSet, cntOverwritten))
+          .format(len(analysis['files']), cnt_set, cnt_overwritten))
 

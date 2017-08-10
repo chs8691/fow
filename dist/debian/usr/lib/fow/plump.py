@@ -14,7 +14,7 @@ DIR_JPG = 'jpg'
 DIR_RAW = 'raw'
 DIR_FINAL = 'final'
 DIR_WORK = 'work'
-VERSION = '1.1.5'
+VERSION = '1.1.5 Build 201707101134'
 BACKUP_PATH = 'backup.path'
 TASK = 'task'
 TYPE_RAW = 'raw'
@@ -40,6 +40,38 @@ LOAD_PREFIX = 'load'
 #####################################################################
 
 
+def progress_prepare(max_index, action, what):
+    """
+    Prepares progress output and writes to stdout. Returns dict with
+    needed values. Output: 'Processing <what> <max_index>: 0'. To update
+    progress use:
+        sys.stdout.write(ret['back'] + ret['formatting'].format(str(index)))
+        sys.stdout.flush()
+    Parameters
+    ----------
+    max_lines: Integer
+        Progress maximum, e.g. '123'
+    action: String
+        Name of the action, e.g. 'Processing', should start in upper case
+    what: String
+        Output text, e.g. 'RAW'
+    :return: Dictionary with keys 'back' and 'formatting' for output
+    Example
+    -------
+    progress_prepare(123, 'RAW')
+    return dict(back=3, formatting=' {:<' + str(len(max_index)) + '}'
+    """
+    digits = len(str(max_index))
+    formatting = ' {:<' + str(digits) + '}'
+    formatting2 = '{} {} {:<' + str(digits) + '}:' + formatting
+    sys.stdout.write(formatting2.format(action, what, str(max_index), str(0)))
+    back = '\b'
+    for i in str(max_index):
+        back += '\b'
+
+    return dict(back=back, formatting=formatting)
+
+
 def load_execute(analysis, subdir, dest, options, verb_present):
     """
     Executes the load (copy or move), for a specific kind of image files
@@ -51,9 +83,19 @@ def load_execute(analysis, subdir, dest, options, verb_present):
     Returns dictionary with statistic.
     Example
     return dict(done=1, overwritten=0, error=0, ignored=1)
+    for each in file_names:
     """
     ret = dict(done=0, overwritten=0, error=0, ignored=0)
+
+    # Progress output 'Processing RAW 123: 1'
+    index = 0
+    progress = progress_prepare(len(analysis),  'Processing', subdir)
+
     for each in analysis:
+        index += 1
+        sys.stdout.write(progress['back'] + progress['formatting'].format(str(index)))
+        sys.stdout.flush()
+
         source = '{0}/{1}'.format(each['path'], each['file'])
         destination = '{0}/{1}/{2}'.format(dest, subdir, each['file'])
         if not each['exist'] or options['force']:
@@ -72,6 +114,7 @@ def load_execute(analysis, subdir, dest, options, verb_present):
         else:
             ret['ignored'] += 1
 
+    sys.stdout.write('\n')
     return ret
 
 
@@ -716,11 +759,15 @@ def images_get_exifs(path, file_names):
         ... ]
     """
     ret = []
-    print('Reading images', end='')
-    for each in file_names:
-        print('.', end='')
-        sys.stdout.flush()
+    # print('Reading images', end='')
 
+    index = 0
+    progress = progress_prepare(len(file_names), 'Reading', path)
+
+    for each in file_names:
+        index += 1
+        sys.stdout.write(progress['back'] + progress['formatting'].format(str(index)))
+        sys.stdout.flush()
 
         cmd = 'exiftool -T -filename -gpslatitude -gpslongitude -title -createdate {}/{}'.format(path, each)
         #     print('images_get_exifs() cmd={}'.format(cmd))
@@ -758,7 +805,8 @@ def images_get_exifs(path, file_names):
 
         ret.append(dict(name=values[0], title=title, gps=gps, createdate=createdate))
 
-    print('Done.')
+    # print('Done.')
+    sys.stdout.write('\n')
     sys.stdout.flush()
 
     return ret
@@ -786,7 +834,7 @@ def image_get_exifs(path, file_name):
         cmd_ret = cmd_ret[0:len(cmd_ret) - 1]
         # print('images_get_exifs() value={}'.format(str(cmd_ret)))
     except subprocess.CalledProcessError as e:
-        return dict(name=each, title=None, gps=None, createdate=None)
+        return dict(name=file_name, title=None, gps=None, createdate=None)
         # print(str(e))
 
     values = cmd_ret.split('\t')
@@ -842,9 +890,8 @@ def image_get_time(filename):
     # print('image_get_time() filename=' + filename)
     try:
         b = subprocess.check_output(
-            # 'exiv2 -K Exif.Photo.DateTimeOriginal -Pt '
-            'exiv2 -Pt -g xif.Photo.DateTimeOriginal '
-            + filename,
+            # 'exiv2 -Pt -g xif.Photo.DateTimeOriginal '
+            'exiftool -DateTimeOriginal -T {}'.format(filename),
             stderr=subprocess.STDOUT,
             shell=True,
             universal_newlines=True)
@@ -865,6 +912,7 @@ def image_get_time(filename):
     ret = ret.replace(':', '')
     ret = ret.replace('\n', '')
 
+    # print('image_get_time(): ' + str(b))
     return ret
 
 

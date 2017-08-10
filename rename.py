@@ -1,6 +1,9 @@
 import os
 
-from plump import DIR_JPG, list_jpg, image_get_time, DIR_RAW, list_raw, DIR_VIDEO, list_video, video_get_time
+import sys
+
+from plump import DIR_JPG, list_jpg, image_get_time, DIR_RAW, list_raw, DIR_VIDEO, list_video, video_get_time, \
+    progress_prepare
 
 
 def analyse(src_path, dest_path):
@@ -24,8 +27,14 @@ def analyse(src_path, dest_path):
     ret = []
 
     subdir = DIR_JPG
-    for each in list_jpg(src_path + '/' + subdir):
+    files = list_jpg(src_path + '/' + subdir)
+    index = 0
+    progress = progress_prepare(len(files), 'Processing', subdir)
+    for each in files:
         # print(str(image_get_time(path)))
+        index += 1
+        sys.stdout.write(progress['back'] + progress['formatting'].format(str(index)))
+        sys.stdout.flush()
         old_name = each
         time_str = image_get_time(src_path + '/' + subdir + '/' + each)
         if time_str is None:
@@ -40,10 +49,17 @@ def analyse(src_path, dest_path):
 
         ret.append(dict(subdir=subdir, old_name=old_name, new_name=new_name,
                         exists=exists))
+    sys.stdout.write('\n')
 
     subdir = DIR_RAW
-    for each in list_raw(src_path + '/' + subdir):
+    files = list_raw(src_path + '/' + subdir)
+    index = 0
+    progress = progress_prepare(len(files), 'Processing', subdir)
+    for each in files:
         # print(str(image_get_time(path)))
+        index += 1
+        sys.stdout.write(progress['back'] + progress['formatting'].format(str(index)))
+        sys.stdout.flush()
         old_name = each
         time_str = image_get_time(src_path + '/' + subdir + '/' + each)
         if time_str is None:
@@ -58,10 +74,17 @@ def analyse(src_path, dest_path):
 
         ret.append(dict(subdir=subdir, old_name=old_name, new_name=new_name,
                         exists=exists))
+    sys.stdout.write('\n')
 
     subdir = DIR_VIDEO
-    for each in list_video(src_path + '/' + subdir):
+    files = list_video(src_path + '/' + subdir)
+    index = 0
+    progress = progress_prepare(len(files), 'Processing', subdir)
+    for each in files:
         # print(str(image_get_time(path)))
+        index += 1
+        sys.stdout.write(progress['back'] + progress['formatting'].format(str(index)))
+        sys.stdout.flush()
         old_name = each
         time_str = video_get_time(src_path + '/' + subdir + '/' + each)
         if time_str is None:
@@ -77,6 +100,8 @@ def analyse(src_path, dest_path):
         ret.append(dict(subdir=subdir, old_name=old_name, new_name=new_name,
                         exists=exists))
 
+    sys.stdout.write('\n')
+
     return dict(src_path=src_path, dest_path=dest_path, files=ret)
 
 
@@ -85,17 +110,17 @@ def test(analysis, verbose, force):
     Dry run of rename command.
     verbose - boolean
     """
-    cntOk = 0
-    cntNok = 0
+    cnt_ok = 0
+    cnt_nok = 0
     for each in analysis['files']:
         if not each['exists']:
-            cntOk += 1
+            cnt_ok += 1
             if verbose:
                 status = '  OK  '
                 print(status + each['subdir'] + ' ' + each['old_name']
                       + ' --> ' + each['new_name'])
         else:
-            cntNok += 1
+            cnt_nok += 1
             if verbose:
                 if force:
                     status = '! OVR '
@@ -106,16 +131,16 @@ def test(analysis, verbose, force):
                     print(status + each['subdir'] + ' '
                           + 'File already exists: ' + each['new_name'])
 
-    if cntNok > 0:
+    if cnt_nok > 0:
         if force:
-            print(("{0}/{1} file(s) already exists an will be overwritten!")
-                  .format(cntNok, len(analysis['files'])))
+            print("{0}/{1} file(s) already exists an will be overwritten!"
+                  .format(cnt_nok, len(analysis['files'])))
         else:
             print(("{0}/{1} file(s) already exists. Remove them first from " +
                    "destination or overwrite file(s) by using --force.")
-                  .format(cntNok, len(analysis['files'])))
+                  .format(cnt_nok, len(analysis['files'])))
     else:
-        print("{0} files will be moved and renamed.".format(cntOk))
+        print("{0} files will be moved and renamed.".format(cnt_ok))
 
 
 def do(analysis, verbose, force):

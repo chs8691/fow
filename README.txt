@@ -1,6 +1,6 @@
 How to build an new fow version into a deb file (Debian package) 
 ================================================================
-Set the vesion nr in lib/fow/plumb.py.VERSION.
+Set the version nr and the build nr in lib/fow/plumb.py.VERSION.
 Set the version nr in make_dist for the mv command for the destination file.
 Set Version in file ../dist/debian/DEBIAN/control
 Call make_man, if man pages in man_source was touched.

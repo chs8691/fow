@@ -182,20 +182,31 @@ def show_task(path, final_only):
             jpg = 'j'
         else:
             jpg = '-'
+
         if each_stat['final']:
             final = 'f'
         else:
             final = '-'
+
         if each_stat['raw']:
             raw = 'r'
         else:
             raw = '-'
+
         if each_stat['title']:
             title_flag = 't'
             title = each_stat['title']
         else:
             title_flag = '-'
-            title = ''
+            title = '-'
+
+        if each_stat['description']:
+            description_flag = 'd'
+            description = each_stat['description']
+        else:
+            description_flag = '-'
+            description = '-'
+
         if each_stat['location'] is None:
             location_flag = '-'
         else:
@@ -203,7 +214,7 @@ def show_task(path, final_only):
 
         # print('show_task() ' + str(location_flag))
 
-        formatting = '{}{}{}{}{} {:<' + str(name_col_len) + '} {}'
+        formatting = '{}{}{}{}{}{} {:<' + str(name_col_len) + '} {} / {}'
         if final_only is False or (final_only is True and final == 'f'):
-            print(formatting.format(jpg, raw, final, title_flag, location_flag,
-                                    each_stat['image'], title))
+            print(formatting.format(jpg, raw, final, title_flag, description_flag, location_flag,
+                                    each_stat['image'], title, description))

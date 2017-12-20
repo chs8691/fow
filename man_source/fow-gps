@@ -20,10 +20,13 @@ But the destination key may not have leading 'gps.' when using this with export 
 gps --path|-p <sub directory> [<options>]
 Add gps information to all images in the directory within the fow. For instance 'gps 01_INBOX/jpg'.
 .SH DESCRIPTION
-The gps information will be searched in gpx files of an particular folder, defined as config value with key 'gps.source'.
-Example: 'config -s gps.source=/home/chris/gpsTracks'. To support a big gpx folder, the track files will be filtered by
+The gps information will be searched in gpx files of an particular folder, defined as config value with key 'gps.tracks'.
+Example: 'config -s gps.tracks=/home/chris/gpsTracks'. To support a big gpx folder, the track files will be filtered by
 the date information in its file name. For instance, if there is an image with create date December, 31th, 2017 (taken from exif),
 all gpx files with string 2017-12-31 in its file name will be filtered.
+When executed, exiftool will be called in this form: 'exiftool -geotag <trackfile> <imagefile>'. Please note, that
+exiftool uses the actual computer time zone to map image time (EXIF's DateTimeOriginal) to track file time
+(normally the UTC time).
 .SH OPTIONS
 .TP
 --test, -t

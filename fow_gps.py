@@ -13,9 +13,9 @@ def analyse(track_path, image_path):
     directories should exist and should be accessible; but they can be empty. Subdirectories are not supported, neither
     for tracks, nor for images.
     Returns a list with a dict for every image file. List can be empty.
-    Supported image file types are: jpg, raw and videos; it will be
-    always search for every image type. Other files will be untouched
-    (XMP, tiff).
+    Supported image file types are: jpg, raw and videos; it will be always search for every image type. Other files
+    will be untouched (XMP, tiff).
+    Supported track files are: gpx, tcx.
     Example with explanations:
     dict=(track_path=track_path, image_path=image_path, files=
         [dict=(
@@ -46,7 +46,7 @@ def analyse(track_path, image_path):
             (y,m,d) = date.split(':')
             # print("analyse() {}-{}-{}".format(str(y), str(m), str(d)))
             # patterns.append(".*{0}.?{1}.?{2}.*\.gpx".format(y, m, d))
-            pattern = re.compile(".*{0}.?{1}.?{2}.*\.gpx".format(y, m, d))
+            pattern = re.compile(".*{0}.?{1}.?{2}.*\.(tcx|gpx)".format(y, m, d))
             # print("analyse() {0} track_files={1}".format(each['name'], str(track_files)))
             track_files = [f for f in gpx_files if not pattern.match(f) is None]
             ret['files'].append(dict(image_name=each['name'], image_gps=each['gps'], tracks=track_files))

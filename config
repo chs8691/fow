@@ -3,7 +3,7 @@
 # HELP_FILE_DIR Path to the man pages. Obligatory value.
 #     All help files must be in the same directory. 
 # Developer's installation 
-HELP_FILE_DIR=/home/chris/PycharmProjects/fow/man
+HELP_FILE_DIR=/home/chris/fow/man
 # Debian
 # HELP_FILE_DIR=/usr/share/man/man1
 #

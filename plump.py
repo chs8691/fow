@@ -14,7 +14,7 @@ DIR_JPG = 'jpg'
 DIR_RAW = 'raw'
 DIR_FINAL = 'final'
 DIR_WORK = 'work'
-VERSION = '1.1.5 Build 201707101134'
+VERSION = '1.1.6 Build 201712201517'
 BACKUP_PATH = 'backup.path'
 TASK = 'task'
 TYPE_RAW = 'raw'
@@ -525,6 +525,7 @@ def get_exif_status(path):
     video_images = []
     titles = dict()
     locations = dict()
+    descriptions = dict()
 
     jpg_exifs = images_get_exifs('{}/{}'.format(path, DIR_JPG), jpg_files)
     raw_exifs = images_get_exifs('{}/{}'.format(path, DIR_RAW), raw_files)
@@ -538,24 +539,28 @@ def get_exif_status(path):
 
     for each_exifs in jpg_exifs:
         titles[filename_get_name(each_exifs['name'])] = each_exifs['title']
+        descriptions[filename_get_name(each_exifs['name'])] = each_exifs['description']
         locations[filename_get_name(each_exifs['name'])] = each_exifs['gps']
         images.append(filename_get_name(each_exifs['name']))
         jpg_images.append(filename_get_name(each_exifs['name']))
 
     for each_exifs in raw_exifs:
         titles[filename_get_name(each_exifs['name'])] = each_exifs['title']
+        descriptions[filename_get_name(each_exifs['name'])] = each_exifs['description']
         locations[filename_get_name(each_exifs['name'])] = each_exifs['gps']
         images.append(filename_get_name(each_exifs['name']))
         raw_images.append(filename_get_name(each_exifs['name']))
 
     for each_exifs in video_exifs:
         titles[filename_get_name(each_exifs['name'])] = each_exifs['title']
+        descriptions[filename_get_name(each_exifs['name'])] = each_exifs['description']
         locations[filename_get_name(each_exifs['name'])] = each_exifs['gps']
         images.append(filename_get_name(each_exifs['name']))
         video_images.append(filename_get_name(each_exifs['name']))
 
     for each_exifs in final_exifs:
         titles[filename_get_name(each_exifs['name'])] = each_exifs['title']
+        descriptions[filename_get_name(each_exifs['name'])] = each_exifs['description']
         locations[filename_get_name(each_exifs['name'])] = each_exifs['gps']
         images.append(filename_get_name(each_exifs['name']))
         final_images.append(filename_get_name(each_exifs['name']))
@@ -576,6 +581,7 @@ def get_exif_status(path):
 
         stat = dict(image=each_image, final=is_in_final,
                     jpg=is_in_jpg, raw=is_in_raw, video=is_in_video, title=titles[each_image],
+                    description=descriptions[each_image],
                     location=locations[each_image])
         stats.append(stat)
 
@@ -608,6 +614,7 @@ def get_exif_status_final_only(path):
     final_images = []
     titles = dict()
     locations = dict()
+    descriptions = dict()
 
     final_exifs = images_get_exifs('{}/{}'.format(path, DIR_FINAL), final_files)
 
@@ -617,6 +624,7 @@ def get_exif_status_final_only(path):
 
     for each_exifs in final_exifs:
         titles[filename_get_name(each_exifs['name'])] = each_exifs['title']
+        descriptions[filename_get_name(each_exifs['name'])] = each_exifs['description']
         locations[filename_get_name(each_exifs['name'])] = each_exifs['gps']
         images.append(filename_get_name(each_exifs['name']))
         final_images.append(filename_get_name(each_exifs['name']))
@@ -637,6 +645,7 @@ def get_exif_status_final_only(path):
 
         stat = dict(image=each_image, final=is_in_final,
                     jpg=is_in_jpg, raw=is_in_raw, video=is_in_video, title=titles[each_image],
+                    description=descriptions[each_image],
                     location=locations[each_image])
         stats.append(stat)
 
@@ -730,7 +739,7 @@ def image_write_gps(image_path, gpx_path):
     """
 
     cmd = 'exiftool -geotag {0} {1} -overwrite_original'.format(gpx_path, image_path)
-    #     print('images_get_exifs() cmd={}'.format(cmd))
+    # print('image_write_gps() cmd={}'.format(cmd))
     try:
         b = subprocess.check_output(
             cmd,
@@ -755,6 +764,7 @@ def images_get_exifs(path, file_names):
     Example
         return [
         dict(name='img01.jpg', gps=dict(lan=1.0, lat=49,54.318340N), title='A huge tree',
+            description='Very short description'
             createdate='2017:06:19 08:16:11',
         ... ]
     """
@@ -769,7 +779,7 @@ def images_get_exifs(path, file_names):
         sys.stdout.write(progress['back'] + progress['formatting'].format(str(index)))
         sys.stdout.flush()
 
-        cmd = 'exiftool -T -filename -gpslatitude -gpslongitude -title -createdate {}/{}'.format(path, each)
+        cmd = 'exiftool -T -filename -gpslatitude -gpslongitude -title -createdate -description {}/{}'.format(path, each)
         #     print('images_get_exifs() cmd={}'.format(cmd))
         try:
             b = subprocess.check_output(
@@ -798,12 +808,17 @@ def images_get_exifs(path, file_names):
         else:
             title = values[3]
 
+        if values[5] == '-':
+            description = None
+        else:
+            description = values[5]
+
         if values[1] == '-' and values[2] == '-':
             gps = None
         else:
             gps = dict(lat=values[1], lon=values[2])
 
-        ret.append(dict(name=values[0], title=title, gps=gps, createdate=createdate))
+        ret.append(dict(name=values[0], title=title, description=description, gps=gps, createdate=createdate))
 
     # print('Done.')
     sys.stdout.write('\n')

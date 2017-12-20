@@ -1,9 +1,0 @@
-Package: fow
-Version: 1.1-1
-Section: base
-Priority: optional
-Architecture: all
-Depends: python3-minimal
-Maintainer: Christian Schulzendorff <christian.schulzendorff@arcor.de>
-Description: File bases workflow for image processing
- Command-line tools for processing your images from import, rename, adding locatin, organize in tasks up to publish them.

@@ -49,6 +49,8 @@ f (or -) - Image in final folder
 .P
 t (or -) - Final image has title. If no final image exists, title of jpg.
 .P
+d (or -) - Final image has description. If no final image exists, description of jpg.
+.P
 g (or -) - Final image has geo location. If no final image exists, geo location of jpg.
 .P
 space
@@ -57,7 +59,7 @@ Image name without suffix
 .P
 space
 .P
-Title, if exists
+Title or - (if not exists) / Description or - (if not exists)
 
 .SH OPTIONS
 .TP

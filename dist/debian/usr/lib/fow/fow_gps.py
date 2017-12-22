@@ -3,8 +3,90 @@ import os
 import re
 
 import sys
+import webbrowser
 
-from plump import list_raw, list_video, list_jpg, images_get_exifs, image_get_exifs, image_write_gps, progress_prepare
+from plump import DIR_FOW, get_fow_root, list_video, list_jpg, images_get_exifs, image_get_exifs, image_write_gps, progress_prepare
+
+
+class Map(object):
+    def __init__(self):
+        self._points = []
+
+    def add_point(self, coordinates):
+        """
+        Adds new marker
+        :param coordinates: array with lan, lon, title, label
+        :return:
+        """
+        self._points.append(coordinates)
+
+    def count(self):
+        """
+        Returns the nr. of points
+        :return: Positive integer
+        """
+        return len(self._points)
+
+    def __str__(self):
+        center_lat = sum(( x[0] for x in self._points)) / len(self._points)
+        center_lon = sum(( x[1] for x in self._points)) / len(self._points)
+        markers_code = "\n".join(
+            [ """new google.maps.Marker({{
+                position: new google.maps.LatLng({lat}, {lon}),
+                label: '{label}',
+                map: map,
+                title: '{name} \\n {title} \\n {description}'
+                }});""".format(lat=x[0], lon=x[1], name=x[2], title=x[3], description=x[4], label=x[5]) for x in self._points
+            ])
+        return """
+            <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+            <div id="map-canvas" style="height: 100%; width: 100%"></div>
+            <script type="text/javascript">
+                var map;
+                function show_map() {{
+                    map = new google.maps.Map(document.getElementById("map-canvas"), {{
+                        zoom: 12,
+                        center: new google.maps.LatLng({centerLat}, {centerLon})
+                    }});
+                    {markersCode}
+                }}
+                google.maps.event.addDomListener(window, 'load', show_map);
+            </script>
+        """.format(centerLat=center_lat, centerLon=center_lon,
+                   markersCode=markers_code)
+
+
+def map(image_path):
+    """
+    Show map with pins for all jpg images in the given path
+    :param image_path: String with path
+    :return: -
+    """
+    labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    labelIndex = 0
+
+    map = Map()
+    images = list_jpg(image_path)
+    exifs = images_get_exifs(image_path, images)
+
+    # Sorted list by date, so the labels will be sorted
+    names = list()
+    for each in exifs:
+        names.append((each['createdate'], each))
+    for e in sorted(names, key=lambda item: item[0]):
+        if not e[1]['gps'] is None and not e[1]['gps']['lon'] is None:
+            map.add_point((float(e[1]['gps']['lat']), float(e[1]['gps']['lon']), e[1]['name'],
+                           e[1]['title'], e[1]['description'], labels[labelIndex % len(labels)]))
+            labelIndex += 1;
+
+    if map.count() < 1:
+        print('All {} images without geo locations'.format(str(len(images))))
+        return
+
+    file_path = get_fow_root() + DIR_FOW + "/map.html"
+    with open(file_path, "w") as out:
+        print(map, file=out)
+        webbrowser.open(file_path)
 
 
 def analyse(track_path, image_path):

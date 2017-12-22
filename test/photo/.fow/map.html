@@ -1,0 +1,26 @@
+
+            <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+            <div id="map-canvas" style="height: 100%; width: 100%"></div>
+            <script type="text/javascript">
+                var map;
+                function show_map() {
+                    map = new google.maps.Map(document.getElementById("map-canvas"), {
+                        zoom: 12,
+                        center: new google.maps.LatLng(50.1092868346139, 8.856981224715)
+                    });
+                    new google.maps.Marker({
+                position: new google.maps.LatLng(50.1237963081972, 8.91209270686111),
+                label: 'A',
+                map: map,
+                title: '20171106-074136-DSCF6107.jpg \n Pende XIII \n Steinheimer Brücke, Hanau'
+                });
+new google.maps.Marker({
+                position: new google.maps.LatLng(50.0947773610306, 8.80186974256889),
+                label: 'B',
+                map: map,
+                title: '20171106-175226-DSCF6111.jpg \n Pendel XIV \n Bieber Berg, Offenbach'
+                });
+                }
+                google.maps.event.addDomListener(window, 'load', show_map);
+            </script>
+        

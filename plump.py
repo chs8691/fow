@@ -14,7 +14,7 @@ DIR_JPG = 'jpg'
 DIR_RAW = 'raw'
 DIR_FINAL = 'final'
 DIR_WORK = 'work'
-VERSION = '1.1.6 Build 201712201517'
+VERSION = '1.1.7 Build 201712220132'
 BACKUP_PATH = 'backup.path'
 TASK = 'task'
 TYPE_RAW = 'raw'
@@ -763,7 +763,7 @@ def images_get_exifs(path, file_names):
     path: Path to the files
     Example
         return [
-        dict(name='img01.jpg', gps=dict(lan=1.0, lat=49,54.318340N), title='A huge tree',
+        dict(name='img01.jpg', gps=dict(lon=1.0, lat=49,54.318340N), title='A huge tree',
             description='Very short description'
             createdate='2017:06:19 08:16:11',
         ... ]
@@ -779,7 +779,7 @@ def images_get_exifs(path, file_names):
         sys.stdout.write(progress['back'] + progress['formatting'].format(str(index)))
         sys.stdout.flush()
 
-        cmd = 'exiftool -T -filename -gpslatitude -gpslongitude -title -createdate -description {}/{}'.format(path, each)
+        cmd = 'exiftool -T -n -filename -gpslatitude -gpslongitude -title -createdate -description {}/{}'.format(path, each)
         #     print('images_get_exifs() cmd={}'.format(cmd))
         try:
             b = subprocess.check_output(

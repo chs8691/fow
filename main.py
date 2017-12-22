@@ -73,6 +73,7 @@ def cmd_gps(_arg_struct):
     atom_none = dict(name='', short='', args=1)
     atom_path = dict(name='path', short='p', args=2)
     atom_test = dict(name='test', short='t', args=0)
+    atom_map = dict(name='map', short='m', args=0)
     atom_force = dict(name='force', short='f', args=0)
     atom_verbose = dict(name='verbose', short='v', args=0)
 
@@ -90,6 +91,10 @@ def cmd_gps(_arg_struct):
         [dict(atom=atom_path, obligat=True),
          dict(atom=atom_test, obligat=True),
          dict(atom=atom_verbose, obligat=False)],
+        [dict(atom=atom_path, obligat=True),
+         dict(atom=atom_map, obligat=True)],
+        [dict(atom=atom_none, obligat=True),
+         dict(atom=atom_map, obligat=True)],
     ]
 
     if not check_params(_arg_struct, rules, 'gps'):
@@ -122,6 +127,10 @@ def cmd_gps(_arg_struct):
         return
 
     # Now we have a valid, existing absolute path to the images
+    # Just show map
+    if 'map' in args['names']:
+        fow_gps.map(image_path)
+        return;
 
     track_path = config.read_item(plump.GPS_TRACK_PATH)
     if track_path is None:

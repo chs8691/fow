@@ -322,24 +322,44 @@ def cmd_export(_arg_struct):
 
     # Get destination
     if 'path' in args['names']:
-        dest = args['args'][0]
+        destination = args['args'][0]
     else:
         try:
-            dest = config.read_pickle()[plump.EXPORT_PREFIX
+            destination = config.read_pickle()[plump.EXPORT_PREFIX
                                         + '.' + args['args'][0]]
         except:
             print('Destination value not defined. Create it with ' +
                   '"config -s export.' + args['args'][0] + '" first.')
             return
 
-    if dest is None:
+    if destination is None:
         print('Destination not valid. See "help export".')
         return
 
-    if not os.path.exists(dest):
-        print('Destination directory not reachable: ' + dest)
-        return
+    # Extract task specific subdirectory {1} or {2}, if given
+    m = re.compile('(.*)(/{[12]}/?)').match(destination)
 
+    # Direct path
+    if m is None:
+        if not os.path.exists(destination):
+            print('Destination directory not reachable: ' + destination)
+            return
+
+    # Task specific path
+    else:
+        root_dir = m.group(1)
+        if os.path.exists(m.group(1)):
+            # Resolve subdirectory placeholder: task name
+            if destination.endswith(('{1}', '{1}/')):
+                destination = root_dir + '/' + task.get_actual()['name']
+            # Resolve subdirectory placeholder: folder + task name
+            elif destination.endswith(('{2}', '{2}/')):
+                destination = root_dir + '/' + task.get_actual()['task']
+        else:
+            print('Destination root directory not reachable: ' + root_dir)
+            return
+
+    print('destination={}'.format(destination))
     if not task.check_actual():
         return
 
@@ -348,17 +368,17 @@ def cmd_export(_arg_struct):
     files = plump.list_jpg(src_path)
 
     # [dict(name='image001.jpg', exists='true')]
-    analysis = export.analyse(task.get_actual(), dest)
+    analysis = export.analyse(task.get_actual(), destination)
     if 'test' in args['names']:
-        export.test(analysis, src_dir, dest)
+        export.test(analysis, src_dir, destination)
         return
 
     # export --force
     if 'force' in args['names']:
         print(str(len(files)) + ' images in ' + task.get_actual()['task']
               + '/' + plump.DIR_FINAL)
-        print('Destination: ' + dest)
-        export.copy(analysis, src_path, dest)
+        print('Destination: ' + destination)
+        export.copy(analysis, src_path, destination)
 
     # export
     else:
@@ -373,8 +393,8 @@ def cmd_export(_arg_struct):
         else:
             print(str(len(files)) + ' images in ' + task.get_actual()['task']
                   + '/' + plump.DIR_FINAL)
-            print('Destination: ' + dest)
-            export.copy(analysis, src_path, dest)
+            print('Destination: ' + destination)
+            export.copy(analysis, src_path, destination)
 
 
 def cmd_task(_arg_struct):
@@ -904,7 +924,7 @@ def show_help(_arg_struct):
                      if os.path.isfile(os.path.join(
                     config.get_help_file_dir(), f))
                      and pattern.match(f)]
-            print(('fow commands:'))
+            print('fow commands:')
             out = ''
             for f in names:
                 with open(os.path.join(

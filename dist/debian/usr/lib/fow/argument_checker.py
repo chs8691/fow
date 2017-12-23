@@ -121,9 +121,9 @@ def _node_match_actual(actual, node):
         atomShort = dict(name='short', short='s', args=0)
         node = dict(atom=atomShort, obligat=True)
     """
-    #print('node=' + str(node))
+    # print('node=' + str(node))
 
-    #The None-Option always match
+    # e None-Option always match
     if len(node['atom']['name']) == 0 and \
         len(node['atom']['short']) == 0:
         return True
@@ -146,11 +146,11 @@ def _options_match_rule(items, rule, type):
     The None-Item will be ignored.
     Returns True, if all items are defined in the rule, otherwise False.
     """
-    #print('_options_match_rule() rule=' + str(rule))
-    #print('_options_match_rule() type=' + type)
-    #print('_options_match_rule() items=' + str(items))
+    # print('_options_match_rule() rule=' + str(rule))
+    # print('_options_match_rule() type=' + type)
+    # print('_options_match_rule() items=' + str(items))
     for item in items:
-        #print('_options_match_rule() item=' + str(item))
+        # print('_options_match_rule() item=' + str(item))
 
         found_node = False
         for node in [n for n in rule if len(n['atom']['name']) > 0]:
@@ -158,10 +158,10 @@ def _options_match_rule(items, rule, type):
                 found_node = True
                 break
         if not found_node:
-            #print('_options_match_rule() found_node=' + str(found_node))
+            # print('_options_match_rule() found_node=' + str(found_node))
             return False
 
-    #print('_options_match_rule() return True')
+    # print('_options_match_rule() return True')
     return True
 
 
@@ -171,22 +171,22 @@ def _has_valid_options(actual, rule):
     Doesn't check if actual has additional invalid options.
     earlier step.
     """
-    #check obligatories
-    #Be careful: A rule with a non-option returns true
+    # check obligatories
+    #B e careful: A rule with a non-option returns true
     for node in rule:
         if node['obligat'] is True:
-            #print('_has_valid_options() node=' + str(node))
+            # print('_has_valid_options() node=' + str(node))
             if not _node_match_actual(actual, node):
                 return False
 
-    #check optionals
-    #print('_has_valid_options() rule=' + str(rule))
+    # check optionals
+    # print('_has_valid_options() rule=' + str(rule))
     if not (_options_match_rule(actual['names'], rule, 'name') and
             _options_match_rule(actual['shorts'], rule, 'short')):
-        #print('_has_valid_options() _options_match_rule=' + 'False')
+        # print('_has_valid_options() _options_match_rule=' + 'False')
         return False
 
-    #print('_has_valid_options() _options_match_rule=' + 'True')
+    # print('_has_valid_options() _options_match_rule=' + 'True')
     return True
 
 

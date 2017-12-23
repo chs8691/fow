@@ -15,6 +15,17 @@ Existing files will be overwritten. The destination must be set with the config 
   fow config \-\-set export.local=/home/chris/exported_images
 .TP
 fow export local
+.PP
+To export into a task named subdirectory, the suffix /{1} and /{2} can be added to the path. The first appends subdirectory based on the task name, the latter one appends two nested subdirectories named by task folder name and task name.
+Examples:
+.PP
+fow task -a 'weekly/week01'
+.PP
+fow export --path /pictures/{1} # Exports to /pictures/week01
+.PP
+fow export --path /pictures/{2} # Exports to /pictures/weekly/week01
+.TP
+The specified root directory must exists, but task specific subdirectories will be created.
 
 .SH "OPTIONS"
 Options:

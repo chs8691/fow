@@ -68,15 +68,26 @@ def test(analysis, src_dir, dest):
               ' ' + time_str)
 
 
-def copy(analysis, src_dir, dest):
+def copy(analysis, src_dir, destination_dir):
     """
-    Copies files.
+    Copies files. Create, if task specific subdirectory doesn't exists.
     """
+    print('Copy(): dest={}'.format(destination_dir))
+
+    # Create path
+    if not os.path.exists(destination_dir):
+        print('create {} now...'.format(destination_dir))
+        os.makedirs(destination_dir)
+
+    if not os.path.exists(destination_dir):
+        print('Failed to create directory {}'.format(destination_dir))
+        return
+
     name = ''
     try:
         for item in analysis:
             name = item['name']
-            shutil.copy2(src_dir + '/' + item['name'], dest)
+            shutil.copy2(src_dir + '/' + item['name'], destination_dir)
             print('Copying ' + name + '. Done.')
     except IOError as err:
         print('Copying ' + name + '. Error!')

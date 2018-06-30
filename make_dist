@@ -12,4 +12,4 @@ rsync -rltv --delete --info=FLIST0,STATS0,BACKUP1 task.py dist/debian/usr/lib/fo
 rsync -rltv --delete --info=FLIST0,STATS0,BACKUP1 xe2hack.py dist/debian/usr/lib/fow/
 rsync -rltv --delete --info=FLIST0,STATS0,BACKUP1 man/ dist/debian/usr/share/man/man1/
 dpkg-deb --build dist/debian/
-mv dist/debian.deb dist/fow_1.1.5_all.deb
+mv -v dist/debian.deb dist/fow_1.1.7_all.deb

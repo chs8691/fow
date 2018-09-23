@@ -4,6 +4,7 @@ import shutil
 import subprocess
 import time
 import sys
+import re
 
 DIR_00 = '00_Inbox'
 DIR_01 = '01_Import'
@@ -14,7 +15,7 @@ DIR_JPG = 'jpg'
 DIR_RAW = 'raw'
 DIR_FINAL = 'final'
 DIR_WORK = 'work'
-VERSION = '1.1.7 Build 201712231430'
+VERSION = '1.1.7 Build 201712282222'
 BACKUP_PATH = 'backup.path'
 TASK = 'task'
 TYPE_RAW = 'raw'
@@ -1034,6 +1035,109 @@ def exist_dir(dir_name):
 
 def toArgStruct(cmds):
     """
+    Returns for every command one item in every three list of the return dictionary=(names, shorts, args):
+        names: sorted list with command name or None
+        shorts: sorted list with command short or None
+        args: sorted list with argument or None
+    For commandless arguments, item in names and shorts are set to ''.
+    For commands without arguments, item in args is None.
+
+    Example:
+
+    From ['--test', '--create', '-p=~/backup' 'image001.jpg']
+    To   dict=(names= ['test', 'create', None      , None],
+               shorts=[None  , None    , 'p'       , None],
+               args=  [None  , None    , '~/backup', None])
+    """
+
+    names = []
+    shorts = []
+    args = []
+
+    for i in range(len(cmds)):
+        # print('cmds i = ' + cmds[i])
+        # print('cmds i = ' + cmds[i][0:2])
+
+        # distinguish between 3 kinds of command -x[=yyy] and --xxx[=yyy] and yyy
+
+        # short command
+        if re.match("^\-\w(=.*)?", cmds[i]):
+            mo = re.match("^\-(\w)(=.*)?", cmds[i])
+            shorts.append(mo.group(1))
+            names.append(None)
+            if mo.group(2) is None:
+                args.append(None)
+            else:
+                args.append(mo.group(2)[1:])
+            # print('1 cmd=' + cmds[i] + " grout1=" + str(mo.group(1)) + " grout2=" + str(mo.group(2)))
+
+        # named command
+        elif re.match("^\-{2}\w+(=.*)?", cmds[i]):
+            mo = re.match("^\-{2}(\w*)(=.*)?", cmds[i])
+            names.append(mo.group(1))
+            shorts.append(None)
+            if mo.group(2) is None:
+                args.append(None)
+            else:
+                args.append(mo.group(2)[1:])
+            # print('2 cmd=' + cmds[i] + " group1=" + str(mo.group(1)) + " group2=" + str(mo.group(2)))
+
+        # commandless argument
+        else:
+            names.append('')
+            shorts.append('')
+            args.append(cmds[i])
+            # print('3 cmd=' + cmds[i])
+
+        # if len(cmds[i]) >= 2 and cmds[i][0:2] == '--':
+        #     names.append(cmds[i][2:])
+        #     shorts.append(None)
+        # elif len(cmds[i]) >= 1 and cmds[i][0] == '-':
+        #     shorts.append(cmds[i][1:])
+        #     names.append(None)
+        # else:
+        #     args.append(cmds[i])
+        #
+    # If no option, add a none one. Maybe this is a bad idea
+    # if len(names) + len(shorts) == 0:
+    #   names.append('none')
+
+    # # As tree structure
+    # print('cmds={}'.format(str(cmds)))
+    # cmd_list = []
+    # for i in range(len(cmds)):
+    #     j = 1
+    #     cmd = dict(name=None, short=None, arg=None)
+    #
+    #     # actual is a new parameter
+    #     if len(cmds[i]) >= 2 and cmds[i][0:2] == '--':
+    #         cmd['name'] = cmds[i][2:]
+    #         j = i + 1
+    #     elif len(cmds[i]) >= 1 and cmds[i][0] == '-':
+    #         cmd['short'] = cmds[i][1:]
+    #         j = i + 1
+    #
+    #     # last cmd entry
+    #     if j >= len(cmds):
+    #         cmd_list.append(cmd)
+    #         break
+    #
+    #     # next one is the parameter's argument
+    #     if not (len(cmds[i]) >= 2 and cmds[i][0:2] == '--' or len(cmds[i]) >= 1 and cmds[i][0] == '-'):
+    #         cmd['arg'] = cmds[j]
+    #
+    #
+    # cmd_list.append(cmd)
+    # print('cmd_list={}'.format(str(cmd_list)))
+
+    ret = dict(names=names, shorts=shorts, args=args)
+    # print("ret=" + str(ret))
+
+    return ret
+
+
+def toArgStructOLD(cmds):
+    """
     Returns well formed structure of the given command list as a
     dictionary of two list options and args.
     Non option calls will be convereted to option '--none'
@@ -1060,9 +1164,9 @@ def toArgStruct(cmds):
             args.append(cmds[i])
 
     # If no option, add a none one. Maybe this is a bad idea
-    # if len(names) + len(shorts) == 0:
-    #   names.append('none')
+    if len(names) + len(shorts) == 0:
+      names.append('none')
 
-    return dict(names=names, shorts=shorts, args=args)
+    return dict(names=names, shorts=shorts, args=args, cmds=cmd_list)
 
 

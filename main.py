@@ -72,30 +72,42 @@ def cmd_gps(_arg_struct):
     # 0: No param allowed, 1: param optional, 2: param obligatory
     atom_none = dict(name='', short='', args=1)
     atom_path = dict(name='path', short='p', args=2)
+    atom_source = dict(name='source', short='s', args=2)
     atom_test = dict(name='test', short='t', args=0)
     atom_map = dict(name='map', short='m', args=0)
     atom_force = dict(name='force', short='f', args=0)
     atom_verbose = dict(name='verbose', short='v', args=0)
 
-    # print('export() _arg_struct=' + str(_arg_struct))
     rules = [
         [dict(atom=atom_none, obligat=True),
          dict(atom=atom_force, obligat=False),
-         dict(atom=atom_verbose, obligat=False)],
-        [dict(atom=atom_path, obligat=True),
+         dict(atom=atom_verbose, obligat=False)
+         ],
+        [dict(atom=atom_source, obligat=True),
          dict(atom=atom_force, obligat=False),
-         dict(atom=atom_verbose, obligat=False)],
+         dict(atom=atom_verbose, obligat=False)
+         ],
+        [dict(atom=atom_path, obligat=True),
+         dict(atom=atom_source, obligat=False),
+         dict(atom=atom_force, obligat=False),
+         dict(atom=atom_verbose, obligat=False)
+         ],
         [dict(atom=atom_none, obligat=True),
          dict(atom=atom_test, obligat=True),
-         dict(atom=atom_verbose, obligat=False)],
+         dict(atom=atom_verbose, obligat=False)
+         ],
         [dict(atom=atom_path, obligat=True),
          dict(atom=atom_test, obligat=True),
-         dict(atom=atom_verbose, obligat=False)],
+         dict(atom=atom_verbose, obligat=False)
+         ],
         [dict(atom=atom_path, obligat=True),
-         dict(atom=atom_map, obligat=True)],
+         dict(atom=atom_map, obligat=True)
+         ],
         [dict(atom=atom_none, obligat=True),
-         dict(atom=atom_map, obligat=True)],
+         dict(atom=atom_map, obligat=True)
+         ],
     ]
+    print('_arg_struct=' + str(_arg_struct))
 
     if not check_params(_arg_struct, rules, 'gps'):
         return
@@ -103,10 +115,12 @@ def cmd_gps(_arg_struct):
     # Normalize for easy access: -t -> --test etc.
     args = plump.normalizeArgs(_arg_struct, rules)
 
-    # print("cmp_gps() {}".format(str(args)))
+    print("cmp_gps() {}".format(str(args)))
     # get path
     if 'path' in args['names']:
         image_path = args['args'][0]
+    # if 'source' in args['names']:
+    #     source_path =
     elif len(args['args']) == 1:
         key = 'gps.{}'.format(args['args'][0])
         if config.read_item(key) is None:
@@ -402,7 +416,7 @@ def cmd_task(_arg_struct):
     Task manipulation.
     """
 
-    # Command needs an existing fw.
+    # Command needs an existing fow.
     if not plump.is_fow():
         return
 
@@ -855,7 +869,7 @@ def fow(args=None):
         print('fow version ' + plump.VERSION + '. "help" shows all commands.')
         return
 
-    # print((str(len(cmds)) + ' args=' + str(cmds)))
+    # print('args=' + str(args))
     cmds = args[1:]
 
     if cmds[0] == 'help':

@@ -1,44 +1,48 @@
 ." Manpage for fow.gps
 ." Contact christian.schulzendorff@arcor.de to correct errors or typos.
-.TH FOW-GPS 1 "22 December 2017" "Fow manual" "fow gps"
+.TH FOW-GPS 1 "17 September 2018" "Fow manual" "fow gps"
 .SH NAME
-gps \- add gps locations from gpx files or show on a map
+gps [\-\-map] [<options>] \- add gps locations to images or show image location on a map (JPG)
+
 .SH SYNOPSIS
+There are two different modes, the command can be used for:
 .TP
-gps [<options>]
-Add/show gps information to all images in the final directory of the actual task.
-.TP
-gps <destination> [<options>]
-Add/show gps information to all images in the directory of specified destination.
-The destination must exists and points to an fow internal sub directory.
-The destination must be set with the config command and must be prefixed with 'gps.'.
-But the destination key may not have leading 'gps.' when using this with export (for instance: 'gps import_jpg'):
-.TP
-  fow config \-\-set gps.import_jpg=02_IMPORT/jpg
-.TP
-Showing locations an a map only supports jpg files.
+gps [\-\-source <track file source path>] [\-\-path <images sub dir>|<destination>] [\-\-test] [\-\-forece] [\-\-verbose]
+Add gps information to all images.
+
+If \-\-source is not used, the logical destination to the track file directory must be set with 'fow config \-\-set gps.tracks=/my/path'
+first.
+
+If neither \-\-path nor <destination> is used, the actual fow final is used for the image sub dir. To use <destination>,
+it must be set once with e.g. 'fow config \-\-set gps.ij=01_Import/jpg'.
 
 .TP
-gps --path|-p <sub directory> [<options>]
-Add or show gps information to all images in the directory within the fow. For instance 'gps 01_INBOX/jpg'.
+gps \-\-map [\-\-dir <images sub dir>|<destination>]
+Show gps locations from all image files of the specified folder on a map.
+
+
 .SH DESCRIPTION
-The gps information will be searched in gpx files of an particular folder, defined as config value with key 'gps.tracks'.
+For the add gps location-mode, the gps information will be searched in gpx files of an particular folder, defined as config value with key 'gps.tracks'.
 Example: 'config -s gps.tracks=/home/chris/gpsTracks'. To support a big gpx folder, the track files will be filtered by
 the date information in its file name. For instance, if there is an image with create date December, 31th, 2017 (taken from exif),
 all gpx files with string 2017-12-31 in its file name will be filtered.
 When executed, exiftool will be called in this form: 'exiftool -geotag <trackfile> <imagefile>'. Please note, that
 exiftool uses the actual computer time zone to map image time (EXIF's DateTimeOriginal) to track file time
 (normally the UTC time).
+
 .SH OPTIONS
 .TP
 --test, -t
 Dry run, simulates but does not update any image files. Can't be used with -m.
+
 .TP
 --force, -f
 Overwrite existing gps information. If not set, images with existing gps data will be ignored. Can't be used with -m.
+
 .TP
 --map, -m
 Show map with location of all location tagged images of the specified directory. Only jpg files are supported.
+
 .TP
 --verbose, -v
 Prints information for every image. Otherwise just a summary is printed. Can't be used with -m.

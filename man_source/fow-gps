@@ -2,28 +2,28 @@
 ." Contact christian.schulzendorff@arcor.de to correct errors or typos.
 .TH FOW-GPS 1 "17 September 2018" "Fow manual" "fow gps"
 .SH NAME
-gps [\-\-map] [<options>] \- add gps locations to images or show image location on a map (JPG)
+gps \- add gps locations to images or show image location on a map (JPG)
 
 .SH SYNOPSIS
 There are two different modes, the command can be used for:
 .TP
-gps [\-\-source <track file source path>] [\-\-path <images sub dir>|<destination>] [\-\-test] [\-\-forece] [\-\-verbose]
+gps [\-\-source=<track file source path>] [\-\-path=<images sub dir>|<destination>] [\-\-test] [\-\-forece] [\-\-verbose]
 Add gps information to all images.
 
-If \-\-source is not used, the logical destination to the track file directory must be set with 'fow config \-\-set gps.tracks=/my/path'
+If \-\-source is not used, the logical destination to the track file directory must be set with 'fow config \-\-set=gps.tracks=/my/path'
 first.
 
 If neither \-\-path nor <destination> is used, the actual fow final is used for the image sub dir. To use <destination>,
-it must be set once with e.g. 'fow config \-\-set gps.ij=01_Import/jpg'.
+it must be set once with e.g. 'fow config \-\-set=gps.ij=01_Import/jpg'.
 
 .TP
-gps \-\-map [\-\-dir <images sub dir>|<destination>]
+gps \-\-map [\-\-path=<images sub dir>|<destination>]
 Show gps locations from all image files of the specified folder on a map.
 
 
 .SH DESCRIPTION
 For the add gps location-mode, the gps information will be searched in gpx files of an particular folder, defined as config value with key 'gps.tracks'.
-Example: 'config -s gps.tracks=/home/chris/gpsTracks'. To support a big gpx folder, the track files will be filtered by
+Example: 'config -s=gps.tracks=/home/chris/gpsTracks'. To support a big gpx folder, the track files will be filtered by
 the date information in its file name. For instance, if there is an image with create date December, 31th, 2017 (taken from exif),
 all gpx files with string 2017-12-31 in its file name will be filtered.
 When executed, exiftool will be called in this form: 'exiftool -geotag <trackfile> <imagefile>'. Please note, that

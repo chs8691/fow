@@ -1,13 +1,13 @@
 ." Manpage for fow.config
 ." Contact christian.schulzendorff@arcor.de to correct errors or typos.
-.TH FOW-TASK 1 "31 July 2016" "Fow manual" "fow task"
+.TH FOW-TASK 1 "24 September 2018" "Fow manual" "fow task"
 .SH NAME
 task \- manage a fow's task 
 .SH SYNAPSIS
 
-task --activate|-a name
+task --activate=name|-a=name
 
-task --create|-c name
+task --create=name|-c=name
 
 task --fill-final|-f [--test|-t]
 
@@ -63,13 +63,13 @@ Title or - (if not exists) / Description or - (if not exists)
 
 .SH OPTIONS
 .TP
-\-\-create <name>, \-c <name>
+\-\-create=<name>, \-c=<name>
 Creates a new task in the same folder of the actual task in 02_PROCESS/<folder_actual_task>. The task name may not exists.  
 .TP
-\-\-create <folder/task>, \-c <folder/task>
+\-\-create=<folder/task>, \-c=<folder/task>
 Creates a new task in the particular subfolder of 02_PROCESS. A task has to be structured in a one-level folder path. For instance "weeklyPicture/<task>".   
 .TP
-\-a <task>, \-\-activate <task>
+\-a=<task>, \-\-activate=<task>
 Set this task as the active one.
 .TP
 \-n, \-\-next

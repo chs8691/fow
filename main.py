@@ -64,6 +64,19 @@ def cmd_xe2hack(_arg_struct):
         xe2hack.do(analysis)
 
 
+def get_arg_by_name(args, name):
+    """
+    For a given name, the arg value will returned
+    :param args: arg_structure, s. plumb.normalizeArgs()
+    :param name: key of list names
+    :return: String with arg or, if not found, None
+    """
+    if name not in args['names']:
+        return None
+
+    return args['args'][args['names'].index(name)]
+
+
 def cmd_gps(_arg_struct):
     """
     Adds geo locations from gps files
@@ -88,7 +101,6 @@ def cmd_gps(_arg_struct):
          dict(atom=atom_verbose, obligat=False)
          ],
         [dict(atom=atom_path, obligat=True),
-         dict(atom=atom_source, obligat=False),
          dict(atom=atom_force, obligat=False),
          dict(atom=atom_verbose, obligat=False)
          ],
@@ -107,7 +119,7 @@ def cmd_gps(_arg_struct):
          dict(atom=atom_map, obligat=True)
          ],
     ]
-    print('_arg_struct=' + str(_arg_struct))
+    # print('_arg_struct=' + str(_arg_struct))
 
     if not check_params(_arg_struct, rules, 'gps'):
         return
@@ -115,49 +127,75 @@ def cmd_gps(_arg_struct):
     # Normalize for easy access: -t -> --test etc.
     args = plump.normalizeArgs(_arg_struct, rules)
 
-    print("cmp_gps() {}".format(str(args)))
-    # get path
-    if 'path' in args['names']:
-        image_path = args['args'][0]
-    # if 'source' in args['names']:
-    #     source_path =
-    elif len(args['args']) == 1:
-        key = 'gps.{}'.format(args['args'][0])
+    # print("cmp_gps() {}".format(str(args)))
+    # Possible arguments, None, if not given
+
+    # arg validation
+    # image path as destination
+    if get_arg_by_name(args, '') is not None:
+        key = 'gps.{}'.format(get_arg_by_name(args, ''))
         if config.read_item(key) is None:
-            print('Value {0} not configured. Maybe you have to set it first with config -s {0}=yourPath'.format(key))
+            print("Value {0} not configured. Maybe you have to set it first with config -s='{0}=fow-subdir-to-images'".format(key))
             return
-        else:
-            image_path = plump.get_path(config.read_item(key))
+        if not os.path.exists(plump.get_path(config.read_item(key))):
+            print((("Destination points to a non existing sub dir: '{0}'. " +
+                    "Maybe the directory is temporary not available or you have to" +
+                   " change the destination with 'config -s={1}=fow-subdir-to-images'"))
+                  .format(str(config.read_item(key)), key))
+            return
+        # Validated absolute path to the images
+        image_path = plump.get_path(config.read_item(key))
+
+    # image path as path argument
+    elif get_arg_by_name(args, 'path') is not None:
+        if not os.path.exists(plump.get_path(get_arg_by_name(args, 'path'))):
+            print((("'{0}' is not an existing sub dir within this fow. " +
+                    "Maybe the directory is temporary not available or you have to " +
+                   "write the correct path."))
+                  .format(str(get_arg_by_name(args, 'path'))))
+            return
+        # Validated absolute path to the images
+        image_path = plump.get_path(get_arg_by_name(args, 'path'))
+
+    # image path is the actual final
     else:
         if task.get_actual() is None:
             print('No active task.')
             return
+        elif not os.path.exists(task.get_actual()['path']):
+            print("Actual task '{0}' is not an existing sub dir within this fow."
+                  .format(str(task.get_actual()['path'])))
+            return
         else:
-            # print('cmd_gps() {}'.format(str(task.get_actual())))
             image_path = '{}/{}'.format(task.get_actual()['path'], plump.DIR_FINAL)
-
-    if not os.path.exists(image_path):
-        print("Invalid path '{}'".format(str(image_path)))
-        return
 
     # Now we have a valid, existing absolute path to the images
     # Just show map
     if 'map' in args['names']:
         fow_gps.map(image_path)
-        return;
-
-    track_path = config.read_item(plump.GPS_TRACK_PATH)
-    if track_path is None:
-        print('{0} not set. Define the path to tracks folder with config -s {0}=/your/tracks/path'
-              .format(plump.GPS_TRACK_PATH))
-        return
-    elif not os.path.exists(track_path):
-        print(("Invalid path to track files: '{0}'. May the directory is temporary not available or you have to" +
-               " change it with 'config -s {1}=/your/tracks/path'").format(str(track_path), plump.GPS_TRACK_PATH))
         return
 
-    # Now we have both valid path
-    # print("cmp_gps() images={0}, tracks={1}".format(str(image_path), str(track_path)))
+    # track path as source argument
+    if get_arg_by_name(args, 'source') is not None:
+        if not os.path.exists(get_arg_by_name(args, 'source')):
+            print("'{0}' is not an existing, accessible directory. "
+                  .format(str(get_arg_by_name(args, 'source'))))
+            return
+        # Validated absolute path to the images
+        track_path = get_arg_by_name(args, 'source')
+
+    else:
+        if config.read_item(plump.GPS_TRACK_PATH) is None:
+            print('{0} not set. Define the path to tracks folder with config -s={0}=/your/tracks/path'
+                  .format(plump.GPS_TRACK_PATH))
+            return
+        elif not os.path.exists(config.read_item(plump.GPS_TRACK_PATH)):
+            print(("Invalid path to track files: '{0}'. May the directory is temporary not available or you have to" +
+                   " change it with 'config -s={1}=/your/tracks/path'")
+                  .format(str(config.read_item(plump.GPS_TRACK_PATH)), plump.GPS_TRACK_PATH))
+            return
+        # Validated absolute path to the images
+        track_path = config.read_item(plump.GPS_TRACK_PATH)
 
     analysis = fow_gps.analyse(track_path, image_path)
     # print('cmd_gps() analysis=' + str(analysis))
@@ -269,8 +307,8 @@ def cmd_load(_arg_struct):
             src = config.read_pickle()['{0}.{1}'.format(
                 plump.LOAD_PREFIX, args['args'][0])]
         except:
-            print('Source value not defined. Create it with ' +
-                  '"config -s load.' + args['args'][0] + '=<sourceDir>" first.')
+            print("Source value not defined. Create it with " +
+                  "config -s='load." + args['args'][0] + "=<sourceDir>' first.")
             return
 
     if src is None:
@@ -342,8 +380,7 @@ def cmd_export(_arg_struct):
             destination = config.read_pickle()[plump.EXPORT_PREFIX
                                         + '.' + args['args'][0]]
         except:
-            print('Destination value not defined. Create it with ' +
-                  '"config -s export.' + args['args'][0] + '" first.')
+            print("Destination value not defined. Create it with config -s='export.{}' first.".format(args['args'][0] ))
             return
 
     if destination is None:

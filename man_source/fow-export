@@ -1,6 +1,6 @@
 ." Manpage for fow.export
 ." Contact christian.schulzendorff@arcor.de to correct errors or typos.
-.TH FOW-EXPORT 1 "22 August 2016" "Fow manual" "fow export"
+.TH FOW-EXPORT 1 "24 September 2018" "Fow manual" "fow export"
 .SH "NAME"
 export \- Copy final images to external destinations for the actual task
 .SH "SYNOPSIS"	
@@ -12,18 +12,18 @@ export destination
 Copy all images in final of the actual task to the logical destination 'export.destination'. The destination must exists. It can be set with the config command.
 Existing files will be overwritten. The destination must be set with the config command and must be prefixed with 'export.'. But the destination key may not have leading 'export.' when using this with export. For instance:
 .TP
-  fow config \-\-set export.local=/home/chris/exported_images
+  fow config \-\-set='export.local=/home/chris/exported_images'
 .TP
 fow export local
 .PP
 To export into a task named subdirectory, the suffix /{1} and /{2} can be added to the path. The first appends subdirectory based on the task name, the latter one appends two nested subdirectories named by task folder name and task name.
 Examples:
 .PP
-fow task -a 'weekly/week01'
+fow task --activate='weekly/week01'
 .PP
-fow export --path /pictures/{1} # Exports to /pictures/week01
+fow export --path=/pictures/{1} # Exports to /pictures/week01
 .PP
-fow export --path /pictures/{2} # Exports to /pictures/weekly/week01
+fow export --path=/pictures/{2} # Exports to /pictures/weekly/week01
 .TP
 The specified root directory must exists, but task specific subdirectories will be created.
 
@@ -36,5 +36,5 @@ Overwrite existing files in the destination.
 \-\-test, \-t
 Dry run. Just test the export and report the result. In column one, list for image, if it will be overwritten (o), or (+) for a new image in the destination. Nothing will be changed. 
 .TP
-\-\-path <path>, \-p <path>
+\-\-path=<path>, \-p=<path>
 Export to the give path instead of using a logical destination

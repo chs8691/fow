@@ -110,7 +110,7 @@ def cmd_gps(_arg_struct):
     elif len(args['args']) == 1:
         key = 'gps.{}'.format(args['args'][0])
         if config.read_item(key) is None:
-            print('Value {0} not configured. Maybe you have to set it first with config -s {0}=yourPath'.format(key))
+            print('Value {0} not configured. Maybe you have to set it first with config -s={0}=yourPath'.format(key))
             return
         else:
             image_path = plump.get_path(config.read_item(key))
@@ -134,12 +134,12 @@ def cmd_gps(_arg_struct):
 
     track_path = config.read_item(plump.GPS_TRACK_PATH)
     if track_path is None:
-        print('{0} not set. Define the path to tracks folder with config -s {0}=/your/tracks/path'
+        print('{0} not set. Define the path to tracks folder with config -s={0}=/your/tracks/path'
               .format(plump.GPS_TRACK_PATH))
         return
     elif not os.path.exists(track_path):
         print(("Invalid path to track files: '{0}'. May the directory is temporary not available or you have to" +
-               " change it with 'config -s {1}=/your/tracks/path'").format(str(track_path), plump.GPS_TRACK_PATH))
+               " change it with 'config -s={1}=/your/tracks/path'").format(str(track_path), plump.GPS_TRACK_PATH))
         return
 
     # Now we have both valid path
@@ -256,7 +256,7 @@ def cmd_load(_arg_struct):
                 plump.LOAD_PREFIX, args['args'][0])]
         except:
             print('Source value not defined. Create it with ' +
-                  '"config -s load.' + args['args'][0] + '=<sourceDir>" first.')
+                  '"config -s=load.' + args['args'][0] + '=<sourceDir>" first.')
             return
 
     if src is None:
@@ -329,7 +329,7 @@ def cmd_export(_arg_struct):
                                         + '.' + args['args'][0]]
         except:
             print('Destination value not defined. Create it with ' +
-                  '"config -s export.' + args['args'][0] + '" first.')
+                  '"config -s=export.' + args['args'][0] + '" first.')
             return
 
     if destination is None:

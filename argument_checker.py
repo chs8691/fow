@@ -1,6 +1,6 @@
 ###############################################################################
 # Parameter checker and all its stuff
-# Use check_params(). Methods, startging with an underscore (_) are private.
+# Use check_options(). Methods, starting with an underscore (_) are private.
 # Example: fw export --path /my/backup/path -t
 # actual
 # ------
@@ -27,23 +27,23 @@
 ###############################################################################
 
 
-def check_params(actual, rules, command):
+def check_options(actual_matrix, rules, command):
     """
     Check for the user input against the command-specific
     rule. If a rule violation is found, a message will be printed, otherwise
     the check is silent.
-    actual: dict with actual values, see header description
+    actual_matrix: dict with actual_matrix values, see header description
     rules: rules, see header description
     command: String with command under check, for message printing
-    Returns true, if actual is valid, otherwise false.
+    Returns true, if actual_matrix is valid, otherwise false.
     """
-    # print('actual=' + str(actual))
+    # print('actual_matrix=' + str(actual_matrix))
     # print('rules=' + str(rules))
     see_msg = 'See "fow help ' + command + '".'
 
-    # First, check that every actual option is known (names and shorts)
+    # First, check that every actual_matrix option is known (names and shorts)
     # Regardless of particular paths. Just for printing a good message
-    ret = _find_unknown_options(actual, rules)
+    ret = _find_unknown_options(actual_matrix, rules)
     if ret is not None:
         if ret['type'] == 'name':
             print('Unknown option --' + ret['option'] + '. ' + see_msg)
@@ -54,23 +54,30 @@ def check_params(actual, rules, command):
     # print('checkParams() findUnknownOption=' + str(ret))
 
     # All options are known; now find the path that match the options
-    rule = _find_rule_by_options(actual, rules)
+    rule = _find_rule_by_options(actual_matrix, rules)
     if rule is None:
-        print('Missing obligatory parameter(s). ' + see_msg)
+        print('Invalid option constellation. ' + see_msg)
         return False
     # else:
     # print('checkParams() Found rule=' + str(rule))
 
-    # Check actual arguments againts this path
-    cnt = _check_args(actual, rule)
-    if cnt < 0:
-        print('Missing arguments. ' + see_msg)
-        return False
-    elif cnt > 0:
-        print('Too many arguments. ' + see_msg)
+    # Check actual_matrix arguments against this path
+    # cnt = _check_args(actual_matrix, rule)
+    # if cnt < 0:
+    #     print('Missing arguments. ' + see_msg)
+    #     return False
+    # elif cnt > 0:
+    #     print('Too many arguments. ' + see_msg)
+    #     return False
+    # # else:
+    # # print('checkParams() Arguments are ok.')
+
+    message = _check_options2(actual_matrix, rule)
+    if message is not None:
+        print(message)
         return False
     # else:
-    # print('checkParams() Arguments are ok.')
+    #     print('checkParams() Arguments are ok.')
 
     return True
 
@@ -169,7 +176,7 @@ def _options_match_rule(items, rule, type):
 
 def _has_valid_options(actual, rule):
     """
-    Returns True, if actal's options match this rule. Otherwise returns False.
+    Returns True, if actual's options match this rule. Otherwise returns False.
     Doesn't check if actual has additional invalid options.
     earlier step.
     """
@@ -204,21 +211,26 @@ def _find_rule_by_options(actual, rules):
     Returns found rule or, if nothing found None.
     """
     for rule in rules:
+        # print("_find_rule_by_options() rule={}".format(str(rule)))
         if _has_valid_options(actual, rule):
+            # print("_find_rule_by_options() valid={}".format(str('true')))
             return rule
+        # else:
+        #     print("_find_rule_by_options() valid={}".format(str('false')))
 
     return None
 
 
 def _check_args(actual, rule):
     """
-    Counts number of actual arguments and number of defines arguments in
+    Counts number of actual arguments and number of defined arguments in
     the rule.
     Returns 0, if actual argument's number match the rules one.
     Returns an integer < 0, if the actuals or to few.
     Returns an integer > 0, if the actuals or to many.
     """
-    # print('_check_args() rule=' + str(rule))
+    print('_check_args() actual=' + str(actual))
+    print('_check_args() rule=' + str(rule))
 
     actualsNr = len([n for n in actual['args'] if n is not None])
     ruleMin = 0
@@ -230,9 +242,9 @@ def _check_args(actual, rule):
         elif node['atom']['args'] == 2:
             ruleMax += 1
             ruleMin += 1
-    # print('_check_args() actualNr=' + str(actualsNr))
-    # print('_check_args() ruleMin=' + str(ruleMin))
-    # print('_check_args() ruleMax=' + str(ruleMax))
+    print('_check_args() actualNr=' + str(actualsNr))
+    print('_check_args() ruleMin=' + str(ruleMin))
+    print('_check_args() ruleMax=' + str(ruleMax))
 
     if actualsNr < ruleMin:
         return actualsNr - ruleMin
@@ -240,3 +252,100 @@ def _check_args(actual, rule):
         return actualsNr - ruleMax
     else:
         return 0
+
+
+def _check_options2(actual_matrix, rule):
+    """
+    Check actual parameter vs. its rule
+    :param actual_matrix: Options matrix
+    :param rule: Give rule
+    :return: message in error case or None, of valid
+    """
+    # print('_check_args() actual_matrix=' + str(actual_matrix))
+    # print('_check_args() rule=' + str(rule))
+
+    for name in actual_matrix['names']:
+        for node in (n for n in rule if n['atom']['name'] == name):
+            arg = get_arg_by_name(actual_matrix, name)
+            if node['atom']['args'] == 0 and arg is not None:
+                if name == '':
+                    return "Unexpected argument '{0}' for this fow command".format(arg)
+                else:
+                    return "Unexpected argument {0} for option {1} not allowed. Usage: fow <cmd> --{1}"\
+                        .format(arg, name)
+            elif node['atom']['args'] == 2 and arg is None:
+                if name == '':
+                    return "Mandatory argument for this fow command missing: fow <cmd> <arg>"
+                else:
+                    return "Mandatory argument for option {0} missing. Usage: {0}=<arg> or {0}='<arg>'".format(name)
+
+    return None
+
+
+def get_arg_by_name(paramatrix, name):
+    """
+    For a given name, the arg value will returned
+    :param paramatrix: normalized arg_structure, s. plumb.normalizeArgs()
+    :param name: key of list names
+    :return: String with arg or, if not found, None
+    """
+    # print("get_arg_by_name() paramatrix=" + str(paramatrix))
+    # print("get_arg_by_name() name=" + str(name))
+    if name not in paramatrix['names']:
+        return None
+
+    return paramatrix['args'][paramatrix['names'].index(name)]
+
+
+def normalize_option_matrix(_actual, rules):
+    """
+    Replace missing shorts and names, so it's easier to analyze
+    and read the arguments. 'args' won't be touched. Unknown options wil be ignored
+    Example:
+        _actual = {
+            names=[None, 'test', 'notDefinedName], shorts=['c', None, None], args=['argCreate', 'argTest', None]
+            }
+        _rules = [Path1List, ...]
+        pathList = [testDict, createDict, ...]
+        testDict = {atom=atomTestDict, obligat=trueOrFalse}
+        atomTestDict = {name='test', short='t', args=0_1_OR_2}  etc.
+    :param _actual: n x n matrix with names, shorts and args
+    :returns updated _actual: Example: { names=['create','test', 'notDefinesName],
+        shorts=['c', 't', None],
+        args=['argCreate', 'argTest', None] }
+    """
+    # print('normalizeArgs() _actual=' + str(_actual))
+    # print('normalizeArgs() rules=' + str(rules))
+    ret = _actual.copy()
+    # founds = set()
+    # print('copy=' + str(ret))
+    for short in _actual['shorts']:
+        i = _actual['shorts'].index(short)
+        # print('short=' + short)
+        for path in rules:
+            # print('path=' + str(path))
+            for node in path:
+                # print('node=' + str(node))
+                if short == node['atom']['short']:
+                    # print('found short ' + short)
+                    ret['names'][i] = node['atom']['name']
+                    # if short in ret['shorts']:
+                    #     founds.add(short)
+
+    for name in _actual['names']:
+        i = _actual['names'].index(name)
+        # print('name={}, i={}'.format(name, i))
+        for path in rules:
+            # print('path=' + str(path))
+            for node in path:
+                # print('node=' + str(node))
+                if name == node['atom']['name']:
+                    # print('found name {}.'.format(name))
+                    ret['shorts'][i] = node['atom']['short']
+                    # if name in ret['names']:
+                    #     founds.add(short)
+
+    # print('founds=' + str(founds))
+
+    # print('normalize_option_matrix() ret=' + str(ret))
+    return ret

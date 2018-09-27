@@ -7,7 +7,7 @@ gps \- add gps locations to images or show image location on a map (JPG)
 .SH SYNOPSIS
 There are two different modes, the command can be used for:
 .TP
-gps [\-\-source=<track file source path>] [\-\-path=<images sub dir>|<destination>] [\-\-test] [\-\-forece] [\-\-verbose]
+gps [\-\-path=<images sub dir>|<destination>] [\-\-source=<track file source path>] [\-\-verbose] [\-\-test|\-\-force]
 Add gps information to all images.
 
 If \-\-source is not used, the logical destination to the track file directory must be set with 'fow config \-\-set=gps.tracks=/my/path'

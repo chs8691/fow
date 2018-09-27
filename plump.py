@@ -277,13 +277,13 @@ def getAllFowDirs():
     return dirs
 
 
-def normalizeArgs(_actual, rules):
+def normalize_args_OLD(_actual, rules):
     """
     Only changes shorts to name, so it's easier to analyze
     the arguments.
     Example:
         _actual = {
-            names=[], shorts=['c', 't'], args=[]
+            names=[None, None], shorts=['c', 't'], args=[]
             }
         _rules = [Path1List, ...]
         pathList = [testDict, createDict, ...]
@@ -291,7 +291,7 @@ def normalizeArgs(_actual, rules):
         atomTestDict = {name='test', short='t', args=0_1_OR_2}  etc.
         returns { names=['create','test'], args=[] }
     """
-    # print('_actual=' + str(_actual))
+    print('normalizeArgs() _actual=' + str(_actual))
     ret = _actual.copy()
     founds = set()
     # print('copy=' + str(ret))
@@ -1033,9 +1033,10 @@ def exist_dir(dir_name):
     return False
 
 
-def toArgStruct(cmds):
+def to_arg_struct(cmds):
     """
-    Returns for every command one item in every three list of the return dictionary=(names, shorts, args):
+    Returns for every command one item in every three lists 'names', 'shorts' and 'args', packed into a dictionary.
+    dictionary=(names, shorts, args, params):
         names: sorted list with command name or None
         shorts: sorted list with command short or None
         args: sorted list with argument or None
@@ -1047,12 +1048,20 @@ def toArgStruct(cmds):
     From ['--test', '--create', '-p=~/backup' 'image001.jpg']
     To   dict=(names= ['test', 'create', None      , None],
                shorts=[None  , None    , 'p'       , None],
-               args=  [None  , None    , '~/backup', None])
+               args=  [None  , None    , '~/backup', None],
+               )
     """
 
     names = []
     shorts = []
     args = []
+
+    # Special case for non command parameter: Create a '' parameter
+    # We need this for matching the commands rule
+    if len(cmds) == 0:
+        names.append('')
+        shorts.append('')
+        args.append(None)
 
     for i in range(len(cmds)):
         # print('cmds i = ' + cmds[i])
@@ -1089,84 +1098,8 @@ def toArgStruct(cmds):
             args.append(cmds[i])
             # print('3 cmd=' + cmds[i])
 
-        # if len(cmds[i]) >= 2 and cmds[i][0:2] == '--':
-        #     names.append(cmds[i][2:])
-        #     shorts.append(None)
-        # elif len(cmds[i]) >= 1 and cmds[i][0] == '-':
-        #     shorts.append(cmds[i][1:])
-        #     names.append(None)
-        # else:
-        #     args.append(cmds[i])
-        #
-    # If no option, add a none one. Maybe this is a bad idea
-    # if len(names) + len(shorts) == 0:
-    #   names.append('none')
-
-    # # As tree structure
-    # print('cmds={}'.format(str(cmds)))
-    # cmd_list = []
-    # for i in range(len(cmds)):
-    #     j = 1
-    #     cmd = dict(name=None, short=None, arg=None)
-    #
-    #     # actual is a new parameter
-    #     if len(cmds[i]) >= 2 and cmds[i][0:2] == '--':
-    #         cmd['name'] = cmds[i][2:]
-    #         j = i + 1
-    #     elif len(cmds[i]) >= 1 and cmds[i][0] == '-':
-    #         cmd['short'] = cmds[i][1:]
-    #         j = i + 1
-    #
-    #     # last cmd entry
-    #     if j >= len(cmds):
-    #         cmd_list.append(cmd)
-    #         break
-    #
-    #     # next one is the parameter's argument
-    #     if not (len(cmds[i]) >= 2 and cmds[i][0:2] == '--' or len(cmds[i]) >= 1 and cmds[i][0] == '-'):
-    #         cmd['arg'] = cmds[j]
-    #
-    #
-    # cmd_list.append(cmd)
-    # print('cmd_list={}'.format(str(cmd_list)))
-
     ret = dict(names=names, shorts=shorts, args=args)
-    # print("ret=" + str(ret))
+    # print("to_arg_struct() ret=" + str(ret))
 
     return ret
-
-
-def toArgStructOLD(cmds):
-    """
-    Returns well formed structure of the given command list as a
-    dictionary of two list options and args.
-    Non option calls will be convereted to option '--none'
-    Example:
-    From ['--test', '--create', '-p', '~/backup']
-    To   dict=(names=['test', 'create'], shorts=['p'], args=['~/backup'])
-    Example:
-    From ['~/backup']
-    To   dict=(names=['none'], shorts=[], args=['~/backup'])
-    """
-
-    names = []
-    shorts = []
-    args = []
-
-    for i in range(len(cmds)):
-        # print('cmds i = ' + cmds[i])
-        # print('cmds i = ' + cmds[i][0:2])
-        if len(cmds[i]) >= 2 and cmds[i][0:2] == '--':
-            names.append(cmds[i][2:])
-        elif len(cmds[i]) >= 1 and cmds[i][0] == '-':
-            shorts.append(cmds[i][1:])
-        else:
-            args.append(cmds[i])
-
-    # If no option, add a none one. Maybe this is a bad idea
-    if len(names) + len(shorts) == 0:
-      names.append('none')
-
-    return dict(names=names, shorts=shorts, args=args, cmds=cmd_list)
-
 

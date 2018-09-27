@@ -4,6 +4,7 @@ import os
 import re
 import shutil
 
+import argument_checker
 import export
 import load
 import plump
@@ -14,7 +15,7 @@ import fow_gps
 import config
 
 import xe2hack
-from argument_checker import check_params
+from argument_checker import check_options, get_arg_by_name
 
 
 def cmd_xe2hack(_arg_struct):
@@ -37,11 +38,11 @@ def cmd_xe2hack(_arg_struct):
          dict(atom=atom_test, obligat=False)]
     ]
 
-    if not check_params(_arg_struct, rules, 'x2ehack'):
+    if not check_options(_arg_struct, rules, 'x2ehack'):
         return
 
     # Normalize for easy access: -t -> --test etc.
-    args = plump.normalizeArgs(_arg_struct, rules)
+    args = argument_checker.normalize_option_matrix(_arg_struct, rules)
 
     if 'revert' in args['names']:
         from_model = 'X-E2'
@@ -64,19 +65,6 @@ def cmd_xe2hack(_arg_struct):
         xe2hack.do(analysis)
 
 
-def get_arg_by_name(args, name):
-    """
-    For a given name, the arg value will returned
-    :param args: arg_structure, s. plumb.normalizeArgs()
-    :param name: key of list names
-    :return: String with arg or, if not found, None
-    """
-    if name not in args['names']:
-        return None
-
-    return args['args'][args['names'].index(name)]
-
-
 def cmd_gps(_arg_struct):
     """
     Adds geo locations from gps files
@@ -93,39 +81,32 @@ def cmd_gps(_arg_struct):
 
     rules = [
         [dict(atom=atom_none, obligat=True),
-         dict(atom=atom_force, obligat=False),
-         dict(atom=atom_verbose, obligat=False)
-         ],
-        [dict(atom=atom_source, obligat=True),
-         dict(atom=atom_force, obligat=False),
-         dict(atom=atom_verbose, obligat=False)
+         dict(atom=atom_test, obligat=False),
+         dict(atom=atom_verbose, obligat=False),
+         dict(atom=atom_source, obligat=False),
+         dict(atom=atom_force, obligat=False)
          ],
         [dict(atom=atom_path, obligat=True),
-         dict(atom=atom_force, obligat=False),
-         dict(atom=atom_verbose, obligat=False)
+         dict(atom=atom_test, obligat=False),
+         dict(atom=atom_verbose, obligat=False),
+         dict(atom=atom_source, obligat=False),
+         dict(atom=atom_force, obligat=False)
          ],
         [dict(atom=atom_none, obligat=True),
-         dict(atom=atom_test, obligat=True),
-         dict(atom=atom_verbose, obligat=False)
-         ],
-        [dict(atom=atom_path, obligat=True),
-         dict(atom=atom_test, obligat=True),
-         dict(atom=atom_verbose, obligat=False)
-         ],
-        [dict(atom=atom_path, obligat=True),
          dict(atom=atom_map, obligat=True)
          ],
-        [dict(atom=atom_none, obligat=True),
+        [dict(atom=atom_path, obligat=True),
          dict(atom=atom_map, obligat=True)
          ],
     ]
     # print('_arg_struct=' + str(_arg_struct))
 
-    if not check_params(_arg_struct, rules, 'gps'):
-        return
-
     # Normalize for easy access: -t -> --test etc.
-    args = plump.normalizeArgs(_arg_struct, rules)
+    args = argument_checker.normalize_option_matrix(_arg_struct, rules)
+    # print("cmd_gps() args={}".format(str(args)))
+
+    if not check_options(args, rules, 'gps'):
+        return
 
     # print("cmp_gps() {}".format(str(args)))
     # Possible arguments, None, if not given
@@ -238,11 +219,11 @@ def cmd_rename(_arg_struct):
          dict(atom=atom_verbose, obligat=False)]
     ]
 
-    if not check_params(_arg_struct, rules, 'rename'):
+    if not check_options(_arg_struct, rules, 'rename'):
         return
 
     # Normalize for easy access: -t -> --test etc.
-    args = plump.normalizeArgs(_arg_struct, rules)
+    args = argument_checker.normalize_option_matrix(_arg_struct, rules)
 
     analysis = rename.analyse(plump.get_path(plump.DIR_00),
                               plump.get_path(plump.DIR_01))
@@ -293,11 +274,11 @@ def cmd_load(_arg_struct):
          dict(atom=atom_test, obligat=False)]
     ]
 
-    if not check_params(_arg_struct, rules, 'load'):
+    if not check_options(_arg_struct, rules, 'load'):
         return
 
     # Normalize for easy access: -t -> --test etc.
-    args = plump.normalizeArgs(_arg_struct, rules)
+    args = argument_checker.normalize_option_matrix(_arg_struct, rules)
 
     # Get srcination
     if 'path' in args['names']:
@@ -366,11 +347,11 @@ def cmd_export(_arg_struct):
          dict(atom=atom_test, obligat=False)]
     ]
 
-    if not check_params(_arg_struct, rules, 'export'):
+    if not check_options(_arg_struct, rules, 'export'):
         return
 
     # Normalize for easy access: -t -> --test etc.
-    args = plump.normalizeArgs(_arg_struct, rules)
+    args = argument_checker.normalize_option_matrix(_arg_struct, rules)
 
     # Get destination
     if 'path' in args['names']:
@@ -495,11 +476,11 @@ def cmd_task(_arg_struct):
         [dict(atom=atom_long, obligat=True)]
     ]
 
-    if not check_params(_arg_struct, rules, 'task'):
+    if not check_options(_arg_struct, rules, 'task'):
         return
 
     # Normalize for easy access: -t -> --test etc.
-    args = plump.normalizeArgs(_arg_struct, rules)
+    args = argument_checker.normalize_option_matrix(_arg_struct, rules)
     # print('args=' + str(args))
 
     # print('Params=' + str(arg_dict))
@@ -686,11 +667,11 @@ def cmd_backup(_arg_struct):
          dict(atom=atom_test, obligat=False)]
     ]
 
-    if not check_params(_arg_struct, rules, 'backup'):
+    if not check_options(_arg_struct, rules, 'backup'):
         return
 
     # Normalize for easy access: -t -> --test etc.
-    args = plump.normalizeArgs(_arg_struct, rules)
+    args = argument_checker.normalize_option_matrix(_arg_struct, rules)
     # print('args=' + str(args))
 
     # backup --path <path>
@@ -738,12 +719,12 @@ def cmd_show(_arg_struct):
     rules = [[dict(atom=atom_none, obligat=True)],
              [dict(atom=atom_short, obligat=False)]]
 
-    if not check_params(_arg_struct, rules, 'show'):
+    if not check_options(_arg_struct, rules, 'show'):
         return
 
     # Normalize for easy access: -t -> --test etc.
     # args = {names=[<option1>,...], args=[<arg1>,...]}
-    args = plump.normalizeArgs(_arg_struct, rules)
+    args = argument_checker.normalize_option_matrix(_arg_struct, rules)
 
     # print(str(args))
 
@@ -796,7 +777,7 @@ def cmd_show(_arg_struct):
         return
 
 
-def cmd_config(_arg_struct):
+def cmd_config(option_matrix):
     """
     Set or delete a config item
     """
@@ -815,34 +796,48 @@ def cmd_config(_arg_struct):
 
              [dict(atom=atom_set, obligat=True)]]
 
-    if not check_params(_arg_struct, rules, 'config'):
-        return
+    nom = argument_checker.normalize_option_matrix(option_matrix, rules)
 
-    # Normalize for easy access: -t -> --test etc.
-    # args = {names=[<option1>,...], args=[<arg1>,...]}
-    args = plump.normalizeArgs(_arg_struct, rules)
+    if not check_options(nom, rules, 'config'):
+        return
 
     settings = config.read_pickle()
+    unknown_msg = "Key '{0}' not found."
 
-    if 'delete' in args['names']:
-        del settings[args['args'][0]]
-        # settings[args['args'][0]] = 'None'
-        config.create_pickle(settings)
+    if 'delete' in nom['names']:
+        arg = get_arg_by_name(nom, 'delete')
+        if arg in settings:
+            del settings[arg]
+            config.create_pickle(settings)
+        else:
+            print(unknown_msg.format(arg))
+
         return
 
-    if 'list' in args['names'] or len(args['names']) == 0:
-        if len(args['args']) == 0:
+    if 'list' in nom['names'] or '' in nom['names']:
+        if 'list' in nom['names']:
+            arg = get_arg_by_name(nom, 'list')
+        else:
+            arg = get_arg_by_name(nom, '')
+
+        if arg is None:
             items = list(settings.items())
             items.sort()
             for key, value in items:
                 print((key + ' = ' + str(value)))
+        elif arg in settings:
+            print((settings[arg]))
         else:
-            print((settings[args['args'][0]]))
+            print(unknown_msg.format(arg))
 
-    if 'set' in args['names']:
-        (key, value) = args['args'][0].split('=')
-        settings[key] = value
-        config.create_pickle(settings)
+    if 'set' in nom['names']:
+        arg = get_arg_by_name(nom, 'set')
+        try:
+            (key, value) = arg.split('=')
+            settings[key] = value
+            config.create_pickle(settings)
+        except ValueError:
+            print("Missing value to set. Usage: config --set=<key>=<value> or --set='<key>=<value>'")
 
 
 def cmd_init(_arg_struct):
@@ -857,11 +852,11 @@ def cmd_init(_arg_struct):
     rules = [[dict(atom=atom_none, obligat=True),
               dict(atom=atom_force, obligat=False)]]
 
-    if not check_params(_arg_struct, rules, 'init'):
+    if not check_options(_arg_struct, rules, 'init'):
         return
 
     # Normalize for easy access: -t -> --test etc.
-    args = plump.normalizeArgs(_arg_struct, rules)
+    args = argument_checker.normalize_option_matrix(_arg_struct, rules)
     # print('args=' + str(args))
 
     if not 'force' in args['names']:
@@ -910,37 +905,37 @@ def fow(args=None):
     cmds = args[1:]
 
     if cmds[0] == 'help':
-        cmd_help(plump.toArgStruct(cmds[1:]))
+        cmd_help(plump.to_arg_struct(cmds[1:]))
 
     elif cmds[0] == 'config':
-        cmd_config(plump.toArgStruct(cmds[1:]))
+        cmd_config(plump.to_arg_struct(cmds[1:]))
 
     elif cmds[0] == 'init':
-        cmd_init(plump.toArgStruct(cmds[1:]))
+        cmd_init(plump.to_arg_struct(cmds[1:]))
 
     elif cmds[0] == 'backup':
-        cmd_backup(plump.toArgStruct(cmds[1:]))
+        cmd_backup(plump.to_arg_struct(cmds[1:]))
 
     elif cmds[0] == 'task':
-        cmd_task(plump.toArgStruct(cmds[1:]))
+        cmd_task(plump.to_arg_struct(cmds[1:]))
 
     elif cmds[0] == 'show':
-        cmd_show(plump.toArgStruct(cmds[1:]))
+        cmd_show(plump.to_arg_struct(cmds[1:]))
 
     elif cmds[0] == 'export':
-        cmd_export(plump.toArgStruct(cmds[1:]))
+        cmd_export(plump.to_arg_struct(cmds[1:]))
 
     elif cmds[0] == 'load':
-        cmd_load(plump.toArgStruct(cmds[1:]))
+        cmd_load(plump.to_arg_struct(cmds[1:]))
 
     elif cmds[0] == 'rename':
-        cmd_rename(plump.toArgStruct(cmds[1:]))
+        cmd_rename(plump.to_arg_struct(cmds[1:]))
 
     elif cmds[0] == 'xe2hack':
-        cmd_xe2hack(plump.toArgStruct(cmds[1:]))
+        cmd_xe2hack(plump.to_arg_struct(cmds[1:]))
 
     elif cmds[0] == 'gps':
-        cmd_gps(plump.toArgStruct(cmds[1:]))
+        cmd_gps(plump.to_arg_struct(cmds[1:]))
 
         # elif cmds[0] == 'cd':
         # cmd_cd(plump.toArgStruct(cmds[1:]))
@@ -960,11 +955,11 @@ def show_help(_arg_struct):
     # For commands with only one path atomNone must be non-obligatory!
     rules = [[dict(atom=atomNone, obligat=True)]]
 
-    if not check_params(_arg_struct, rules, ''):
+    if not check_options(_arg_struct, rules, ''):
         return
 
     # Normalize for easy access: -t -> --test etc.
-    args = plump.normalizeArgs(_arg_struct, rules)
+    args = argument_checker.normalize_option_matrix(_arg_struct, rules)
     # help
     if len(args['args']) == 0:
         # Get all help files in the help dir
@@ -1015,11 +1010,11 @@ def cmd_help(_arg_struct):
     # For commands with only one path atomNone must be non-obligatory!
     rules = [[dict(atom=atomNone, obligat=True)]]
 
-    if not check_params(_arg_struct, rules, ''):
+    if not check_options(_arg_struct, rules, ''):
         return
 
     ##Normalize for easy access: -t -> --test etc.
-    args = plump.normalizeArgs(_arg_struct, rules)
+    args = argument_checker.normalize_option_matrix(_arg_struct, rules)
     # help
     if len(args['args']) == 0:
 

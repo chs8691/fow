@@ -37,10 +37,9 @@ def read_item(key):
 
 def read_pickle():
     """
-    Returns a dictionary from setting.pickle.
-    Returns None, if setting not found
-    Example:
-        return dict(task='w/kw05', export.pc='/media/diskstation/photo/w')
+    Example: return dict(task='w/kw05', export.pc='/media/diskstation/photo/w')
+
+    :Return: a dictionary from setting.pickle. Returns None, if setting not found.
     """
     try:
         with open(get_fow_root() + '/' + DIR_FOW + '/setting.pickle',

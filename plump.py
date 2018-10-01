@@ -73,7 +73,7 @@ def progress_prepare(max_index, action, what):
     return dict(back=back, formatting=formatting)
 
 
-def load_execute(analysis, subdir, dest, options, verb_present):
+def load_execute(analysis, subdir, dest, processing_flags, verb_present):
     """
     Executes the load (copy or move), for a specific kind of image files
     (jpg, raw of videos).
@@ -99,9 +99,9 @@ def load_execute(analysis, subdir, dest, options, verb_present):
 
         source = '{0}/{1}'.format(each['path'], each['file'])
         destination = '{0}/{1}/{2}'.format(dest, subdir, each['file'])
-        if not each['exist'] or options['force']:
+        if not each['exist'] or processing_flags['force']:
             try:
-                if options['move']:
+                if processing_flags['move']:
                     os.rename(source, destination)
                 else:
                     shutil.copy2(source, destination)

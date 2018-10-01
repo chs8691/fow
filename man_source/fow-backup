@@ -5,13 +5,13 @@
 backup \- save the fow to an external directory 
 .SH SYNOPSIS
 .TP
-backup [<options>] [<path>]
+backup [<options>]
 .TP
 backup
 Saves fow to the external path. The past variable must be defined once with "config -s='backup.path=<ABSOLUTE_PATH>'".
 .SH OPTIONS
 .TP
---path <path>, -p <path>
+--path|-p <path>
 determines the destination path, deviating from the default path
 .TP
 --test, -t

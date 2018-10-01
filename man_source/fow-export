@@ -19,7 +19,7 @@ fow export local
 To export into a task named subdirectory, the suffix /{1} and /{2} can be added to the path. The first appends subdirectory based on the task name, the latter one appends two nested subdirectories named by task folder name and task name.
 Examples:
 .PP
-fow task --activate='weekly/week01'
+fow task --activate 'weekly/week01'
 .PP
 fow export --path=/pictures/{1} # Exports to /pictures/week01
 .PP

@@ -37,11 +37,11 @@ def check_options(options, rules, command):
     command: String with command under check, for message printing
     Returns true, if options is valid, otherwise false.
     """
-    # print('options=' + str(options))
-    # print('rules=' + str(rules))
+    # print('check_options() options=' + str(options))
+    # print('check_options() rules=' + str(rules))
     see_msg = 'See "fow help ' + command + '".'
 
-    # First, check that every options option is known (names and shorts)
+    # First, check that every options option is known by name
     # Regardless of particular paths. Just for printing a good message
     ret = _find_unknown_options(options, rules)
     if ret is not None:
@@ -51,29 +51,29 @@ def check_options(options, rules, command):
             print('Unknown option -' + ret['option'] + '. ' + see_msg)
         return
     # else:
-    # print('checkParams() findUnknownOption=' + str(ret))
+    #     print('check_options() findUnknownOption=' + str(ret))
 
     # All options are known; now find the path that match the options
-    rule = _find_rule_by_options(options, rules)
+    rule = _find_rule(options, rules)
     if rule is None:
         print('Invalid option constellation. ' + see_msg)
         return False
 
-    print('check_options() Found rule=' + str(rule))
+    # print('check_options() Found rule=' + str(rule))
 
-    message = _check_options(options, rule, command)
+    message = _check_rule(options, rule, command)
     if message is not None:
         print(message)
         return False
-    # else:
-    #     print('checkParams() Arguments are ok.')
+
+    # print('check_options() Arguments are ok.')
 
     return True
 
 
-def _find_unknown_options(actual, rules):
+def _find_unknown_options(options, rules):
     """
-    Simple check, if all actual options are defined in at least one rule.
+    Simple check, if all options options are defined in at least one rule.
     But it doesn't check for a valid rule.
     If an unknown option is found, information about it will be retured. Return
     format = dict(option='force', type='name'), where type can be 'name' or
@@ -82,7 +82,7 @@ def _find_unknown_options(actual, rules):
     False.
     """
     # First check all named options
-    for actual_name in (n for n in actual['names'] if n is not None):
+    for actual_name in (n for n in options['names'] if n is not None):
         found_name = False
         for rule in rules:
             for node in rule:
@@ -94,41 +94,41 @@ def _find_unknown_options(actual, rules):
         if not found_name:
             return dict(option=actual_name, type='name')
 
-    # Names or ok, now check short options
-    for actual_short in (n for n in actual['shorts'] if n is not None):
-        found_short = False
-        for rule in rules:
-            for node in rule:
-                if node['atom']['short'] == actual_short:
-                    found_short = True
-                    break
-            if found_short:
-                break
-        if not found_short:
-            return dict(option=actual_short, type='short')
+    # # Names or ok, now check short options
+    # for actual_short in (n for n in options['shorts'] if n is not None):
+    #     found_short = False
+    #     for rule in rules:
+    #         for node in rule:
+    #             if node['atom']['short'] == actual_short:
+    #                 found_short = True
+    #                 break
+    #         if found_short:
+    #             break
+    #     if not found_short:
+    #         return dict(option=actual_short, type='short')
 
     return None
 
 
-def _node_match_actual(actual, node):
+def _node_match_options(options, node):
     """
-    Returns True, if there is an actual option, that matches the node
+    Returns True, if there is an options option, that matches the node
     Example:
         atomShort = dict(name='short', short='s', args=0)
         node = dict(atom=atomShort, obligat=True)
     """
-    # print('_node_match_actual node=' + str(node))
+    # print('_node_match_options node=' + str(node))
 
-    # e None-Option always match
-    if len(node['atom']['name']) == 0 and \
-            len(node['atom']['short']) == 0:
-        return True
+    # # a none-option always match
+    # if len(node['atom']['name']) == 0 and \
+    #         len(node['atom']['short']) == 0:
+    #     return True
 
-    for name in actual['names']:
+    for name in options['names']:
         if name == node['atom']['name']:
             return True
 
-    for short in actual['shorts']:
+    for short in options['shorts']:
         if short == node['atom']['short']:
             return True
 
@@ -163,33 +163,54 @@ def _options_match_rule(items, rule, type):
     return True
 
 
+def _has_duplicates(options, rule):
+    """
+    Returns True, if quantity of every option with the same name exceeds the rule's definitions
+    """
+    # print('_has_duplicates() rule=' + str(rule))
+    # print('_has_duplicates() options=' + str(options))
+
+    # List of actual names as a set (uniques)
+    for actual_name in frozenset(options['names']):
+        # print('_has_duplicates()   checking actual=' + str(actual_name))
+        actual_nr = options['names'].count(actual_name)
+        expected_nr = len([n for n in rule if n['atom']['name'] == actual_name])
+        # print('_has_duplicates()   actual={}, expected={}'.format(str(actual_nr), str(expected_nr)))
+        if actual_nr > expected_nr:
+            return True
+
+    return False
+
+
 def _has_valid_options(options, rule):
     """
     Returns True, if options's options match this rule. Otherwise returns False.
     Doesn't check if options has additional invalid options.
     earlier step.
     """
-    print("_has_valid_options() rule={}".format(str(rule)))
+    # print("_has_valid_options() options={}".format(str(options)))
+    # print("_has_valid_options() rule={}".format(str(rule)))
     # check obligatory parameters
     # Be careful: A rule with a non-option returns true
     for node in rule:
-        print('_has_valid_options() processing node=' + str(node))
+        # print('_has_valid_options() processing node=' + str(node))
         if node['obligat'] is True:
-            print('_has_valid_options()   checking obligatory')
-            if not _node_match_actual(options, node):
-                print('_has_valid_options()    _node_match_actual=False')
+            # print('_has_valid_options()   checking obligatory')
+            if not _node_match_options(options, node):
+                # print('_has_valid_options()    _node_match_options=False')
                 return False
 
-            print('_has_valid_options()   _node_match_actual=true')
+            # print('_has_valid_options()   _node_match_options=true')
 
     # check optionals
-    print('_has_valid_options() checking optionals rule=' + str(rule))
+    # print('_has_valid_options() checking optionals rule=' + str(rule))
     if not (_options_match_rule([n for n in options['names'] if n is not None], rule, 'name') and
             _options_match_rule([n for n in options['shorts'] if n is not None], rule, 'short')):
-        print('_has_valid_options() optionals check _options_match_rule=' + 'False')
+        # print('_has_valid_options() optionals check _options_match_rule=' + 'False')
         return False
+
     else:
-        print('_has_valid_options() optionals check _options_match_rule=' + 'True')
+        # print('_has_valid_options() optionals check _options_match_rule=' + 'True')
         return True
 
 
@@ -197,19 +218,19 @@ def _has_valid_options(options, rule):
 # rule = [node1, node2, ...]
 # node = dict(atom_dict, obligat)
 # atom_dict = dict(name='force', short = 's', args=2)
-def _find_rule_by_options(options, rules):
+def _find_rule(options, rules):
     """
     Search the rule, that match its options. The search will stop
     at the first hit, so the rules have to been disjunkt.
-    Returns found rule or, if nothing found None.
+    :Returns: found rule or, if nothing found None.
     """
     for rule in rules:
-        # print("_find_rule_by_options() processing rule={}".format(str(rule)))
-        if _has_valid_options(options, rule):
-            # print("_find_rule_by_options()   valid={}".format(str('true')))
+        # print("_find_rule() processing rule={}".format(str(rule)))
+        if _has_valid_options(options, rule) and not _has_duplicates(options, rule):
+            # print("_find_rule()   valid={}".format(str('true')))
             return rule
 
-        # print("_find_rule_by_options()   valid={}".format(str('false')))
+        # print("_find_rule()   valid={}".format(str('false')))
 
     return None
 
@@ -247,7 +268,7 @@ def _find_rule_by_options(options, rules):
 #         return 0
 
 
-def _check_options(actual_matrix, rule, command):
+def _check_rule(actual_matrix, rule, command):
     """
     Check actual parameter vs. its rule
     :param actual_matrix: Options matrix
@@ -255,15 +276,15 @@ def _check_options(actual_matrix, rule, command):
     :param command: Name of the command under test
     :return: message in error case or None, of valid
     """
-    print('_check_options() actual_matrix=' + str(actual_matrix))
-    print('_check_options() rule=' + str(rule))
+    # print('_check_rule() actual_matrix=' + str(actual_matrix))
+    # print('_check_rule() rule=' + str(rule))
 
     for name in actual_matrix['names']:
-        # print("_check_options() processing actual name={}".format(name))
+        # print("_check_rule() processing actual name={}".format(name))
         for node in (n for n in rule if n['atom']['name'] == name):
-            # print("_check_options()   processing node={}".format(str(node)))
+            # print("_check_rule()   processing node={}".format(str(node)))
             arg = get_arg_by_name(actual_matrix, name)
-            # print("_check_options()   actual arg={}".format(str(arg)))
+            # print("_check_rule()   actual arg={}".format(str(arg)))
             if node['atom']['args'] == 0 and arg is not None:
                 if name == '':
                     return "Unexpected argument '{0}' for command '{1}'".format(arg, command)
@@ -278,7 +299,7 @@ def _check_options(actual_matrix, rule, command):
                     return ("Mandatory argument for option '{1}' missing." +
                             " Usage: fow {0} {1}=<arg> or fow {0} {1}='<arg>'. " +
                             "See 'fow help {0}'.").format(command, name)
-            # print("_check_options()   --> ok")
+            # print("_check_rule()   --> ok")
 
     return None
 

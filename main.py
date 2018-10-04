@@ -330,6 +330,8 @@ def cmd_load(options_matrix):
 
     return
 
+# TODO hier geht's weiter: Export auch getestet incl. man. Nun kommmt gps
+
 
 def cmd_export(options_matrix):
     """
@@ -339,14 +341,16 @@ def cmd_export(options_matrix):
     # if not checkArgs(_arg_dict,
     #    {'-t': 0, '--test': 0, '-p': 2, '--path': 2}):
     #    return
-    atom_path = dict(name='path', short='p', args=2)
+    atom_path = dict(name='path', short='p', args=0)
     atom_force = dict(name='force', short='f', args=0)
     atom_test = dict(name='test', short='t', args=0)
+    atom_param = dict(name='', short='', args=2)
     atom_none = dict(name='', short='', args=2)
 
     # print('export() options_matrix=' + str(options_matrix))
     rules = [
         [dict(atom=atom_path, obligat=True),
+         dict(atom=atom_param, obligat=True),
          dict(atom=atom_force, obligat=False),
          dict(atom=atom_test, obligat=False)],
 
@@ -363,7 +367,7 @@ def cmd_export(options_matrix):
 
     # Get destination
     if 'path' in options['names']:
-        destination = get_arg_by_name(options, 'path')
+        destination = get_arg_by_name(options, '')
     else:
         try:
             destination = config.read_pickle()[plump.EXPORT_PREFIX + '.' + get_arg_by_name(options, '')]
@@ -694,7 +698,7 @@ def cmd_backup(option_matrix):
          dict(atom=atom_param, obligat=True),
          dict(atom=atom_test, obligat=False)],
 
-        [dict(atom=atom_none, obligat=True),
+        [dict(atom=atom_none, obligat=False),
          dict(atom=atom_test, obligat=False)]
     ]
 
@@ -859,10 +863,10 @@ def cmd_config(option_matrix):
         return
 
     if 'list' in options['names'] or '' in options['names']:
-        if 'list' in options['names']:
-            arg = get_arg_by_name(options, 'list')
-        else:
-            arg = get_arg_by_name(options, '')
+        # if 'list' in options['names']:
+        #     arg = get_arg_by_name(options, 'list')
+        # else:
+        arg = get_arg_by_name(options, '')
 
         if arg is None:
             items = list(settings.items())

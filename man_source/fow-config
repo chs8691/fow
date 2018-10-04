@@ -4,22 +4,22 @@
 .SH NAME
 config \- show and change settings of the fow. A setting is a key value pair.
 .SH SYNOPSIS
-config [<options>] [<key> [<value>]]
+config [<options>] [<key> [=<value>]]
 
 config: List all items. Same as 'config \-\-list'
 
-config <key>=None: Set value to 'None'
+config \-\-set <key>=None: Set value to 'None'
 .SH DESCRIPTION
 The command shows or changes settings of the fow. A setting is a key value pair.
 .SH OPTIONS 
 .TP
-\-l [<key>], \-\-list [<key>]
+\-l|\-\-list [<key>]
 lists all settings or setting for a specific key
 .TP
-\-s <key>=<value>, \-\-set='<key>=<value>'
+\-s|\-\-set <key>=<value>
 Set or create this item.
 .TP
-\-d <key>, \-\-delete=<key>
+\-d|\-\-delete <key>
 Delete this item.
 
 .".SH EXAMPLES

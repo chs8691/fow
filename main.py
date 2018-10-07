@@ -17,6 +17,15 @@ import config
 import xe2hack
 from argument_checker import check_options, get_arg_by_name
 
+# Kind of allowed arguments: None
+NONE = 0
+
+# Kind of allowed arguments: optional
+OPTIONAL = 1
+
+# Kind of allowed arguments: mandatory
+MANDATORY = 2
+
 
 def cmd_xe2hack(options_matrix):
     """
@@ -71,74 +80,91 @@ def cmd_gps(options_matrix):
     """
 
     # 0: No param allowed, 1: param optional, 2: param obligatory
-    atom_none = dict(name='', short='', args=1)
-    atom_path = dict(name='path', short='p', args=2)
-    atom_source = dict(name='source', short='s', args=2)
+    atom_none = dict(name='', short='', args=0)
+    atom_param = dict(name='', short='', args=2)
+    atom_path = dict(name='path', short='p', args=0)
+    atom_source = dict(name='source', short='s', args=0)
     atom_test = dict(name='test', short='t', args=0)
     atom_map = dict(name='map', short='m', args=0)
     atom_force = dict(name='force', short='f', args=0)
     atom_verbose = dict(name='verbose', short='v', args=0)
 
     rules = [
-        [dict(atom=atom_none, obligat=True),
-         dict(atom=atom_test, obligat=False),
-         dict(atom=atom_verbose, obligat=False),
-         dict(atom=atom_source, obligat=False),
-         dict(atom=atom_force, obligat=False)
+        [
+            dict(atom=atom_none, obligat=True),
+            dict(atom=atom_test, obligat=False),
+            dict(atom=atom_verbose, obligat=False),
+            dict(atom=atom_force, obligat=False)
+        ],
+        [
+            dict(atom=atom_path, obligat=False),
+            dict(atom=atom_param, obligat=True),
+            dict(atom=atom_test, obligat=False),
+            dict(atom=atom_verbose, obligat=False),
+            dict(atom=atom_force, obligat=False)
+        ],
+        # [
+        #     dict(atom=atom_path, obligat=True),
+        #     dict(atom=atom_param, obligat=True),
+        #     dict(atom=atom_test, obligat=False),
+        #     dict(atom=atom_verbose, obligat=False),
+        #     dict(atom=atom_force, obligat=False)
+        #  ],
+        # [dict(atom=atom_path, obligat=True),
+        #  dict(atom=atom_test, obligat=False),
+        #  dict(atom=atom_verbose, obligat=False),
+        #  dict(atom=atom_source, obligat=False),
+        #  dict(atom=atom_force, obligat=False)
+        #  ],
+        [
+            dict(atom=atom_map, obligat=True)
          ],
-        [dict(atom=atom_path, obligat=True),
-         dict(atom=atom_test, obligat=False),
-         dict(atom=atom_verbose, obligat=False),
-         dict(atom=atom_source, obligat=False),
-         dict(atom=atom_force, obligat=False)
-         ],
-        [dict(atom=atom_none, obligat=True),
-         dict(atom=atom_map, obligat=True)
-         ],
-        [dict(atom=atom_path, obligat=True),
-         dict(atom=atom_map, obligat=True)
+        [
+            dict(atom=atom_map, obligat=True),
+            dict(atom=atom_path, obligat=False),
+            dict(atom=atom_param, obligat=True)
          ],
     ]
-    # print('options_matrix=' + str(options_matrix))
+    # print('cmd_gps() options_matrix=' + str(options_matrix))
 
     # Normalize for easy access: -t -> --test etc.
     options = argument_checker.normalize_option_matrix(options_matrix, rules)
-    # print("cmd_gps() args={}".format(str(args)))
+    # print("cmd_gps() args={}".format(str(options)))
 
     if not check_options(options, rules, 'gps'):
         return
 
-    # print("cmp_gps() {}".format(str(args)))
+    # print("cmp_gps() {}".format(str(options)))
     # Possible arguments, None, if not given
 
     # arg validation
     # image path as destination
-    if get_arg_by_name(options, '') is not None:
+    # image path as path argument
+    if 'path' in options['names']:
+        if not os.path.exists(plump.get_path(get_arg_by_name(options, ''))):
+            print((("'{0}' is not an existing sub dir within this fow. " +
+                    "Maybe the directory is temporary not available or you have to " +
+                    "write the correct path."))
+                  .format(str(get_arg_by_name(options, ''))))
+            return
+        # Validated absolute path to the images
+        image_path = plump.get_path(get_arg_by_name(options, ''))
+
+    elif get_arg_by_name(options, '') is not None:
         key = 'gps.{}'.format(get_arg_by_name(options, ''))
         if config.read_item(key) is None:
             print(
-                "Value {0} not configured. Maybe you have to set it first with config -s='{0}=fow-subdir-to-images'".format(
+                "Value {0} not configured. Maybe you have to set it first with config -s '{0}=fow-subdir-to-images'".format(
                     key))
             return
         if not os.path.exists(plump.get_path(config.read_item(key))):
             print((("Destination points to a non existing sub dir: '{0}'. " +
                     "Maybe the directory is temporary not available or you have to" +
-                    " change the destination with 'config -s={1}=fow-subdir-to-images'"))
+                    " change the destination with 'config -s {1}=fow-subdir-to-images'"))
                   .format(str(config.read_item(key)), key))
             return
         # Validated absolute path to the images
         image_path = plump.get_path(config.read_item(key))
-
-    # image path as path argument
-    elif get_arg_by_name(options, 'path') is not None:
-        if not os.path.exists(plump.get_path(get_arg_by_name(options, 'path'))):
-            print((("'{0}' is not an existing sub dir within this fow. " +
-                    "Maybe the directory is temporary not available or you have to " +
-                    "write the correct path."))
-                  .format(str(get_arg_by_name(options, 'path'))))
-            return
-        # Validated absolute path to the images
-        image_path = plump.get_path(get_arg_by_name(options, 'path'))
 
     # image path is the actual final
     else:
@@ -169,12 +195,12 @@ def cmd_gps(options_matrix):
 
     else:
         if config.read_item(plump.GPS_TRACK_PATH) is None:
-            print('{0} not set. Define the path to tracks folder with config -s={0}=/your/tracks/path'
+            print('{0} not set. Define the path to tracks folder with config -s {0}=/your/tracks/path'
                   .format(plump.GPS_TRACK_PATH))
             return
         elif not os.path.exists(config.read_item(plump.GPS_TRACK_PATH)):
             print(("Invalid path to track files: '{0}'. May the directory is temporary not available or you have to" +
-                   " change it with 'config -s={1}=/your/tracks/path'")
+                   " change it with 'config -s {1}=/your/tracks/path'")
                   .format(str(config.read_item(plump.GPS_TRACK_PATH)), plump.GPS_TRACK_PATH))
             return
         # Validated absolute path to the images
@@ -329,8 +355,6 @@ def cmd_load(options_matrix):
         load.do(analysis, src, dest, processing_flags)
 
     return
-
-# TODO hier geht's weiter: Export auch getestet incl. man. Nun kommmt gps
 
 
 def cmd_export(options_matrix):
@@ -812,32 +836,34 @@ def cmd_show(options_matrix):
         return
 
 
-def cmd_config(option_matrix):
+def cmd_config(option_matrix, cmd_list):
     """
     Set or delete a config item
     """
 
-    atom_delete = dict(name='delete', short='d', args=0)
-    atom_list = dict(name='list', short='l', args=0)
-    atom_none = dict(name='', short='', args=0)
-    atom_set = dict(name='set', short='s', args=0)
-    atom_param = dict(name='', short='', args=2)
+    atom_delete = dict(name='delete', short='d', args=MANDATORY)
+    atom_list = dict(name='list', short='l', args=OPTIONAL)
+    atom_none = dict(name='', short='', args=NONE)
+    atom_set = dict(name='set', short='s', args=MANDATORY)
 
     # atomNone must be mandatory for rules with more than one path
-    rules = [[dict(atom=atom_none, obligat=True)],
+    rules = [
+        [dict(atom=atom_none, obligat=True)],
 
-             [dict(atom=atom_list, obligat=True),
-              dict(atom=atom_param, obligat=False)],
+        [dict(atom=atom_list, obligat=True)],
 
-             [dict(atom=atom_param, obligat=False),
-              dict(atom=atom_delete, obligat=True)],
+        [dict(atom=atom_delete, obligat=True)],
 
-             [dict(atom=atom_set, obligat=True),
-              dict(atom=atom_param, obligat=True)]
+        [dict(atom=atom_set, obligat=True)]
     ]
 
-    options = argument_checker.normalize_option_matrix(option_matrix, rules)
+    # options = argument_checker.normalize_option_matrix(option_matrix, rules)
+    args = argument_checker.normalize_commands(cmd_list, [atom_delete, atom_list, atom_none, atom_set])
 
+    if not argument_checker.find_rule(args, rules):
+        return
+
+    return
     if not check_options(options, rules, 'config'):
         return
 
@@ -943,14 +969,14 @@ def fow(args=None):
         print('fow version ' + plump.VERSION + '. "help" shows all commands.')
         return
 
-    # print('args=' + str(args))
     cmds = args[1:]
+    # print('fow() cmds=' + str(cmds))
 
     if cmds[0] == 'help':
         cmd_help(plump.to_arg_struct(cmds[1:]))
 
     elif cmds[0] == 'config':
-        cmd_config(plump.to_arg_struct(cmds[1:]))
+        cmd_config(plump.to_arg_struct(cmds[1:]), cmds)
 
     elif cmds[0] == 'init':
         cmd_init(plump.to_arg_struct(cmds[1:]))

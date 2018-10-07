@@ -25,6 +25,58 @@
 #         dict(atom=atom_force, obligat=False),
 #         dict(atom=atom_test, obligat=False)]]
 ###############################################################################
+import re
+
+
+def _find_rule_by_mandatory(args, rules):
+    """
+    Parse rule set to find the rule which options match the mandatory expected ones.
+    :param args: Command line list, e.g. ['config', '--create', 'x;, '--test']
+    :param rules: [rule1, rule2, ...]
+    :return: dictionary with 'message' [error message text|None] and 'rule' with [rule|None]
+    """
+    ret = dict(message=None, rule=None)
+
+    print("_find_rule_by_mandatory() rules={}".format(str(rules)))
+
+    for rule_set in rules:
+        for rule in (r for r in rule_set if r['obligat']):
+            ret['rule'] = rule
+            if rule['atom']['name'] != '':
+                try:
+                    args.index("--{}".format(rule['atom']['name']))
+                except ValueError:
+                    ret['message'] = "Missing obligatory parameter '{}'".format(rule['atom']['name'])
+                    ret['rule'] = None
+                    continue
+        if ret['rule'] is not None:
+            return ret
+
+            # print("_find_rule_by_mandatory() rule={}".format(str(rule)))
+    return ret
+
+
+def find_rule(args, rules):
+    """
+    Scans rule set for the matching rule. If no rule is matching, an message
+    will be printed
+    :param args: Command line list, e.g. ['config', '--create', 'x;, '--test']
+    :param rules: [rule1, rule2, ...]
+    :return: Matching rule or, if no rules is matching, None
+    """
+    see_msg = 'See "fow help ' + args[0] + '".'
+
+    # Find rule that matches the mandatory options
+    ret = _find_rule_by_mandatory(args, rules)
+    if ret['rule'] is None:
+        print(ret['message'])
+        return
+
+    print("find_rule() goes on here....")
+
+
+    print('Invalid option constellation. ' + see_msg)
+    return None
 
 
 def check_options(options, rules, command):
@@ -126,11 +178,15 @@ def _node_match_options(options, node):
 
     for name in options['names']:
         if name == node['atom']['name']:
-            return True
+            arg = get_arg_by_name(options, name)
+            if arg is None and node['atom']['args'] < 2:
+                return True
+            elif arg is not None and node['atom']['args'] == 2:
+                return True
 
-    for short in options['shorts']:
-        if short == node['atom']['short']:
-            return True
+    # for short in options['shorts']:
+    #     if short == node['atom']['short']:
+    #         return True
 
     # print("returning false")
     return False
@@ -317,6 +373,34 @@ def get_arg_by_name(paramatrix, name):
         return None
 
     return paramatrix['args'][paramatrix['names'].index(name)]
+
+
+def normalize_commands(_actual, rules):
+    """
+    Replace shorts by names, so it's easier to analyze
+    and read the arguments. Unknown options wil be ignored
+    Example:
+        _actual = ['config', '--create', 'x;, '-t']
+        _rules = [rule1, rule2, ...]
+        return = ['config', '--create', 'x, '--test']
+    :param _actual: command line arguments
+    :param rules: List of rules
+    :returns updated _actual
+    """
+
+    # print("normalize_commands() rules={}".format(rules))
+
+    ret = _actual.copy()
+    for arg in _actual[1:]:
+        if re.match('^-\w$', arg):
+            for rule in (r for r in rules if r['short'] == arg[1:]):
+                ret[_actual.index(arg)] = "--{}".format(rule['name'])
+                # print("normalize_commands() arg {0} to {1}".format(arg, ret[_actual.index(arg)]))
+        # else:
+        #     print("normalize_commands() arg {} not matching".format(arg))
+
+    # print("normalize_commands() ret={}".format(str(ret)))
+    return ret
 
 
 def normalize_option_matrix(_actual, rules):

@@ -29,17 +29,18 @@ import re
 from plump import NONE_PARAM, MANDATORY_PARAM, OPTIONAL_PARAM
 
 
-def _find_rule_by_mandatory(args, rules):
+def analyze_rules(args, rules):
     """
     Parse rule set to find the rule which options match the mandatory expected ones.
     :param args: Command line list, e.g. ['config', '--create', 'x;, '--test']
     :param rules: [rules1, rules2, ...]
-    :return: dictionary with 'message' [error message text|None] and 'rule' with [rule|None]
+    :return: dictionary with 'message' [error message text|None], 'rule' with [rule|None] and list with
+    options dicts (empty, if options not valid).
     """
-    ret = dict(message=None, rule=None)
+    ret = dict(message=None, rule=None, options=dict())
 
-    # print("_find_rule_by_mandatory() rules={}".format(str(rules)))
-    # print("_find_rule_by_mandatory() args={}".format(str(args)))
+    # print("analyze_rules() rules={}".format(str(rules)))
+    # print("analyze_rules() args={}".format(str(args)))
 
     # First check that all args are known
     for arg in (a for a in args if re.match('^--\w+$', a)):
@@ -54,36 +55,33 @@ def _find_rule_by_mandatory(args, rules):
 
     # Now we can check all args and options
     for rule in rules:
-        print("\n_find_rule_by_mandatory()   rule={}".format(str(rule)))
-        # has_none_item = False
-        # has_other_item = False
+        # print("\nanalyze_rules()   rule={}".format(str(rule)))
         valid_rule = True
-        # non_arg_checked = False
 
         # --- 1. Check obligatory rule item against actuals --- #
         for rule_item in (i for i in rule if i['obligat']):
-            print("_find_rule_by_mandatory()     item={}".format(str(rule_item)))
+            # print("analyze_rules()     item={}".format(str(rule_item)))
             if rule_item['atom']['name'] == '':
                 continue
             try:
                 args.index("--{}".format(rule_item['atom']['name']))
             except ValueError:
-                print("_find_rule_by_mandatory()     ValueError={}".format(str(rule_item['atom']['name'])))
+                # print("analyze_rules()     ValueError={}".format(str(rule_item['atom']['name'])))
                 ret['message'] = "Missing obligatory parameter '{}'".format(rule_item['atom']['name'])
                 valid_rule = False
                 break
 
         if not valid_rule:
-            print("_find_rule_by_mandatory()   rule->arg: not valid")
+            # print("analyze_rules()   rule->arg: not valid")
             continue
-        else:
-            print("_find_rule_by_mandatory()   rule->arg: valid")
+        # else:
+        #     print("analyze_rules()   rule->arg: valid")
 
         # --- 2. Check all args against rule items --- #
         for arg in (a for a in args if re.match('^--\w+$', a)):
-            print("_find_rule_by_mandatory()     arg={}".format(str(arg)))
+            # print("analyze_rules()     arg={}".format(str(arg)))
             if len([i for i in rule if i['atom']['name'] == arg[2:]]) == 0:
-                print("_find_rule_by_mandatory()     not found={}".format(str(arg)))
+                # print("analyze_rules()     not found={}".format(str(arg)))
                 ret['message'] = "Unexpected option '{}'".format(arg[2:])
                 valid_rule = False
                 break
@@ -96,89 +94,86 @@ def _find_rule_by_mandatory(args, rules):
         # ----------------------------------- #
         # --- Now we have chosen the rule --- #
         # ----------------------------------- #
-        valid_options = True
+        params_ret = _analyze_params(args, rule)
 
-        # print("\n_find_rule_by_mandatory()   rule={}".format(str(rule)))
-        # print("_find_rule_by_mandatory()   checking args {}".format(str(args)))
-        # --- 3. Check parameters --- #
-        for arg in (a for a in args if re.match('^--\w+$', a)):
-            rule_item = [i for i in rule if i['atom']['name'] == arg[2:]][0]
-            # print("_find_rule_by_mandatory()     arg={} rule_item={}".format(str(arg), str(rule_item)))
-            # Not the last item
-            if (args.index(arg)+1) < (len(args)) and re.match('[^-].*', args[args.index(arg)+1]):
-                arg2 = args[args.index(arg)+1]
-                param_actual = True
-                # print("_find_rule_by_mandatory()     arg2 {}".format(str(arg2)))
-            else:
-                param_actual = False
-
-            if rule_item['atom']['args'] == NONE_PARAM and param_actual:
-                ret['message'] = "Option '{}' may not have an argument".format(arg[2:])
-                valid_options = False
-                break
-
-            if rule_item['atom']['args'] == MANDATORY_PARAM and not param_actual:
-                ret['message'] = "Missing mandatory argument for option '{}'".format(arg[2:])
-                # print("_find_rule_by_mandatory()     message={}".format(str(ret['message'])))
-                valid_options = False
-                break
-
-            # mark checked values as empty string
-            if valid_options and param_actual:
-                args[args.index(arg) + 1] = ''
-            args[args.index(arg)] = ''
-
-        # print("_find_rule_by_mandatory()  args is now={}".format(str(args)))
-
-        if valid_options:
-            # Check now '' rule
-            try:
-                rule_item = [i for i in rule if i['atom']['name'] == ''][0]
-                expected_none_arg = rule_item['atom']['args']
-            except IndexError:
-                expected_none_arg = NONE_PARAM
-
-            # find all not handled items
-            for arg in (a for a in args[1:] if len(a) > 0):
-                if expected_none_arg == NONE_PARAM:
-                    ret['message'] = "Unexpected argument '{}'".format(arg)
-                    valid_options = False
-                    break
-                else:
-                    args[args.index(arg)] = ''
-                    # parameter found, no more parameter expected
-                    expected_none_arg = NONE_PARAM
-
-        if valid_rule and valid_options:
-            ret['rule'] = rule
-            ret['message'] = None
         if valid_rule:
+            ret['rule'] = rule
+            if params_ret['valid_options']:
+                ret['options'] = params_ret['options']
+                ret['message'] = None
+            else:
+                ret['message'] = params_ret['message']
+
             break
 
     return ret
 
 
-def find_rule(args, rules):
+def _analyze_params(args, rule):
     """
-    Scans rule set for the matching rule. If no rule is matching, an message
-    will be printed
-    :param args: Command line list, e.g. ['config', '--create', 'x;, '--test']
-    :param rules: [rule1, rule2, ...]
-    :return: Matching rule or, if no rules is matching, None
+    Checks for one valid rule the parameters
     """
-    see_msg = 'See "fow help ' + args[0] + '".'
+    ret = dict(message=None, options=dict(), valid_options=True)
 
-    # Find rule that matches the mandatory options
-    ret = _find_rule_by_mandatory(args, rules)
-    if ret['rule'] is None:
-        print(ret['message'])
-        return None
+    # print("\n_find_rule_by_mandatory()   rule={}".format(str(rule)))
+    # print("analyze_rules()   checking args {}".format(str(args)))
+    # --- 3. Check parameters --- #
+    for arg in (a for a in args if re.match('^--\w+$', a)):
+        rule_item = [i for i in rule if i['atom']['name'] == arg[2:]][0]
+        # print("analyze_rules()     arg={} rule_item={}".format(str(arg), str(rule_item)))
+        # Not the last item
+        if (args.index(arg) + 1) < (len(args)) and re.match('[^-].*', args[args.index(arg) + 1]):
+            arg2 = args[args.index(arg) + 1]
+            param_actual = True
+            # print("analyze_rules()     arg2 {}".format(str(arg2)))
+        else:
+            param_actual = False
 
-    print("find_rule() goes on here....")
-    return ret['rule']
+        if rule_item['atom']['args'] == NONE_PARAM and param_actual:
+            ret['message'] = "Option '{}' may not have an argument".format(arg[2:])
+            ret['valid_options'] = False
+            break
 
-    print('Invalid option constellation. ' + see_msg)
-    return None
+        if rule_item['atom']['args'] == MANDATORY_PARAM and not param_actual:
+            ret['message'] = "Missing mandatory argument for option '{}'".format(arg[2:])
+            # print("analyze_rules()     message={}".format(str(ret['message'])))
+            ret['valid_options'] = False
+            break
+
+        # mark checked values as empty string and save options/param for return
+        if ret['valid_options'] and param_actual:
+            ret['options'][args[args.index(arg)][2:]] = args[args.index(arg) + 1]
+            args[args.index(arg) + 1] = ''
+        else:
+            ret['options'][args[args.index(arg)][2:]] = None
+
+        args[args.index(arg)] = ''
+
+    # print("analyze_rules()  args is now={}".format(str(args)))
+
+    if ret['valid_options']:
+        # Always return the '' option
+        ret['options'][''] = None
+        # Check now '' rule
+        try:
+            rule_item = [i for i in rule if i['atom']['name'] == ''][0]
+            expected_none_arg = rule_item['atom']['args']
+        except IndexError:
+            expected_none_arg = NONE_PARAM
+
+        # find all not handled items
+        for arg in (a for a in args[1:] if len(a) > 0):
+            if expected_none_arg == NONE_PARAM:
+                ret['message'] = "Unexpected argument '{}'".format(arg)
+                ret['valid_options'] = False
+                break
+            else:
+                ret['options'][''] = arg
+                args[args.index(arg)] = ''
+                # parameter found, no more parameter expected
+                expected_none_arg = NONE_PARAM
+
+    return ret
 
 
 def check_options(options, rules, command):
@@ -208,7 +203,7 @@ def check_options(options, rules, command):
     #     print('check_options() findUnknownOption=' + str(ret))
 
     # All options are known; now find the path that match the options
-    rule = _find_rule(options, rules)
+    rule = old_find_rule(options, rules)
     if rule is None:
         print('Invalid option constellation. ' + see_msg)
         return False
@@ -376,19 +371,19 @@ def _has_valid_options(options, rule):
 # rule = [node1, node2, ...]
 # node = dict(atom_dict, obligat)
 # atom_dict = dict(name='force', short = 's', args=2)
-def _find_rule(options, rules):
+def old_find_rule(options, rules):
     """
     Search the rule, that match its options. The search will stop
     at the first hit, so the rules have to been disjunkt.
     :Returns: found rule or, if nothing found None.
     """
     for rule in rules:
-        # print("_find_rule() processing rule={}".format(str(rule)))
+        # print("old_find_rule() processing rule={}".format(str(rule)))
         if _has_valid_options(options, rule) and not _has_duplicates(options, rule):
-            # print("_find_rule()   valid={}".format(str('true')))
+            # print("old_find_rule()   valid={}".format(str('true')))
             return rule
 
-        # print("_find_rule()   valid={}".format(str('false')))
+        # print("old_find_rule()   valid={}".format(str('false')))
 
     return None
 

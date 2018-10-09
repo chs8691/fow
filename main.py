@@ -108,20 +108,20 @@ def cmd_gps(options_matrix, cmd_list):
          ]
     ]
 
-    rule = argument_checker.find_rule(args, rules)
-    print('cmd_gps() rule=' + str(rule))
-    if rule is None:
+    ret = argument_checker.analyze_rules(args, rules)
+    # print('cmd_gps() ret=' + str(ret))
+    if ret['message'] is not None:
+        print(ret['message'])
         return
 
-    return
     # print('cmd_gps() options_matrix=' + str(options_matrix))
 
     # Normalize for easy access: -t -> --test etc.
-    options = argument_checker.normalize_option_matrix(options_matrix, rules)
+    # options = argument_checker.normalize_option_matrix(options_matrix, rules)
     # print("cmd_gps() args={}".format(str(options)))
 
-    if not check_options(options, rules, 'gps'):
-        return
+    # if not check_options(options, rules, 'gps'):
+    #     return
 
     # print("cmp_gps() {}".format(str(options)))
     # Possible arguments, None, if not given
@@ -129,22 +129,22 @@ def cmd_gps(options_matrix, cmd_list):
     # arg validation
     # image path as destination
     # image path as path argument
-    if 'path' in options['names']:
-        if not os.path.exists(plump.get_path(get_arg_by_name(options, ''))):
+    # if 'path' in options['names']:
+    if 'path' in ret['options']:
+        if not os.path.exists(plump.get_path(ret['options'][''])):
             print((("'{0}' is not an existing sub dir within this fow. " +
                     "Maybe the directory is temporary not available or you have to " +
                     "write the correct path."))
-                  .format(str(get_arg_by_name(options, ''))))
+                  .format(str(ret['options'][''])))
             return
         # Validated absolute path to the images
-        image_path = plump.get_path(get_arg_by_name(options, ''))
+        image_path = plump.get_path(ret['options'][''])
 
-    elif get_arg_by_name(options, '') is not None:
-        key = 'gps.{}'.format(get_arg_by_name(options, ''))
+    elif ret['options'][''] is not None:
+        key = 'gps.{}'.format(ret['options'][''])
         if config.read_item(key) is None:
             print(
-                "Value {0} not configured. Maybe you have to set it first with config -s '{0}=fow-subdir-to-images'".format(
-                    key))
+                "Value {0} not configured. Maybe you have to set it first with config -s '{0}=fow-subdir-to-images'".format(key))
             return
         if not os.path.exists(plump.get_path(config.read_item(key))):
             print((("Destination points to a non existing sub dir: '{0}'. " +
@@ -169,18 +169,18 @@ def cmd_gps(options_matrix, cmd_list):
 
     # Now we have a valid, existing absolute path to the images
     # Just show map
-    if 'map' in options['names']:
+    if 'map' in ret['options']:
         fow_gps.map(image_path)
         return
 
     # track path as source argument
-    if get_arg_by_name(options, 'source') is not None:
-        if not os.path.exists(get_arg_by_name(options, 'source')):
+    if 'source' in ret['options']:
+        if not os.path.exists(ret['options']['source']):
             print("'{0}' is not an existing, accessible directory. "
-                  .format(str(get_arg_by_name(options, 'source'))))
+                  .format(str(ret['options']['source'])))
             return
         # Validated absolute path to the images
-        track_path = get_arg_by_name(options, 'source')
+        track_path = ret['options']['source']
 
     else:
         if config.read_item(plump.GPS_TRACK_PATH) is None:
@@ -199,13 +199,13 @@ def cmd_gps(options_matrix, cmd_list):
     # print('cmd_gps() analysis=' + str(analysis))
 
     # gps --verbose
-    if 'verbose' in options['names']:
+    if 'verbose' in ret['options']:
         verbose = True
     else:
         verbose = False
 
     # gps --test
-    if 'test' in options['names']:
+    if 'test' in ret['options']:
         fow_gps.test(analysis, verbose)
         return
 

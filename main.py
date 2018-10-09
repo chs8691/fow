@@ -14,17 +14,11 @@ import task
 import fow_gps
 import config
 
+from plump import NONE_PARAM, MANDATORY_PARAM, OPTIONAL_PARAM
+
 import xe2hack
 from argument_checker import check_options, get_arg_by_name
 
-# Kind of allowed arguments: None
-NONE = 0
-
-# Kind of allowed arguments: optional
-OPTIONAL = 1
-
-# Kind of allowed arguments: mandatory
-MANDATORY = 2
 
 
 def cmd_xe2hack(options_matrix):
@@ -74,57 +68,52 @@ def cmd_xe2hack(options_matrix):
         xe2hack.do(analysis)
 
 
-def cmd_gps(options_matrix):
+def cmd_gps(options_matrix, cmd_list):
     """
     Adds geo locations from gps files
     """
 
-    # 0: No param allowed, 1: param optional, 2: param obligatory
-    atom_none = dict(name='', short='', args=0)
-    atom_param = dict(name='', short='', args=2)
-    atom_path = dict(name='path', short='p', args=0)
-    atom_source = dict(name='source', short='s', args=0)
-    atom_test = dict(name='test', short='t', args=0)
-    atom_map = dict(name='map', short='m', args=0)
-    atom_force = dict(name='force', short='f', args=0)
-    atom_verbose = dict(name='verbose', short='v', args=0)
+    atom_none = dict(name='', short='', args=NONE_PARAM)
+    atom_path = dict(name='path', short='p', args=MANDATORY_PARAM)
+    atom_source = dict(name='source', short='s', args=MANDATORY_PARAM)
+    atom_test = dict(name='test', short='t', args=NONE_PARAM)
+    atom_map = dict(name='map', short='m', args=NONE_PARAM)
+    atom_force = dict(name='force', short='f', args=NONE_PARAM)
+    atom_verbose = dict(name='verbose', short='v', args=NONE_PARAM)
 
+    args = argument_checker.normalize_commands(cmd_list, [atom_none, atom_path, atom_source, atom_test, atom_map,
+                                                          atom_force, atom_verbose])
+
+    # Restrictions for rule building:
+    # - atom_none should only used as obligatory.
+    # - if atom_none has an optional argument, no other rule item may have an option argument
     rules = [
         [
             dict(atom=atom_none, obligat=True),
+            dict(atom=atom_source, obligat=False),
             dict(atom=atom_test, obligat=False),
             dict(atom=atom_verbose, obligat=False),
             dict(atom=atom_force, obligat=False)
         ],
         [
-            dict(atom=atom_path, obligat=False),
-            dict(atom=atom_param, obligat=True),
+            dict(atom=atom_path, obligat=True),
+            dict(atom=atom_source, obligat=False),
             dict(atom=atom_test, obligat=False),
             dict(atom=atom_verbose, obligat=False),
             dict(atom=atom_force, obligat=False)
         ],
-        # [
-        #     dict(atom=atom_path, obligat=True),
-        #     dict(atom=atom_param, obligat=True),
-        #     dict(atom=atom_test, obligat=False),
-        #     dict(atom=atom_verbose, obligat=False),
-        #     dict(atom=atom_force, obligat=False)
-        #  ],
-        # [dict(atom=atom_path, obligat=True),
-        #  dict(atom=atom_test, obligat=False),
-        #  dict(atom=atom_verbose, obligat=False),
-        #  dict(atom=atom_source, obligat=False),
-        #  dict(atom=atom_force, obligat=False)
-        #  ],
-        [
-            dict(atom=atom_map, obligat=True)
-         ],
         [
             dict(atom=atom_map, obligat=True),
-            dict(atom=atom_path, obligat=False),
-            dict(atom=atom_param, obligat=True)
-         ],
+            dict(atom=atom_path, obligat=False)
+         ]
     ]
+
+    rule = argument_checker.find_rule(args, rules)
+    print('cmd_gps() rule=' + str(rule))
+    if rule is None:
+        return
+
+    return
     # print('cmd_gps() options_matrix=' + str(options_matrix))
 
     # Normalize for easy access: -t -> --test etc.
@@ -841,10 +830,10 @@ def cmd_config(option_matrix, cmd_list):
     Set or delete a config item
     """
 
-    atom_delete = dict(name='delete', short='d', args=MANDATORY)
-    atom_list = dict(name='list', short='l', args=OPTIONAL)
-    atom_none = dict(name='', short='', args=NONE)
-    atom_set = dict(name='set', short='s', args=MANDATORY)
+    atom_delete = dict(name='delete', short='d', args=MANDATORY_PARAM)
+    atom_list = dict(name='list', short='l', args=OPTIONAL_PARAM)
+    atom_none = dict(name='', short='', args=NONE_PARAM)
+    atom_set = dict(name='set', short='s', args=MANDATORY_PARAM)
 
     # atomNone must be mandatory for rules with more than one path
     rules = [
@@ -1003,7 +992,7 @@ def fow(args=None):
         cmd_xe2hack(plump.to_arg_struct(cmds[1:]))
 
     elif cmds[0] == 'gps':
-        cmd_gps(plump.to_arg_struct(cmds[1:]))
+        cmd_gps(plump.to_arg_struct(cmds[1:]), cmds)
 
         # elif cmds[0] == 'cd':
         # cmd_cd(plump.toArgStruct(cmds[1:]))

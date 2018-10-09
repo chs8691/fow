@@ -22,6 +22,14 @@ TYPE_RAW = 'raw'
 TYPE_JPG = 'jpg'
 TYPE_TIF = 'tif'
 
+# Kind of allowed arguments: None
+NONE_PARAM = 0
+
+# Kind of allowed arguments: optional
+OPTIONAL_PARAM = 1
+
+# Kind of allowed arguments: mandatory
+MANDATORY_PARAM = 2
 
 # Groups all exports destinations together. The have to start with 'export.'
 EXPORT_PREFIX = 'export'

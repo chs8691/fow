@@ -4,6 +4,7 @@ import shutil
 import subprocess
 import time
 import sys
+import re
 
 DIR_00 = '00_Inbox'
 DIR_01 = '01_Import'
@@ -14,13 +15,21 @@ DIR_JPG = 'jpg'
 DIR_RAW = 'raw'
 DIR_FINAL = 'final'
 DIR_WORK = 'work'
-VERSION = '1.1.7 Build 201712231430'
+VERSION = '1.1.7 Build 201712282222'
 BACKUP_PATH = 'backup.path'
 TASK = 'task'
 TYPE_RAW = 'raw'
 TYPE_JPG = 'jpg'
 TYPE_TIF = 'tif'
 
+# Kind of allowed arguments: None
+NONE_PARAM = 0
+
+# Kind of allowed arguments: optional
+OPTIONAL_PARAM = 1
+
+# Kind of allowed arguments: mandatory
+MANDATORY_PARAM = 2
 
 # Groups all exports destinations together. The have to start with 'export.'
 EXPORT_PREFIX = 'export'
@@ -72,7 +81,7 @@ def progress_prepare(max_index, action, what):
     return dict(back=back, formatting=formatting)
 
 
-def load_execute(analysis, subdir, dest, options, verb_present):
+def load_execute(analysis, subdir, dest, processing_flags, verb_present):
     """
     Executes the load (copy or move), for a specific kind of image files
     (jpg, raw of videos).
@@ -98,9 +107,9 @@ def load_execute(analysis, subdir, dest, options, verb_present):
 
         source = '{0}/{1}'.format(each['path'], each['file'])
         destination = '{0}/{1}/{2}'.format(dest, subdir, each['file'])
-        if not each['exist'] or options['force']:
+        if not each['exist'] or processing_flags['force']:
             try:
-                if options['move']:
+                if processing_flags['move']:
                     os.rename(source, destination)
                 else:
                     shutil.copy2(source, destination)
@@ -276,13 +285,13 @@ def getAllFowDirs():
     return dirs
 
 
-def normalizeArgs(_actual, rules):
+def normalize_args_OLD(_actual, rules):
     """
     Only changes shorts to name, so it's easier to analyze
     the arguments.
     Example:
         _actual = {
-            names=[], shorts=['c', 't'], args=[]
+            names=[None, None], shorts=['c', 't'], args=[]
             }
         _rules = [Path1List, ...]
         pathList = [testDict, createDict, ...]
@@ -290,7 +299,7 @@ def normalizeArgs(_actual, rules):
         atomTestDict = {name='test', short='t', args=0_1_OR_2}  etc.
         returns { names=['create','test'], args=[] }
     """
-    # print('_actual=' + str(_actual))
+    print('normalizeArgs() _actual=' + str(_actual))
     ret = _actual.copy()
     founds = set()
     # print('copy=' + str(ret))
@@ -1032,37 +1041,73 @@ def exist_dir(dir_name):
     return False
 
 
-def toArgStruct(cmds):
+def to_arg_struct(cmds):
     """
-    Returns well formed structure of the given command list as a
-    dictionary of two list options and args.
-    Non option calls will be convereted to option '--none'
+    Returns for every command one item in every three lists 'names', 'shorts' and 'args', packed into a dictionary.
+    dictionary=(names, shorts, args, params):
+        names: sorted list with command name or None
+        shorts: sorted list with command short or None
+        args: sorted list with argument or None
+    For commandless arguments, item in names and shorts are set to ''.
+    For commands without arguments, item in args is None.
+
     Example:
-    From ['--test', '--create', '-p', '~/backup']
-    To   dict=(names=['test', 'create'], shorts=['p'], args=['~/backup'])
-    Example:
-    From ['~/backup']
-    To   dict=(names=['none'], shorts=[], args=['~/backup'])
+
+    From ['--test', '--create', '-p=~/backup' 'image001.jpg']
+    To   dict=(names= ['test', 'create', None      , None],
+               shorts=[None  , None    , 'p'       , None],
+               args=  [None  , None    , '~/backup', None],
+               )
     """
 
     names = []
     shorts = []
     args = []
 
+    # Special case for non command parameter: Create a '' parameter
+    # We need this for matching the commands rule
+    if len(cmds) == 0:
+        names.append('')
+        shorts.append('')
+        args.append(None)
+
     for i in range(len(cmds)):
         # print('cmds i = ' + cmds[i])
         # print('cmds i = ' + cmds[i][0:2])
-        if len(cmds[i]) >= 2 and cmds[i][0:2] == '--':
-            names.append(cmds[i][2:])
-        elif len(cmds[i]) >= 1 and cmds[i][0] == '-':
-            shorts.append(cmds[i][1:])
+
+        # distinguish between 3 kinds of command -x[=yyy] and --xxx[=yyy] and yyy
+
+        # short command
+        if re.match("^\-\w(=.*)?", cmds[i]):
+            mo = re.match("^\-(\w)(=.*)?", cmds[i])
+            shorts.append(mo.group(1))
+            names.append(None)
+            if mo.group(2) is None:
+                args.append(None)
+            else:
+                args.append(mo.group(2)[1:])
+            # print('1 cmd=' + cmds[i] + " grout1=" + str(mo.group(1)) + " grout2=" + str(mo.group(2)))
+
+        # named command
+        elif re.match("^\-{2}\w+(=.*)?", cmds[i]):
+            mo = re.match("^\-{2}(\w*)(=.*)?", cmds[i])
+            names.append(mo.group(1))
+            shorts.append(None)
+            if mo.group(2) is None:
+                args.append(None)
+            else:
+                args.append(mo.group(2)[1:])
+            # print('2 cmd=' + cmds[i] + " group1=" + str(mo.group(1)) + " group2=" + str(mo.group(2)))
+
+        # commandless argument
         else:
+            names.append('')
+            shorts.append('')
             args.append(cmds[i])
+            # print('3 cmd=' + cmds[i])
 
-    # If no option, add a none one. Maybe this is a bad idea
-    # if len(names) + len(shorts) == 0:
-    #   names.append('none')
+    ret = dict(names=names, shorts=shorts, args=args)
+    # print("to_arg_struct() ret=" + str(ret))
 
-    return dict(names=names, shorts=shorts, args=args)
-
+    return ret
 

@@ -75,14 +75,16 @@ def analyse(_src, _dest_root):
     return values
 
 
-def test(analysis, src, dest, options):
+def test(analysis, src, dest, processing_flags):
     """
     Prints an load test run.
     """
-    if options['move']:
+    if processing_flags['move']:
         kind = 'moved'
     else:
         kind = 'copied'
+
+    # print("load.test() processing_flags={}".format(processing_flags))
 
     print('Dry run, no files will be {0}.'.format(kind))
     print('Source     : {0}'.format(str(src)))
@@ -97,7 +99,8 @@ def test(analysis, src, dest, options):
         max_name_len = max_name_len3
 
     # max_name_len = 30
-    if options['verbose']:
+    if processing_flags['verbose']:
+        print("load.test() verbose")
         load_test_print(analysis['jpg'], max_name_len, 'JPG')
         load_test_print(analysis['raw'], max_name_len, 'RAW')
         load_test_print(analysis['video'], max_name_len, 'MOV')
@@ -106,7 +109,7 @@ def test(analysis, src, dest, options):
     cntExists += len([i for i in analysis['raw'] if i['exist']])
     cntExists += len([i for i in analysis['video'] if i['exist']])
 
-    if options['move']:
+    if processing_flags['move']:
         kind = 'moved'
     else:
         kind = 'copied'
@@ -117,7 +120,7 @@ def test(analysis, src, dest, options):
         str(len(analysis['video'])), src, kind))
 
     if cntExists > 0:
-        if options['force']:
+        if processing_flags['force']:
             print(('{0} files already exist and will be overwritten.')
                   .format(cntExists))
         else:
@@ -125,44 +128,44 @@ def test(analysis, src, dest, options):
                    'overwrite them.').format(cntExists))
 
 
-def do(analysis, src, dest, options):
+def do(analysis, src, dest, processing_flags):
     """
     Executes command load.
     """
     # print('load_do() analysis={0}'.format(str(analysis)))
-    # print('load_do() options={0}'.format(str(options)))
+    # print('load_do() processing_flags={0}'.format(str(processing_flags)))
     # print('load_do() dest={0}'.format(str(dest)))
     done = 0
     error = 0
     overwritten = 0
     ignored = 0
-    if options['move']:
+    if processing_flags['move']:
         verb_past = 'moved'
         verb_present = 'move'
     else:
         verb_past = 'copied'
         verb_present = 'copy'
 
-    ret = load_execute(analysis['jpg'], DIR_JPG, dest, options, verb_present)
+    ret = load_execute(analysis['jpg'], DIR_JPG, dest, processing_flags, verb_present)
     done += ret['done']
     error += ret['error']
     overwritten += ret['overwritten']
     ignored += ret['ignored']
 
-    ret = load_execute(analysis['raw'], DIR_RAW, dest, options, verb_present)
+    ret = load_execute(analysis['raw'], DIR_RAW, dest, processing_flags, verb_present)
     done += ret['done']
     error += ret['error']
     overwritten += ret['overwritten']
     ignored += ret['ignored']
 
-    ret = load_execute(analysis['video'], DIR_VIDEO, dest, options,
+    ret = load_execute(analysis['video'], DIR_VIDEO, dest, processing_flags,
                        verb_present)
     done += ret['done']
     error += ret['error']
     overwritten += ret['overwritten']
     ignored += ret['ignored']
 
-    if options['force']:
+    if processing_flags['force']:
         if error:
             print(('{0}/{1} files {2} ({3} overwritten),' +
                    ' but {4} errors occurred.')

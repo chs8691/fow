@@ -4,7 +4,6 @@ import os
 import re
 import shutil
 
-import argument_checker
 import export
 import load
 import plump
@@ -13,38 +12,34 @@ import show
 import task
 import fow_gps
 import config
-
 import xe2hack
-from argument_checker import check_options
+
+from argument_checker import check_rules
+from plump import NONE_PARAM, MANDATORY_PARAM, OPTIONAL_PARAM
 
 
-def cmd_xe2hack(_arg_struct):
+def cmd_xe2hack(cmd_list):
     """
     Change exif model for raw files in 01_import
     """
 
-    # #0: No param allowed, 1: param optional, 2: param obligatory
-    # if not checkArgs(_arg_dict,
-    #    {'-t': 0, '--test': 0, '-p': 2, '--path': 2}):
-    #    return
-    atom_none = dict(name='', short='', args=0)
-    atom_revert = dict(name='revert', short='r', args=0)
-    atom_test = dict(name='test', short='t', args=0)
+    atom_none = dict(name='', short='', args=NONE_PARAM)
+    atom_revert = dict(name='revert', short='r', args=NONE_PARAM)
+    atom_test = dict(name='test', short='t', args=NONE_PARAM)
 
-    # print('export() _arg_struct=' + str(_arg_struct))
-    rules = [
-        [dict(atom=atom_none, obligat=True),
-         dict(atom=atom_revert, obligat=False),
-         dict(atom=atom_test, obligat=False)]
-    ]
+    ret = check_rules(cmd_list,
+                      [
+                          [
+                              dict(atom=atom_none, obligat=True),
+                              dict(atom=atom_revert, obligat=False),
+                              dict(atom=atom_test, obligat=False)
+                          ]
+                      ])
 
-    if not check_options(_arg_struct, rules, 'x2ehack'):
+    if ret['message'] is not None:
         return
 
-    # Normalize for easy access: -t -> --test etc.
-    args = argument_checker.normalize_option_matrix(_arg_struct, rules)
-
-    if 'revert' in args['names']:
+    if 'revert' in ret['options']:
         from_model = 'X-E2'
         to_model = 'X-E2S'
     else:
@@ -56,7 +51,7 @@ def cmd_xe2hack(_arg_struct):
     # print('rename() analysis=' + str(analysis))
 
     # --test
-    if 'test' in args['names']:
+    if 'test' in ret['options']:
         xe2hack.test(analysis)
         return
 
@@ -65,98 +60,126 @@ def cmd_xe2hack(_arg_struct):
         xe2hack.do(analysis)
 
 
-def cmd_gps(_arg_struct):
+def cmd_gps(cmd_list):
     """
     Adds geo locations from gps files
     """
 
-    # 0: No param allowed, 1: param optional, 2: param obligatory
-    atom_none = dict(name='', short='', args=1)
-    atom_path = dict(name='path', short='p', args=2)
-    atom_test = dict(name='test', short='t', args=0)
-    atom_map = dict(name='map', short='m', args=0)
-    atom_force = dict(name='force', short='f', args=0)
-    atom_verbose = dict(name='verbose', short='v', args=0)
+    atom_none = dict(name='', short='', args=NONE_PARAM)
+    atom_path = dict(name='path', short='p', args=MANDATORY_PARAM)
+    atom_source = dict(name='source', short='s', args=MANDATORY_PARAM)
+    atom_test = dict(name='test', short='t', args=NONE_PARAM)
+    atom_map = dict(name='map', short='m', args=NONE_PARAM)
+    atom_force = dict(name='force', short='f', args=NONE_PARAM)
+    atom_verbose = dict(name='verbose', short='v', args=NONE_PARAM)
 
-    # print('export() _arg_struct=' + str(_arg_struct))
-    rules = [
-        [dict(atom=atom_none, obligat=True),
-         dict(atom=atom_force, obligat=False),
-         dict(atom=atom_verbose, obligat=False)],
-        [dict(atom=atom_path, obligat=True),
-         dict(atom=atom_force, obligat=False),
-         dict(atom=atom_verbose, obligat=False)],
-        [dict(atom=atom_none, obligat=True),
-         dict(atom=atom_test, obligat=True),
-         dict(atom=atom_verbose, obligat=False)],
-        [dict(atom=atom_path, obligat=True),
-         dict(atom=atom_test, obligat=True),
-         dict(atom=atom_verbose, obligat=False)],
-        [dict(atom=atom_path, obligat=True),
-         dict(atom=atom_map, obligat=True)],
-        [dict(atom=atom_none, obligat=True),
-         dict(atom=atom_map, obligat=True)],
-    ]
+    ret = check_rules(cmd_list,
+                      [
+                          [
+                              dict(atom=atom_none, obligat=True),
+                              dict(atom=atom_source, obligat=False),
+                              dict(atom=atom_test, obligat=False),
+                              dict(atom=atom_verbose, obligat=False),
+                              dict(atom=atom_force, obligat=False)
+                          ],
+                          [
+                              dict(atom=atom_path, obligat=True),
+                              dict(atom=atom_source, obligat=False),
+                              dict(atom=atom_test, obligat=False),
+                              dict(atom=atom_verbose, obligat=False),
+                              dict(atom=atom_force, obligat=False)
+                          ],
+                          [
+                              dict(atom=atom_map, obligat=True),
+                              dict(atom=atom_path, obligat=False)
+                          ]
+                      ])
 
-    if not check_options(_arg_struct, rules, 'gps'):
+    if ret['message'] is not None:
         return
 
-    # Normalize for easy access: -t -> --test etc.
-    args = argument_checker.normalize_option_matrix(_arg_struct, rules)
-
-    # print("cmp_gps() {}".format(str(args)))
-    # get path
-    if 'path' in args['names']:
-        image_path = args['args'][0]
-    elif len(args['args']) == 1:
-        key = 'gps.{}'.format(args['args'][0])
-        if config.read_item(key) is None:
-            print('Value {0} not configured. Maybe you have to set it first with config -s={0}=yourPath'.format(key))
+    # print('cmd_gps() options_matrix=' + str(options_matrix))
+    # arg validation
+    # image path as destination
+    # image path as path argument
+    # if 'path' in options['names']:
+    if 'path' in ret['options']:
+        if not os.path.exists(plump.get_path(ret['options'][''])):
+            print((("'{0}' is not an existing sub dir within this fow. " +
+                    "Maybe the directory is temporary not available or you have to " +
+                    "write the correct path."))
+                  .format(str(ret['options'][''])))
             return
-        else:
-            image_path = plump.get_path(config.read_item(key))
+        # Validated absolute path to the images
+        image_path = plump.get_path(ret['options'][''])
+
+    elif ret['options'][''] is not None:
+        key = 'gps.{}'.format(ret['options'][''])
+        if config.read_item(key) is None:
+            print(
+                "Value {0} not configured. Maybe you have to set it first with config -s '{0}=fow-subdir-to-images'".format(
+                    key))
+            return
+        if not os.path.exists(plump.get_path(config.read_item(key))):
+            print((("Destination points to a non existing sub dir: '{0}'. " +
+                    "Maybe the directory is temporary not available or you have to" +
+                    " change the destination with 'config -s {1}=fow-subdir-to-images'"))
+                  .format(str(config.read_item(key)), key))
+            return
+        # Validated absolute path to the images
+        image_path = plump.get_path(config.read_item(key))
+
+    # image path is the actual final
     else:
         if task.get_actual() is None:
             print('No active task.')
             return
+        elif not os.path.exists(task.get_actual()['path']):
+            print("Actual task '{0}' is not an existing sub dir within this fow."
+                  .format(str(task.get_actual()['path'])))
+            return
         else:
-            # print('cmd_gps() {}'.format(str(task.get_actual())))
             image_path = '{}/{}'.format(task.get_actual()['path'], plump.DIR_FINAL)
-
-    if not os.path.exists(image_path):
-        print("Invalid path '{}'".format(str(image_path)))
-        return
 
     # Now we have a valid, existing absolute path to the images
     # Just show map
-    if 'map' in args['names']:
+    if 'map' in ret['options']:
         fow_gps.map(image_path)
-        return;
-
-    track_path = config.read_item(plump.GPS_TRACK_PATH)
-    if track_path is None:
-        print('{0} not set. Define the path to tracks folder with config -s={0}=/your/tracks/path'
-              .format(plump.GPS_TRACK_PATH))
-        return
-    elif not os.path.exists(track_path):
-        print(("Invalid path to track files: '{0}'. May the directory is temporary not available or you have to" +
-               " change it with 'config -s={1}=/your/tracks/path'").format(str(track_path), plump.GPS_TRACK_PATH))
         return
 
-    # Now we have both valid path
-    # print("cmp_gps() images={0}, tracks={1}".format(str(image_path), str(track_path)))
+    # track path as source argument
+    if 'source' in ret['options']:
+        if not os.path.exists(ret['options']['source']):
+            print("'{0}' is not an existing, accessible directory. "
+                  .format(str(ret['options']['source'])))
+            return
+        # Validated absolute path to the images
+        track_path = ret['options']['source']
+
+    else:
+        if config.read_item(plump.GPS_TRACK_PATH) is None:
+            print('{0} not set. Define the path to tracks folder with config -s {0}=/your/tracks/path'
+                  .format(plump.GPS_TRACK_PATH))
+            return
+        elif not os.path.exists(config.read_item(plump.GPS_TRACK_PATH)):
+            print(("Invalid path to track files: '{0}'. May the directory is temporary not available or you have to" +
+                   " change it with 'config -s {1}=/your/tracks/path'")
+                  .format(str(config.read_item(plump.GPS_TRACK_PATH)), plump.GPS_TRACK_PATH))
+            return
+        # Validated absolute path to the images
+        track_path = config.read_item(plump.GPS_TRACK_PATH)
 
     analysis = fow_gps.analyse(track_path, image_path)
     # print('cmd_gps() analysis=' + str(analysis))
 
     # gps --verbose
-    if 'verbose' in args['names']:
+    if 'verbose' in ret['options']:
         verbose = True
     else:
         verbose = False
 
     # gps --test
-    if 'test' in args['names']:
+    if 'test' in ret['options']:
         fow_gps.test(analysis, verbose)
         return
 
@@ -165,44 +188,39 @@ def cmd_gps(_arg_struct):
         fow_gps.do(analysis, True, verbose)
 
 
-def cmd_rename(_arg_struct):
+def cmd_rename(cmd_list):
     """
     Move an rename in files.
     """
 
-    # 0: No param allowed, 1: param optional, 2: param obligatory
-    # if not checkArgs(_arg_dict,
-    #    {'-t': 0, '--test': 0, '-p': 2, '--path': 2}):
-    #    return
-    atom_none = dict(name='', short='', args=0)
-    atom_force = dict(name='force', short='f', args=0)
-    atom_test = dict(name='test', short='t', args=0)
-    atom_verbose = dict(name='verbose', short='v', args=0)
+    atom_none = dict(name='', short='', args=NONE_PARAM)
+    atom_force = dict(name='force', short='f', args=NONE_PARAM)
+    atom_test = dict(name='test', short='t', args=NONE_PARAM)
+    atom_verbose = dict(name='verbose', short='v', args=NONE_PARAM)
 
-    # print('export() _arg_struct=' + str(_arg_struct))
-    rules = [
-        [dict(atom=atom_none, obligat=True),
-         dict(atom=atom_force, obligat=False),
-         dict(atom=atom_test, obligat=False),
-         dict(atom=atom_verbose, obligat=False)]
-    ]
+    ret = check_rules(cmd_list,
+                      [
+                          [
+                              dict(atom=atom_none, obligat=True),
+                              dict(atom=atom_force, obligat=False),
+                              dict(atom=atom_test, obligat=False),
+                              dict(atom=atom_verbose, obligat=False)
+                          ]
+                      ])
 
-    if not check_options(_arg_struct, rules, 'rename'):
+    if ret['message'] is not None:
         return
-
-    # Normalize for easy access: -t -> --test etc.
-    args = argument_checker.normalize_option_matrix(_arg_struct, rules)
 
     analysis = rename.analyse(plump.get_path(plump.DIR_00),
                               plump.get_path(plump.DIR_01))
     # print('rename() analysis=' + str(analysis))
 
     # --verbose option
-    verbose = 'verbose' in args['names']
-    force = 'force' in args['names']
+    verbose = 'verbose' in ret['options']
+    force = 'force' in ret['options']
 
     # rename --test
-    if 'test' in args['names']:
+    if 'test' in ret['options']:
         rename.test(analysis, verbose, force)
         return
 
@@ -211,7 +229,7 @@ def cmd_rename(_arg_struct):
         rename.do(analysis, verbose, force)
 
 
-def cmd_load(_arg_struct):
+def cmd_load(cmd_list):
     """
     Copy or moves files from external destinations.
     """
@@ -220,44 +238,48 @@ def cmd_load(_arg_struct):
     # if not checkArgs(_arg_dict,
     #    {'-t': 0, '--test': 0, '-p': 2, '--path': 2}):
     #    return
-    atom_path = dict(name='path', short='p', args=2)
-    atom_move = dict(name='move', short='m', args=0)
-    atom_force = dict(name='force', short='f', args=0)
-    atom_verbose = dict(name='verbose', short='v', args=0)
-    atom_test = dict(name='test', short='t', args=0)
-    atom_none = dict(name='', short='', args=2)
+    atom_path = dict(name='path', short='p', args=MANDATORY_PARAM)
+    atom_move = dict(name='move', short='m', args=NONE_PARAM)
+    atom_force = dict(name='force', short='f', args=NONE_PARAM)
+    atom_verbose = dict(name='verbose', short='v', args=NONE_PARAM)
+    atom_test = dict(name='test', short='t', args=NONE_PARAM)
+    atom_none = dict(name='', short='', args=MANDATORY_PARAM)
 
-    # print('export() _arg_struct=' + str(_arg_struct))
-    rules = [
-        [dict(atom=atom_path, obligat=True),
-         dict(atom=atom_force, obligat=False),
-         dict(atom=atom_verbose, obligat=False),
-         dict(atom=atom_move, obligat=False),
-         dict(atom=atom_test, obligat=False)],
+    ret = check_rules(cmd_list,
+                      [
+                          [
+                              dict(atom=atom_path, obligat=True),
+                              dict(atom=atom_force, obligat=False),
+                              dict(atom=atom_verbose, obligat=False),
+                              dict(atom=atom_move, obligat=False),
+                              dict(atom=atom_test, obligat=False)
+                          ],
+                          [
+                              dict(atom=atom_none, obligat=True),
+                              dict(atom=atom_force, obligat=False),
+                              dict(atom=atom_verbose, obligat=False),
+                              dict(atom=atom_move, obligat=False),
+                              dict(atom=atom_test, obligat=False)
+                          ]
+                      ])
 
-        [dict(atom=atom_none, obligat=True),
-         dict(atom=atom_force, obligat=False),
-         dict(atom=atom_verbose, obligat=False),
-         dict(atom=atom_move, obligat=False),
-         dict(atom=atom_test, obligat=False)]
-    ]
-
-    if not check_options(_arg_struct, rules, 'load'):
+    if ret['message'] is not None:
         return
 
-    # Normalize for easy access: -t -> --test etc.
-    args = argument_checker.normalize_option_matrix(_arg_struct, rules)
-
-    # Get srcination
-    if 'path' in args['names']:
-        src = args['args'][0]
+    # Get source
+    if 'path' in ret['options']:
+        src = ret['options']['path']
     else:
         try:
-            src = config.read_pickle()['{0}.{1}'.format(
-                plump.LOAD_PREFIX, args['args'][0])]
-        except:
-            print('Source value not defined. Create it with ' +
-                  '"config -s=load.' + args['args'][0] + '=<sourceDir>" first.')
+            key = '{0}.{1}'.format(plump.LOAD_PREFIX, ret['options'][''])
+            if key in config.read_pickle():
+                src = config.read_pickle()['{0}.{1}'.format(
+                    plump.LOAD_PREFIX, ret['options'][''])]
+            else:
+                print("'{0}' not found. Create it with fow config -s='{0}=yourValue' first.".format(key))
+                return
+        except TypeError:
+            print("Now fow configuration found in the actual directory. Create a fow with 'fow init' first. ")
             return
 
     if src is None:
@@ -274,24 +296,26 @@ def cmd_load(_arg_struct):
     dest = '{0}{1}'.format(plump.get_fow_root(), plump.DIR_00)
 
     # Get additional options
-    options = dict(verbose='verbose' in args['names'],
-                   move='move' in args['names'],
-                   force='force' in args['names'])
+    processing_flags = dict(verbose='verbose' in ret['options'],
+                            move='move' in ret['options'],
+                            force='force' in ret['options'])
+
+    # print("cmd_load() processing_flags={}".format(processing_flags))
 
     # [dict(name='image001.jpg', exists='true')]
     analysis = load.analyse(src, dest)
-    if 'test' in args['names']:
-        load.test(analysis, src, dest, options)
+    if 'test' in ret['options']:
+        load.test(analysis, src, dest, processing_flags)
         return
 
     # load
     else:
-        load.do(analysis, src, dest, options)
+        load.do(analysis, src, dest, processing_flags)
 
     return
 
 
-def cmd_export(_arg_struct):
+def cmd_export(cmd_list):
     """
     Copy finals to external destinations.
     """
@@ -299,38 +323,37 @@ def cmd_export(_arg_struct):
     # if not checkArgs(_arg_dict,
     #    {'-t': 0, '--test': 0, '-p': 2, '--path': 2}):
     #    return
-    atom_path = dict(name='path', short='p', args=2)
-    atom_force = dict(name='force', short='f', args=0)
-    atom_test = dict(name='test', short='t', args=0)
-    atom_none = dict(name='', short='', args=2)
+    atom_path = dict(name='path', short='p', args=MANDATORY_PARAM)
+    atom_force = dict(name='force', short='f', args=NONE_PARAM)
+    atom_test = dict(name='test', short='t', args=NONE_PARAM)
+    atom_none = dict(name='', short='', args=MANDATORY_PARAM)
 
-    # print('export() _arg_struct=' + str(_arg_struct))
-    rules = [
-        [dict(atom=atom_path, obligat=True),
-         dict(atom=atom_force, obligat=False),
-         dict(atom=atom_test, obligat=False)],
+    ret = check_rules(cmd_list,
+                      [
+                          [
+                              dict(atom=atom_path, obligat=True),
+                              dict(atom=atom_force, obligat=False),
+                              dict(atom=atom_test, obligat=False)
+                          ],
+                          [
+                              dict(atom=atom_none, obligat=True),
+                              dict(atom=atom_force, obligat=False),
+                              dict(atom=atom_test, obligat=False)
+                          ]
+                      ])
 
-        [dict(atom=atom_none, obligat=True),
-         dict(atom=atom_force, obligat=False),
-         dict(atom=atom_test, obligat=False)]
-    ]
-
-    if not check_options(_arg_struct, rules, 'export'):
+    if ret['message'] is not None:
         return
 
-    # Normalize for easy access: -t -> --test etc.
-    args = argument_checker.normalize_option_matrix(_arg_struct, rules)
-
     # Get destination
-    if 'path' in args['names']:
-        destination = args['args'][0]
+    if 'path' in ret['options']:
+        destination = ret['options']['path']
     else:
         try:
-            destination = config.read_pickle()[plump.EXPORT_PREFIX
-                                        + '.' + args['args'][0]]
+            destination = config.read_pickle()[plump.EXPORT_PREFIX + '.' + ret['options']['']]
         except:
-            print('Destination value not defined. Create it with ' +
-                  '"config -s=export.' + args['args'][0] + '" first.')
+            print("Destination value not defined. Create it with config -s='export.{}' first."
+                  .format(ret['options']['']))
             return
 
     if destination is None:
@@ -370,12 +393,12 @@ def cmd_export(_arg_struct):
 
     # [dict(name='image001.jpg', exists='true')]
     analysis = export.analyse(task.get_actual(), destination)
-    if 'test' in args['names']:
+    if 'test' in ret['options']:
         export.test(analysis, src_dir, destination)
         return
 
     # export --force
-    if 'force' in args['names']:
+    if 'force' in ret['options']:
         print(str(len(files)) + ' images in ' + task.get_actual()['task']
               + '/' + plump.DIR_FINAL)
         print('Destination: ' + destination)
@@ -398,12 +421,12 @@ def cmd_export(_arg_struct):
             export.copy(analysis, src_path, destination)
 
 
-def cmd_task(_arg_struct):
+def cmd_task(cmd_list):
     """
     Task manipulation.
     """
 
-    # Command needs an existing fw.
+    # Command needs an existing fow.
     if not plump.is_fow():
         return
 
@@ -411,66 +434,146 @@ def cmd_task(_arg_struct):
     # if not checkArgs(_arg_dict,
     #    {'-t': 0, '--test': 0, '-p': 2, '--path': 2}):
     #    return
-    atom_create = dict(name='create', short='c', args=2)
-    atom_activate = dict(name='activate', short='a', args=2)
-    atom_next = dict(name='next', short='n', args=0)
-    atom_previous = dict(name='previous', short='p', args=0)
-    atom_short = dict(name='short', short='s', args=0)
-    atom_long = dict(name='long', short='l', args=0)
-    atom_raw_import = dict(name='raw-import', short='r', args=0)
-    atom_fill_final = dict(name='fill-final', short='f', args=0)
-    atom_test = dict(name='test', short='t', args=0)
-    atom_none = dict(name='', short='', args=0)
+    atom_none = dict(name='', short='', args=NONE_PARAM)
+    atom_create = dict(name='create', short='c', args=MANDATORY_PARAM)
+    atom_activate = dict(name='activate', short='a', args=MANDATORY_PARAM)
+    atom_next = dict(name='next', short='n', args=NONE_PARAM)
+    atom_previous = dict(name='previous', short='p', args=NONE_PARAM)
+    atom_short = dict(name='short', short='s', args=NONE_PARAM)
+    atom_long = dict(name='long', short='l', args=NONE_PARAM)
+    atom_raw_import = dict(name='raw-import', short='r', args=NONE_PARAM)
+    atom_fill_final = dict(name='fill-final', short='f', args=NONE_PARAM)
+    atom_test = dict(name='test', short='t', args=NONE_PARAM)
 
-    # print('_arg_struct=' + str(_arg_struct))
-    rules = [
-        [dict(atom=atom_none, obligat=True)],
+    ret = check_rules(cmd_list,
+                      [
+                          [
+                              dict(atom=atom_create, obligat=True)
+                          ],
+                          [
+                              dict(atom=atom_activate, obligat=True)
+                          ],
+                          [
+                              dict(atom=atom_none, obligat=True),
+                              dict(atom=atom_short, obligat=False)
+                          ],
+                          [
+                              dict(atom=atom_none, obligat=True),
+                              dict(atom=atom_long, obligat=False)
+                          ],
+                          [
+                              dict(atom=atom_next, obligat=True)
+                          ],
+                          [
+                              dict(atom=atom_previous, obligat=True)
+                          ],
+                          [
+                              dict(atom=atom_raw_import, obligat=True),
+                              dict(atom=atom_test, obligat=False)
+                          ],
+                          [
+                              dict(atom=atom_fill_final, obligat=True),
+                              dict(atom=atom_test, obligat=False)
+                          ]
+                      ])
 
-        [dict(atom=atom_create, obligat=True)],
-
-        [dict(atom=atom_activate, obligat=True)],
-
-        [dict(atom=atom_next, obligat=True)],
-
-        [dict(atom=atom_previous, obligat=True)],
-
-        [dict(atom=atom_raw_import, obligat=True),
-         dict(atom=atom_test, obligat=False)],
-
-        [dict(atom=atom_fill_final, obligat=True),
-         dict(atom=atom_test, obligat=False)],
-
-        [dict(atom=atom_short, obligat=True)],
-
-        [dict(atom=atom_long, obligat=True)]
-    ]
-
-    if not check_options(_arg_struct, rules, 'task'):
+    if ret['message'] is not None:
         return
 
-    # Normalize for easy access: -t -> --test etc.
-    args = argument_checker.normalize_option_matrix(_arg_struct, rules)
-    # print('args=' + str(args))
+    # print("cmd_task() ret={}".format(str(ret)))
 
-    # print('Params=' + str(arg_dict))
+    # --- Options to change the actual task (activate or create)---#
+    if 'create' in ret['options'] or 'activate' in ret['options']:
+        if 'create' in ret['options']:
+            path_arg = ret['options']['create']
+        else:
+            path_arg = ret['options']['activate']
+
+        # arg for option '' is the path, Path may not end with '/'
+        if path_arg is not None and len(path_arg) > 0 and path_arg[-1] == '/':
+            path_arg = path_arg[0:-1]
+
+        # Extract folder and task name
+        if path_arg.count('/') > 2:
+            print('Path too long, use [[' + plump.DIR_02 + ']/<folder>/]]<task>')
+            return
+
+        # print("cmd_task() path_arg={}".format(str(path_arg)))
+        # Dictionary with all task parts
+        path = dict(folder=None, task=None, ft=None, path=None)
+        if path_arg.count('/') == 2:
+            # print(args['args'][0])
+            if not path_arg.startswith(plump.DIR_02 + '/'):
+                print('Invalid path. Try [[' + plump.DIR_02 +
+                      '/]<folder>/]]<task>.')
+                return
+            else:
+                parts = path_arg.split('/')
+                path['folder'] = parts[-2]
+                path['task'] = parts[-1]
+
+        elif path_arg.count('/') == 1:
+            parts = path_arg.split('/')
+            path['folder'] = parts[-2]
+            path['task'] = parts[-1]
+
+        else:
+            path['task'] = path_arg
+
+        # If only task is given, take the active folder
+        if path['folder'] is None:
+            if task.get_actual() is None:
+                print('No actual task set, please specify the folder, too: ' +
+                      '[[' + plump.DIR_02 + '/]<folder>/]]<task>')
+                return
+            path['folder'] = task.get_actual()['folder']
+
+        # For convenience usage
+        path['ft'] = path['folder'] + '/' + path['task']
+        path['path'] = plump.get_path(plump.DIR_02) + '/' + path['ft']
+
+        # task --create <task>
+        if 'create' in ret['options']:
+            if os.path.exists(path['path']):
+                print('task ' + str(path['ft']) + ' already exists.' +
+                      ' Choose a different name to create a new task.')
+                return
+
+            os.makedirs(path['path'])
+            os.mkdir(path['path'] + '/' + plump.DIR_FINAL)
+            os.mkdir(path['path'] + '/' + plump.DIR_JPG)
+            os.mkdir(path['path'] + '/' + plump.DIR_RAW)
+            os.mkdir(path['path'] + '/' + plump.DIR_WORK)
+            os.mkdir(path['path'] + '/' + plump.DIR_VIDEO)
+            config.set_item(plump.TASK, path['ft'])
+            return
+
+        if 'activate' in ret['options']:
+            # print('path =' + str(path))
+            if not os.path.exists(path['path']):
+                print('task ' + str(path['ft']) + ' does not exist.' +
+                      ' To create a new task use "task --create [<folder>/]<task>"')
+                return
+
+            config.set_item(plump.TASK, path['ft'])
+            return
 
     # --- Options for the actual task ---#
 
     # task --short
     # task
     # task --long
-    if 'short' in args['names'] or 'long' in args['names'] \
-            or len(args['names']) == 0:
+    if 'short' in ret['options'] or 'long' in ret['options'] or len(ret['options']) == 1:
         if task.get_actual() is None:
             print('No actual task. ' +
                   'Use "task --create <task>" to create one.')
         else:
-            if 'short' in args['names']:
+            if 'short' in ret['options']:
                 print('Actual task {}. Showing a summary.'.format(task.get_actual()['task']))
                 show.task_summary(
                     plump.get_path(plump.DIR_02) + '/'
                     + task.get_actual()['task'])
-            elif 'long' in args['names']:
+            elif 'long' in ret['options']:
                 print('Actual task is {}. Listing all image files.'.format(task.get_actual()['task']))
                 show.show_task(
                     plump.get_path(plump.DIR_02) + '/'
@@ -483,7 +586,7 @@ def cmd_task(_arg_struct):
 
     # task --raw-import
     # task --raw-import --test
-    if 'raw-import' in args['names'] or 'missing-raws' in args['names']:
+    if 'raw-import' in ret['options']:
         if task.get_actual() is None:
             print('No actual task set, please specify the folder, too: ' +
                   '[' + plump.get_path(plump.DIR_02) + '/]<folder>/<task>')
@@ -495,12 +598,12 @@ def cmd_task(_arg_struct):
             + '/' + plump.DIR_JPG,
             plump.get_path(plump.DIR_01) + '/' + plump.DIR_RAW,
             plump.get_path(plump.DIR_02) + '/' + task.get_actual()['task']
-            + '/' + plump.DIR_RAW, 'test' in args['names'])
+            + '/' + plump.DIR_RAW, 'test' in ret['options'])
         return
 
     # task --fill-final
     # task --fill-final --test
-    if 'fill-final' in args['names']:
+    if 'fill-final' in ret['options']:
         if task.get_actual() is None:
             print('No actual task set, please specify the folder, too: ' +
                   '[' + plump.get_path(plump.DIR_02) + '/]<folder>/<task>')
@@ -513,13 +616,13 @@ def cmd_task(_arg_struct):
             plump.get_path(plump.DIR_02) + '/' +
             task.get_actual()['task']
             + '/' + plump.DIR_FINAL,
-            'test' in args['names'])
+            'test' in ret['options'])
         return
 
     # task --next
     # task --previous
-    if 'next' in args['names'] or 'previous' in args['names']:
-        if 'previous' in args['names']:
+    if 'next' in ret['options'] or 'previous' in ret['options']:
+        if 'previous' in ret['options']:
             offset = -1
         else:
             offset = 1
@@ -546,111 +649,35 @@ def cmd_task(_arg_struct):
                                   str(new_triple['n_task']['task'])))
         return
 
-    # --- Options to change the actual task ---#
 
-    # arg 0 is the path, Path may not end with '/'
-    if len(args['args'][0]) > 0 and args['args'][0][-1] == '/':
-        args['args'][0] = args['args'][0][0:-1]
-
-    # Extract folder and task name
-    if args['args'][0].count('/') > 2:
-        print('Path too long, use [[' + plump.DIR_02 + ']/<folder>/]]<task>')
-        return
-
-    # Dictionary with all task parts
-    path = dict(folder=None, task=None, ft=None, path=None)
-    if args['args'][0].count('/') == 2:
-        # print(args['args'][0])
-        if not args['args'][0].startswith(plump.DIR_02 + '/'):
-            print('Invalid path. Try [[' + plump.DIR_02 +
-                  '/]<folder>/]]<task>.')
-            return
-        else:
-            parts = args['args'][0].split('/')
-            path['folder'] = parts[-2]
-            path['task'] = parts[-1]
-    elif args['args'][0].count('/') == 1:
-        parts = args['args'][0].split('/')
-        path['folder'] = parts[-2]
-        path['task'] = parts[-1]
-    else:
-        path['task'] = args['args'][0]
-
-    # If only task is given, take the active folder
-    if path['folder'] is None:
-        if task.get_actual() is None:
-            print('No actual task set, please specify the folder, too: ' +
-                  '[[' + plump.DIR_02 + '/]<folder>/]]<task>')
-            return
-        path['folder'] = task.get_actual()['folder']
-
-    # For conveniencly usage
-    path['ft'] = path['folder'] + '/' + path['task']
-    path['path'] = plump.get_path(plump.DIR_02) + '/' + path['ft']
-
-    # task --create <task>
-    if 'create' in args['names']:
-        if os.path.exists(path['path']):
-            print('task ' + path['ft'] + ' already exists.' +
-                  ' Choose a different name to create a new task.')
-            return
-
-        os.makedirs(path['path'])
-        os.mkdir(path['path'] + '/' + plump.DIR_FINAL)
-        os.mkdir(path['path'] + '/' + plump.DIR_JPG)
-        os.mkdir(path['path'] + '/' + plump.DIR_RAW)
-        os.mkdir(path['path'] + '/' + plump.DIR_WORK)
-        os.mkdir(path['path'] + '/' + plump.DIR_VIDEO)
-        config.set_item(plump.TASK, path['ft'])
-        return
-
-    if 'activate' in args['names']:
-        # print('path =' + str(path))
-        if not os.path.exists(path['path']):
-            print('task ' + path['ft'] + ' does not exist.' +
-                  ' To create a new task use "task --create [<folder>/]<task>"')
-            return
-
-        config.set_item(plump.TASK, path['ft'])
-
-
-def cmd_backup(_arg_struct):
+def cmd_backup(cmd_list):
     """
     Backup data to external file system. Input is the argument structure.
     """
-    # 0: No param allowed, 1: param optional, 2: param obligatory
-    # if not checkArgs(_arg_dict,
-    #    {'-t': 0, '--test': 0, '-p': 2, '--path': 2}):
-    #    return
+    atom_none = dict(name='', short='', args=NONE_PARAM)
+    atom_path = dict(name='path', short='p', args=MANDATORY_PARAM)
+    atom_test = dict(name='test', short='t', args=NONE_PARAM)
 
-    atom_test = dict(name='test', short='t', args=0)
-    atom_path = dict(name='path', short='p', args=2)
-    atom_none = dict(name='', short='', args=0)
+    ret = check_rules(cmd_list,
+                      [
+                          [
+                              dict(atom=atom_none, obligat=True),
+                              dict(atom=atom_path, obligat=False),
+                              dict(atom=atom_test, obligat=False)
+                          ]
+                      ])
 
-    # atomNone must be mandatory for rules with more than one path
-    rules = [
-        [dict(atom=atom_path, obligat=True),
-         dict(atom=atom_test, obligat=False)],
-
-        [dict(atom=atom_none, obligat=True),
-         dict(atom=atom_test, obligat=False)]
-    ]
-
-    if not check_options(_arg_struct, rules, 'backup'):
+    if ret['message'] is not None:
         return
 
-    # Normalize for easy access: -t -> --test etc.
-    args = argument_checker.normalize_option_matrix(_arg_struct, rules)
-    # print('args=' + str(args))
-
     # backup --path <path>
-    if 'path' in args['names']:
-        path = args['args'][0]
+    if 'path' in ret['options']:
+        path = ret['options']['path']
     # backup
     else:
         if plump.BACKUP_PATH not in config.read_pickle() or \
-                        config.read_pickle()[plump.BACKUP_PATH] == 'None' or \
-                        config.read_pickle()[plump.BACKUP_PATH] is None:
+                config.read_pickle()[plump.BACKUP_PATH] == 'None' or \
+                config.read_pickle()[plump.BACKUP_PATH] is None:
             print('Backup directory not set. Use "backup <path>" for this ' +
                   'call or set backup path with "config backupDir <path>".')
             return
@@ -658,7 +685,7 @@ def cmd_backup(_arg_struct):
             path = config.read_pickle()[plump.BACKUP_PATH]
 
     # backup --test
-    if 'test' in args['names']:
+    if 'test' in ret['options']:
         option_test = ' --dry-run '
     else:
         option_test = ' '
@@ -676,43 +703,41 @@ def cmd_backup(_arg_struct):
               + path)
 
 
-def cmd_show(_arg_struct):
+def cmd_show(cmd_list):
     """
     Processing step reporting
     """
 
-    atom_short = dict(name='short', short='s', args=1)
-    atom_none = dict(name='', short='', args=1)
+    atom_short = dict(name='short', short='s', args=NONE_PARAM)
+    atom_none = dict(name='', short='', args=OPTIONAL_PARAM)
 
     # atomNone must be mandatory for rules with more than one path
-    rules = [[dict(atom=atom_none, obligat=True)],
-             [dict(atom=atom_short, obligat=False)]]
-
-    if not check_options(_arg_struct, rules, 'show'):
+    ret = check_rules(cmd_list,
+                      [
+                          [
+                              dict(atom=atom_none, obligat=True),
+                              dict(atom=atom_short, obligat=False)
+                          ]
+                      ])
+    if ret['message'] is not None:
         return
 
-    # Normalize for easy access: -t -> --test etc.
-    # args = {names=[<option1>,...], args=[<arg1>,...]}
-    args = argument_checker.normalize_option_matrix(_arg_struct, rules)
-
-    # print(str(args))
-
-    if 'inbox' in args['args']:
-        if 'short' in args['names']:
+    if ret['options'][''] == 'inbox':
+        if 'short' in ret['options']:
             show.in_summary(plump.get_path(plump.DIR_00))
         else:
             show.show_in(plump.get_path(plump.DIR_00))
         return
 
-    if 'import' in args['args']:
-        if 'short' in args['names']:
+    if ret['options'][''] == 'import':
+        if 'short' in ret['options']:
             show.in_summary(plump.get_path(plump.DIR_01))
         else:
             show.show_in(plump.get_path(plump.DIR_01))
         return
 
-    if 'in' in args['args']:
-        if 'short' in args['names']:
+    if ret['options'][''] == 'in':
+        if 'short' in ret['options']:
             print('inbox:')
             show.in_summary(plump.get_path(plump.DIR_00))
             print('import:')
@@ -724,20 +749,21 @@ def cmd_show(_arg_struct):
             show.show_in(plump.get_path(plump.DIR_01))
         return
 
-    if 'tasks' in args['args']:
-        if 'short' in args['names']:
+    if ret['options'][''] == 'tasks':
+        if 'short' in ret['options']:
             show.tasks_summary()
         else:
             show.tasks()
         return
 
-    if 'task' in args['args'] or len(args['args']) == 0:
+    # if 'task' in args['args'] or len(args['args']) == 0:
+    if ret['options'][''] in ('task', None):
         if task.get_actual() is None:
             print('No actual task. ' +
                   'Use "task --create <task>" to create one.')
         else:
             print('Actual task is ' + task.get_actual()['task'] + '.')
-            if 'short' in args['names']:
+            if 'short' in ret['options']:
                 show.task_summary(plump.get_path(plump.DIR_02) + '/'
                                   + task.get_actual()['task'])
             else:
@@ -746,75 +772,97 @@ def cmd_show(_arg_struct):
         return
 
 
-def cmd_config(_arg_struct):
+def cmd_config(cmd_list):
     """
     Set or delete a config item
     """
 
-    atom_delete = dict(name='delete', short='d', args=2)
-    atom_list = dict(name='list', short='l', args=1)
-    atom_none = dict(name='', short='', args=0)
-    atom_set = dict(name='set', short='s', args=2)
+    # Restrictions for rule building:
+    # - If none has OPTIONAL_PARAMETER, avoid a second OPTIONAL_PARAMETER
+    atom_none = dict(name='', short='', args=NONE_PARAM)
+    atom_list = dict(name='list', short='l', args=OPTIONAL_PARAM)
+    atom_set = dict(name='set', short='s', args=MANDATORY_PARAM)
+    atom_delete = dict(name='delete', short='d', args=MANDATORY_PARAM)
 
-    # atomNone must be mandatory for rules with more than one path
-    rules = [[dict(atom=atom_none, obligat=True)],
+    ret = check_rules(cmd_list,
+                      [
+                          [
+                              dict(atom=atom_none, obligat=True)
+                          ],
+                          [
+                              dict(atom=atom_list, obligat=True)
+                          ],
+                          [
+                              dict(atom=atom_delete, obligat=True)
+                          ],
+                          [
+                              dict(atom=atom_set, obligat=True)
+                          ]
+                      ])
 
-             [dict(atom=atom_list, obligat=True)],
-
-             [dict(atom=atom_delete, obligat=True)],
-
-             [dict(atom=atom_set, obligat=True)]]
-
-    if not check_options(_arg_struct, rules, 'config'):
+    if ret['message'] is not None:
         return
-
-    # Normalize for easy access: -t -> --test etc.
-    # args = {names=[<option1>,...], args=[<arg1>,...]}
-    args = argument_checker.normalize_option_matrix(_arg_struct, rules)
 
     settings = config.read_pickle()
+    unknown_msg = "Key '{0}' not found."
 
-    if 'delete' in args['names']:
-        del settings[args['args'][0]]
-        # settings[args['args'][0]] = 'None'
-        config.create_pickle(settings)
+    if 'delete' in ret['options']:
+        arg = ret['options']['delete']
+        if arg in settings:
+            del settings[arg]
+            config.create_pickle(settings)
+        else:
+            print(unknown_msg.format(arg))
+
         return
 
-    if 'list' in args['names'] or len(args['names']) == 0:
-        if len(args['args']) == 0:
+    if 'set' in ret['options']:
+        arg = ret['options']['set']
+        (key, value) = arg.split('=')
+        settings[key] = value
+        config.create_pickle(settings)
+
+        return
+
+    if 'list' in ret['options'] or '' in ret['options']:
+        if 'list' in ret['options']:
+            arg = ret['options']['list']
+        else:
+            arg = ret['options']['']
+
+        if arg is None:
             items = list(settings.items())
             items.sort()
             for key, value in items:
                 print((key + ' = ' + str(value)))
+        elif arg in settings:
+            print((settings[arg]))
         else:
-            print((settings[args['args'][0]]))
+            print(unknown_msg.format(arg))
 
-    if 'set' in args['names']:
-        (key, value) = args['args'][0].split('=')
-        settings[key] = value
-        config.create_pickle(settings)
+        return
 
 
-def cmd_init(_arg_struct):
+def cmd_init(cmd_list):
     """
     Initializes the fow. Call this once.
     """
 
-    atom_force = dict(name='force', short='f', args=0)
-    atom_none = dict(name='', short='', args=0)
+    atom_force = dict(name='force', short='f', args=NONE_PARAM)
+    atom_none = dict(name='', short='', args=NONE_PARAM)
 
-    # Set atomNone as non-obligat, otherwise check will fail
-    rules = [[dict(atom=atom_none, obligat=True),
-              dict(atom=atom_force, obligat=False)]]
+    ret = check_rules(cmd_list,
+                      [
+                          [
+                              dict(atom=atom_none, obligat=True),
+                              dict(atom=atom_force, obligat=False)
+                          ]
+                      ])
 
-    if not check_options(_arg_struct, rules, 'init'):
+    if ret['message'] is not None:
         return
 
-    # Normalize for easy access: -t -> --test etc.
-    args = argument_checker.normalize_option_matrix(_arg_struct, rules)
-    # print('args=' + str(args))
-
-    if not 'force' in args['names']:
+    if 'force' not in ret['options']:
         for my_dir in plump.getAllFowDirs().values():
             if plump.exist_dir(my_dir):
                 print('"' + my_dir + '" already exists. ' + 'Use -f option to ' +
@@ -856,41 +904,41 @@ def fow(args=None):
         print('fow version ' + plump.VERSION + '. "help" shows all commands.')
         return
 
-    # print((str(len(cmds)) + ' args=' + str(cmds)))
     cmds = args[1:]
+    # print('fow() cmds=' + str(cmds))
 
     if cmds[0] == 'help':
-        cmd_help(plump.to_arg_struct(cmds[1:]))
+        cmd_help(cmds)
 
     elif cmds[0] == 'config':
-        cmd_config(plump.to_arg_struct(cmds[1:]))
+        cmd_config(cmds)
 
     elif cmds[0] == 'init':
-        cmd_init(plump.to_arg_struct(cmds[1:]))
+        cmd_init(cmds)
 
     elif cmds[0] == 'backup':
-        cmd_backup(plump.to_arg_struct(cmds[1:]))
+        cmd_backup(cmds)
 
     elif cmds[0] == 'task':
-        cmd_task(plump.to_arg_struct(cmds[1:]))
+        cmd_task(cmds)
 
     elif cmds[0] == 'show':
-        cmd_show(plump.to_arg_struct(cmds[1:]))
+        cmd_show(cmds)
 
     elif cmds[0] == 'export':
-        cmd_export(plump.to_arg_struct(cmds[1:]))
+        cmd_export(cmds)
 
     elif cmds[0] == 'load':
-        cmd_load(plump.to_arg_struct(cmds[1:]))
+        cmd_load(cmds)
 
     elif cmds[0] == 'rename':
-        cmd_rename(plump.to_arg_struct(cmds[1:]))
+        cmd_rename(cmds)
 
     elif cmds[0] == 'xe2hack':
-        cmd_xe2hack(plump.to_arg_struct(cmds[1:]))
+        cmd_xe2hack(cmds)
 
     elif cmds[0] == 'gps':
-        cmd_gps(plump.to_arg_struct(cmds[1:]))
+        cmd_gps(cmds)
 
         # elif cmds[0] == 'cd':
         # cmd_cd(plump.toArgStruct(cmds[1:]))
@@ -899,79 +947,41 @@ def fow(args=None):
         print('Unknown command. Use help to list all commands.')
 
 
-def show_help(_arg_struct):
-    """
-    generate help and show it. For specific command help, there has to be one
-    file for each command with name help_<command>.txt. The first line of this
-    file must be the abstract of the command.
-    """
-    atomNone = dict(name='', short='', args=1)
-
-    # For commands with only one path atomNone must be non-obligatory!
-    rules = [[dict(atom=atomNone, obligat=True)]]
-
-    if not check_options(_arg_struct, rules, ''):
-        return
-
-    # Normalize for easy access: -t -> --test etc.
-    args = argument_checker.normalize_option_matrix(_arg_struct, rules)
-    # help
-    if len(args['args']) == 0:
-        # Get all help files in the help dir
-
-        try:
-            pattern = re.compile('help_\w+.txt')
-            names = [f for f in os.listdir(config.get_help_file_dir())
-                     if os.path.isfile(os.path.join(
-                    config.get_help_file_dir(), f))
-                     and pattern.match(f)]
-            print('fow commands:')
-            out = ''
-            for f in names:
-                with open(os.path.join(
-                        config.get_help_file_dir(), f)) as help_file:
-                    out += help_file.readline()
-                    # print(help_file.readline(), end='')
-            print(out[0:-1])
-        except:
-            print('Uuups, could not find the help files in directory "' +
-                  config.get_help_file_dir()
-                  + '". Please, check your fow installation.')
-            return
-
-    # help <command>
-    elif len(args['args']) == 1:
-        try:
-            with open(os.path.join(config.get_help_file_dir(),
-                                   'help_' + args['args'][0] + '.txt'), 'r') as data:
-                out = ''
-                for each_line in data:
-                    out += each_line
-                    # print(each_line, end='')
-                print(out[0:-1])
-        except:
-            print(args['args'][0] + ' is unknown. ' +
-                  'Use help to see all commands.')
-
-
-def cmd_help(_arg_struct):
+def cmd_help(cmd_list):
     """
     Show man page. For specific command help, there has to be one
     file for each command with name fow-<command>. The first line of this
     file must be the abstract of the command.
     """
-    atomNone = dict(name='', short='', args=1)
+    atom_none = dict(name='', short='', args=OPTIONAL_PARAM)
 
-    # For commands with only one path atomNone must be non-obligatory!
-    rules = [[dict(atom=atomNone, obligat=True)]]
+    ret = check_rules(cmd_list,
+                      [
+                          [dict(atom=atom_none, obligat=True)
+                           ]
+                      ])
 
-    if not check_options(_arg_struct, rules, ''):
+    if ret['message'] is not None:
         return
 
-    ##Normalize for easy access: -t -> --test etc.
-    args = argument_checker.normalize_option_matrix(_arg_struct, rules)
+    # help <command>
+    if ret['options'][''] is not None:
+        i = 0
+        # try:
+        # For developing call man page local, without index db
+        if config.read_installation_item('MAN_DIRECT'):
+            i = os.system('man -l ' + config.get_help_file_dir() +
+                          '/fow-' + ret['options'][''] + '.1.gz')
+        else:
+            i = os.system('man ' + 'fow-' + ret['options'][''])
+        # except:
+        #     # Does't work, no exception thrown
+        #     print(ret['options'][''] + ' is unknown. ' + 'Use help to see all commands.')
+        if i != 0:
+            print("See 'fow help'.")
+
     # help
-    if len(args['args']) == 0:
+    else:
 
         # Get all help files in the help dir, stored as man page
         try:
@@ -985,7 +995,7 @@ def cmd_help(_arg_struct):
                      and pattern.match(f)]
             names.sort()
             # print('names=' + str(names))
-            print(('fow commands:'))
+            print('fow commands:')
             out = ''
             for f in names:
                 with gzip.open(os.path.join(
@@ -1005,16 +1015,3 @@ def cmd_help(_arg_struct):
                   'to the man dirs, e.g. ')
             print('    HELP_FILE_DIR=/usr/share/man/man1')
             return
-
-    # help <command>
-    elif len(args['args']) == 1:
-        try:
-            # For developing call man page local, without index db
-            if config.read_installation_item('MAN_DIRECT'):
-                os.system('man -l ' + config.get_help_file_dir() +
-                          '/fow-' + args['args'][0] + '.1.gz')
-            else:
-                os.system('man ' + 'fow-' + args['args'][0])
-        except:
-            print(args['args'][0] + ' is unknown. ' +
-                  'Use help to see all commands.')

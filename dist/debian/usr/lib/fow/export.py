@@ -72,7 +72,7 @@ def copy(analysis, src_dir, destination_dir):
     """
     Copies files. Create, if task specific subdirectory doesn't exists.
     """
-    print('Copy(): dest={}'.format(destination_dir))
+    # print('Copy(): dest={}'.format(destination_dir))
 
     # Create path
     if not os.path.exists(destination_dir):

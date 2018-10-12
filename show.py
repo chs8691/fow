@@ -21,8 +21,8 @@ def in_summary(path):
     if not DIR_VIDEO in dirs:
         print('Subdirectory missing: ' + DIR_VIDEO)
 
-    print('Files in subdirs: ' +
-          str(len([s for s in stats if s['jpsg']])) + ' jpgs, ' +
+    print('Files in sub dirs: ' +
+          str(len([s for s in stats if s['jpg']])) + ' jpgs, ' +
           str(len([s for s in stats if s['raw']])) + ' raws, ' +
           str(len([s for s in stats if s['video']])) + ' videos.')
 

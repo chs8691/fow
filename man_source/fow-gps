@@ -7,17 +7,16 @@ gps \- add gps locations to images or show image location on a map (JPG)
 .SH SYNOPSIS
 There are two different modes, the command can be used for:
 .TP
-gps [\-\-path <images sub dir>|<destination>] [\-\-source <track file source path>] [\-\-verbose] [\-\-test|\-\-force]
+gps [\-\-path <images sub dir>|\-\-write] [\-\-source <track file source path>] [\-\-verbose] [\-\-test|\-\-force]
 Add gps information to all images.
 
 If \-\-source is not used, the logical destination to the track file directory must be set with 'fow config \-\-set gps.tracks=/my/path'
 first.
 
-If neither \-\-path nor <destination> is used, the actual fow final is used for the image sub dir. To use <destination>,
-it must be set once with e.g. 'fow config \-\-set gps.ij=01_Import/jpg'.
+If not \-\-path is used, the actual fow final is used for the image sub dir.
 
 .TP
-gps \-\-map [\-\-path <images sub dir>|<destination>]
+gps \-\-map [\-\-path <images sub dir>]
 Show gps locations from all image files of the specified folder on a map.
 
 
@@ -31,6 +30,11 @@ exiftool uses the actual computer time zone to map image time (EXIF's DateTimeOr
 (normally the UTC time).
 
 .SH OPTIONS
+
+.TP
+--write, -w
+Copy track file to work directory of the actual task. Can't be used for an other destination or with --path
+
 .TP
 --test, -t
 Dry run, simulates but does not update any image files. Can't be used with -m.

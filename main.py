@@ -68,6 +68,7 @@ def cmd_gps(cmd_list):
     atom_none = dict(name='', short='', args=NONE_PARAM)
     atom_path = dict(name='path', short='p', args=MANDATORY_PARAM)
     atom_source = dict(name='source', short='s', args=MANDATORY_PARAM)
+    atom_write = dict(name='write', short='w', args=NONE_PARAM)
     atom_test = dict(name='test', short='t', args=NONE_PARAM)
     atom_map = dict(name='map', short='m', args=NONE_PARAM)
     atom_force = dict(name='force', short='f', args=NONE_PARAM)
@@ -78,7 +79,9 @@ def cmd_gps(cmd_list):
                           [
                               dict(atom=atom_none, obligat=True),
                               dict(atom=atom_source, obligat=False),
+                              dict(atom=atom_write, obligat=False),
                               dict(atom=atom_test, obligat=False),
+                              dict(atom=atom_write, obligat=False),
                               dict(atom=atom_verbose, obligat=False),
                               dict(atom=atom_force, obligat=False)
                           ],
@@ -113,21 +116,22 @@ def cmd_gps(cmd_list):
         # Validated absolute path to the images
         image_path = plump.get_path(ret['options'][''])
 
-    elif ret['options'][''] is not None:
-        key = 'gps.{}'.format(ret['options'][''])
-        if config.read_item(key) is None:
-            print(
-                "Value {0} not configured. Maybe you have to set it first with config -s '{0}=fow-subdir-to-images'".format(
-                    key))
-            return
-        if not os.path.exists(plump.get_path(config.read_item(key))):
-            print((("Destination points to a non existing sub dir: '{0}'. " +
-                    "Maybe the directory is temporary not available or you have to" +
-                    " change the destination with 'config -s {1}=fow-subdir-to-images'"))
-                  .format(str(config.read_item(key)), key))
-            return
-        # Validated absolute path to the images
-        image_path = plump.get_path(config.read_item(key))
+    # elif ret['options'][''] is not None:
+    #     key = 'gps.{}'.format(ret['options'][''])
+    #     if config.read_item(key) is None:
+    #         print(
+    #             "Value {0} not configured. Maybe you have to set it first with
+    # config -s '{0}=fow-subdir-to-images'".format(
+    #                 key))
+    #         return
+    #     if not os.path.exists(plump.get_path(config.read_item(key))):
+    #         print((("Destination points to a non existing sub dir: '{0}'. " +
+    #                 "Maybe the directory is temporary not available or you have to" +
+    #                 " change the destination with 'config -s {1}=fow-subdir-to-images'"))
+    #               .format(str(config.read_item(key)), key))
+    #         return
+    #     # Validated absolute path to the images
+    #     image_path = plump.get_path(config.read_item(key))
 
     # image path is the actual final
     else:
@@ -178,14 +182,24 @@ def cmd_gps(cmd_list):
     else:
         verbose = False
 
+    # gps --write
+    if 'write' in ret['options']:
+        if not os.path.exists(os.path.join(task.get_actual()['path'], plump.DIR_WORK)):
+            print("Missing sub directory {}.".format(plump.DIR_WORK))
+            return
+        else:
+            write_path = os.path.join(task.get_actual()['path'], plump.DIR_WORK)
+    else:
+        write_path = None
+
     # gps --test
     if 'test' in ret['options']:
-        fow_gps.test(analysis, verbose)
+        fow_gps.test(analysis, verbose, write_path)
         return
 
     # gps
     else:
-        fow_gps.do(analysis, True, verbose)
+        fow_gps.do(analysis, True, verbose, write_path)
 
 
 def cmd_rename(cmd_list):

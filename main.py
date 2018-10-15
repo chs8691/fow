@@ -173,15 +173,6 @@ def cmd_gps(cmd_list):
         # Validated absolute path to the images
         track_path = config.read_item(plump.GPS_TRACK_PATH)
 
-    analysis = fow_gps.analyse(track_path, image_path)
-    # print('cmd_gps() analysis=' + str(analysis))
-
-    # gps --verbose
-    if 'verbose' in ret['options']:
-        verbose = True
-    else:
-        verbose = False
-
     # gps --write
     if 'write' in ret['options']:
         if not os.path.exists(os.path.join(task.get_actual()['path'], plump.DIR_WORK)):
@@ -191,6 +182,15 @@ def cmd_gps(cmd_list):
             write_path = os.path.join(task.get_actual()['path'], plump.DIR_WORK)
     else:
         write_path = None
+
+    analysis = fow_gps.analyse(track_path, image_path, write_path)
+    # print('cmd_gps() analysis=' + str(analysis))
+
+    # gps --verbose
+    if 'verbose' in ret['options']:
+        verbose = True
+    else:
+        verbose = False
 
     # gps --test
     if 'test' in ret['options']:

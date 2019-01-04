@@ -1,0 +1,44 @@
+." Manpage for fow.exif
+." Contact christian.schulzendorff@arcor.de to correct errors or typos.
+.TH FOW-EXIF 1 "04 Januar 2019" "Fow manual" "fow exif"
+.SH "NAME"
+exif \- Set or show EXIF values for final images of the actual task
+.SH "SYNOPSIS"	
+.TP
+exif [\-\-title  <value>] [\-\-description  <value>] [\-\-author] [\-\-force] [\-\-verbose] [<image>|<image nr>|all]
+.TP
+exif [\-\-verbose] [<image>|<image nr>|all]
+.TP
+With the first command, EXIF values will be set. It must set at least on tag (title, description or author). With \
+the second command, the EXIF tags can be shown.
+.PP
+The command just handles image files (jpg) in the final directory of the actual task. \
+By the last parameter, the files will be selected: A particular file name with <image>, the number of the file, \
+ordered like 'fow task' with <image nr> or 'all' to select all images. Without this parameter, \
+theq first image is choosen (same as '1').
+.PP
+For '\-\-author', the config value 'exif.author' must exists. It can be set with the config command. \
+The placeholder '{YYYY}' can be used to set the actual year, e. g. for a copyright.
+.PP
+Only empty exif values will be set. To overwrite values, [\-\-force] must be used.
+
+.SH "OPTIONS"
+Options:
+.TP
+\-\-title, \-t <value>
+Set the title with the given text (use '  ' to enclose more-word texts).
+.TP
+\-\-description, \-d <value>
+Set the description with the given text (use '  ' to enclose more-word texts)..TP
+.TP
+\-\-author, \-a
+Set the author with the text from the given config value 'exif.author'.
+.TP
+\-\-check, \-c <value>
+Dry run; just output what would be done.
+.TP
+\-\-force, \-f
+Overwrite existing exif values.
+.TP
+\-\-verbose, \-v
+Print also an info for untouched/unset tags.

@@ -68,7 +68,7 @@ def map(image_path):
 
     map = Map()
     images = list_jpg(image_path)
-    exifs = images_get_exifs(image_path, images)
+    exifs = images_get_exifs(image_path, images, report=True)
 
     # Sorted list by date, so the labels will be sorted
     names = list()
@@ -120,7 +120,7 @@ def analyse(track_path, image_path, write_path):
     # for each in images:
     #     ret['files'].append(dict(image_name=each))
 
-    exifs = images_get_exifs(image_path, images)
+    exifs = images_get_exifs(image_path, images, True)
     existing_track_files = []
     # print("anlyse() exifs={}".format(str(exifs)))
     for each in exifs:

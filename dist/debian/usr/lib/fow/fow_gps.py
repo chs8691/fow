@@ -4,6 +4,7 @@ import re
 
 import sys
 import webbrowser
+from shutil import copy
 
 from plump import DIR_FOW, get_fow_root, list_video, list_jpg, images_get_exifs, image_get_exifs, image_write_gps, progress_prepare
 
@@ -67,7 +68,7 @@ def map(image_path):
 
     map = Map()
     images = list_jpg(image_path)
-    exifs = images_get_exifs(image_path, images)
+    exifs = images_get_exifs(image_path, images, report=True)
 
     # Sorted list by date, so the labels will be sorted
     names = list()
@@ -89,7 +90,7 @@ def map(image_path):
         webbrowser.open(file_path)
 
 
-def analyse(track_path, image_path):
+def analyse(track_path, image_path, write_path):
     """
     Analyses for gps command for all image files in the given image_path. Tracks will be searched in track_path. Both
     directories should exist and should be accessible; but they can be empty. Subdirectories are not supported, neither
@@ -107,7 +108,7 @@ def analyse(track_path, image_path):
             dict=(...), ...
         ]
     """
-    ret = dict(track_path=track_path, image_path=image_path, files=[])
+    ret = dict(track_path=track_path, image_path=image_path, files=[], existing_track_files=[])
 
     images = list_video(image_path)
     images.extend(list_jpg(image_path))
@@ -119,7 +120,8 @@ def analyse(track_path, image_path):
     # for each in images:
     #     ret['files'].append(dict(image_name=each))
 
-    exifs = images_get_exifs(image_path, images)
+    exifs = images_get_exifs(image_path, images, True)
+    existing_track_files = []
     # print("anlyse() exifs={}".format(str(exifs)))
     for each in exifs:
         # print("analyse() {} {}".format(str(each['name']), str(each['createdate'])))
@@ -131,13 +133,23 @@ def analyse(track_path, image_path):
             pattern = re.compile(".*{0}.?{1}.?{2}.*\.(tcx|gpx)".format(y, m, d))
             # print("analyse() {0} track_files={1}".format(each['name'], str(track_files)))
             track_files = [f for f in gpx_files if not pattern.match(f) is None]
+
+            # Find existing track files, that would be overwritten
+            if write_path is not None:
+                for dest in os.listdir(write_path):
+                    for src in (t for t in track_files if t == dest):
+                        existing_track_files.append(src)
+                        # print("analyse() exists={}".format(src))
+
             ret['files'].append(dict(image_name=each['name'], image_gps=each['gps'], tracks=track_files))
+
+    ret['existing_track_files'] = list(frozenset(existing_track_files))
 
     # print("analyse() ret={}".format(ret))
     return ret
 
 
-def test(analysis, verbose):
+def test(analysis, verbose, write_path):
     """
     Dry run of rename command.
     verbose - boolean
@@ -149,6 +161,7 @@ def test(analysis, verbose):
             tracks=['2017-03-05.gpx', ...],     # list with names of the track file, can be None
             dict=(...), ...
         ]
+    :param write_path: Path to the copy directory for the found ttrack file
     """
     cntWithTracks = 0
     cntWithoutTracks = 0
@@ -186,12 +199,28 @@ def test(analysis, verbose):
         if verbose:
             print(formatting.format(status, each['image_name'], has_gps, str(each['tracks'])))
 
-    print(('{} images, {} with potentially track files, {} without track files. ' +
-           '{} with existing gps information (would be overwritten).')
-          .format(len(analysis['files']), cntWithTracks, cntWithoutTracks, cntOverwrite))
+    if write_path is None:
+        print(('{} images, {} with potentially track files, {} without track files. ' +
+               '{} with existing gps information (would be overwritten)')
+              .format(len(analysis['files']), cntWithTracks, cntWithoutTracks, cntOverwrite))
+    else:
+        print(('{} images, {} with potentially track files, {} without track files. ' +
+               '{} with existing gps information (would be overwritten)')
+              .format(len(analysis['files']), cntWithTracks, cntWithoutTracks, cntOverwrite))
+        if len(analysis['existing_track_files']) > 0:
+            if verbose:
+                print('Track files will be copied to {} and would potentially overwrite up to {} files:'
+                      .format(write_path, len(analysis['existing_track_files'])))
+                for each in analysis['existing_track_files']:
+                    print(each)
+            else:
+                print('Track files will be copied to {} and would potentially overwrite up to {} files.'
+                      .format(write_path, len(analysis['existing_track_files'])))
+        else:
+            print('Track files will be copied to {}'.format(write_path))
 
 
-def do(analysis, force, verbose):
+def do(analysis, force, verbose, write_path):
     """
     Cpmmand gps execution.
     """
@@ -201,6 +230,8 @@ def do(analysis, force, verbose):
 
     print('Path to images: {}'.format(analysis['image_path']))
     print('Path to tracks: {}'.format(analysis['track_path']))
+    if write_path is not None:
+        print('Path to write track file copies: {}'.format(write_path))
 
     name_col_len = 1
     # Column length for image name
@@ -212,6 +243,9 @@ def do(analysis, force, verbose):
         # print('Processing images', end='')
         index = 0
         progress = progress_prepare(len(analysis['files']), 'Processing', analysis['image_path'])
+
+    # --write: Do this in a separate step
+    copy_list = []
 
     for each in analysis['files']:
         if not verbose:
@@ -260,10 +294,38 @@ def do(analysis, force, verbose):
             formatting = '{}{} {:<' + str(name_col_len) + '} {}'
             print(formatting.format(action, has_gps, each['image_name'], gpx_name))
 
+        if action != ' ' and write_path is not None:
+            copy_list.append(gpx_name)
+
     if not verbose:
         # print('Done.')
         sys.stdout.write('\n')
 
-    print('{} images processed, {} gps data set (where {} existing gps data were changed)'
-          .format(len(analysis['files']), cnt_set, cnt_overwritten))
+    # --write: Now copy found track files to destination
+    cnt_write_err = 0
+    cnt_write = 0
+    cnt_overwritten = 0
+    for each in frozenset(copy_list):
+        if each in analysis['existing_track_files']:
+            verb = "Done (overwritten)."
+        else:
+            verb = "Done."
+        try:
+            copy(os.path.join(analysis['track_path'], each), write_path)
+            if verbose:
+                print("Copy {} {}".format(each, verb))
+            cnt_write += 1
+            if each in analysis['existing_track_files']:
+                cnt_overwritten += 1
+        except IOError as e:
+            print("Copy {} failed: {}".format(each, e))
+            cnt_write_err += 1
+
+    if write_path is None:
+        print('{} images processed, {} gps data set (where {} existing gps data were changed).'
+              .format(len(analysis['files']), cnt_set, cnt_overwritten))
+    else:
+        print(('{} images processed, {} gps data set (where {} existing gps data were changed). '
+               'Copied {} track file(s), {} overwritten, {} failed.')
+              .format(len(analysis['files']), cnt_set, cnt_overwritten, cnt_write, cnt_overwritten, cnt_write_err))
 

@@ -1,13 +1,110 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="BookmarkManager">
+    <bookmark url="file://$PROJECT_DIR$/main.py" line="388" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="f8cb2df6-95dd-4088-8792-56cc34cf8cc1" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/dist/fow_1.1.7_all.deb" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/fow_gps.py" afterPath="$PROJECT_DIR$/fow_gps.py" />
-      <change beforePath="$PROJECT_DIR$/main.py" afterPath="$PROJECT_DIR$/main.py" />
+      <change beforePath="$PROJECT_DIR$/.directory" beforeDir="false" afterPath="$PROJECT_DIR$/.directory" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/fow.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/fow.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.txt" beforeDir="false" afterPath="$PROJECT_DIR$/README.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argument_checker.py" beforeDir="false" afterPath="$PROJECT_DIR$/argument_checker.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/commands.odg" beforeDir="false" afterPath="$PROJECT_DIR$/commands.odg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/commands.txt" beforeDir="false" afterPath="$PROJECT_DIR$/commands.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config" beforeDir="false" afterPath="$PROJECT_DIR$/config" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/debs/fow_1.1.7_all.deb" beforeDir="false" afterPath="$PROJECT_DIR$/debs/fow_1.1.7_all.deb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/debian/DEBIAN/control" beforeDir="false" afterPath="$PROJECT_DIR$/dist/debian/DEBIAN/control" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/debian/usr/lib/fow/argument_checker.py" beforeDir="false" afterPath="$PROJECT_DIR$/dist/debian/usr/lib/fow/argument_checker.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/debian/usr/lib/fow/config" beforeDir="false" afterPath="$PROJECT_DIR$/dist/debian/usr/lib/fow/config" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/debian/usr/lib/fow/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/dist/debian/usr/lib/fow/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/debian/usr/lib/fow/export.py" beforeDir="false" afterPath="$PROJECT_DIR$/dist/debian/usr/lib/fow/export.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/debian/usr/lib/fow/fow_gps.py" beforeDir="false" afterPath="$PROJECT_DIR$/dist/debian/usr/lib/fow/fow_gps.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/debian/usr/lib/fow/load.py" beforeDir="false" afterPath="$PROJECT_DIR$/dist/debian/usr/lib/fow/load.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/debian/usr/lib/fow/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/dist/debian/usr/lib/fow/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/debian/usr/lib/fow/plump.py" beforeDir="false" afterPath="$PROJECT_DIR$/dist/debian/usr/lib/fow/plump.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/debian/usr/lib/fow/rename.py" beforeDir="false" afterPath="$PROJECT_DIR$/dist/debian/usr/lib/fow/rename.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/debian/usr/lib/fow/show.py" beforeDir="false" afterPath="$PROJECT_DIR$/dist/debian/usr/lib/fow/show.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/debian/usr/lib/fow/task.py" beforeDir="false" afterPath="$PROJECT_DIR$/dist/debian/usr/lib/fow/task.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/debian/usr/lib/fow/xe2hack.py" beforeDir="false" afterPath="$PROJECT_DIR$/dist/debian/usr/lib/fow/xe2hack.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/debian/usr/share/man/man1/fow-backup.1.gz" beforeDir="false" afterPath="$PROJECT_DIR$/dist/debian/usr/share/man/man1/fow-backup.1.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/debian/usr/share/man/man1/fow-config.1.gz" beforeDir="false" afterPath="$PROJECT_DIR$/dist/debian/usr/share/man/man1/fow-config.1.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/debian/usr/share/man/man1/fow-export.1.gz" beforeDir="false" afterPath="$PROJECT_DIR$/dist/debian/usr/share/man/man1/fow-export.1.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/debian/usr/share/man/man1/fow-gps.1.gz" beforeDir="false" afterPath="$PROJECT_DIR$/dist/debian/usr/share/man/man1/fow-gps.1.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/debian/usr/share/man/man1/fow-help.1.gz" beforeDir="false" afterPath="$PROJECT_DIR$/dist/debian/usr/share/man/man1/fow-help.1.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/debian/usr/share/man/man1/fow-init.1.gz" beforeDir="false" afterPath="$PROJECT_DIR$/dist/debian/usr/share/man/man1/fow-init.1.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/debian/usr/share/man/man1/fow-load.1.gz" beforeDir="false" afterPath="$PROJECT_DIR$/dist/debian/usr/share/man/man1/fow-load.1.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/debian/usr/share/man/man1/fow-rename.1.gz" beforeDir="false" afterPath="$PROJECT_DIR$/dist/debian/usr/share/man/man1/fow-rename.1.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/debian/usr/share/man/man1/fow-show.1.gz" beforeDir="false" afterPath="$PROJECT_DIR$/dist/debian/usr/share/man/man1/fow-show.1.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/debian/usr/share/man/man1/fow-task.1.gz" beforeDir="false" afterPath="$PROJECT_DIR$/dist/debian/usr/share/man/man1/fow-task.1.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/debian/usr/share/man/man1/fow-xe2hack.1.gz" beforeDir="false" afterPath="$PROJECT_DIR$/dist/debian/usr/share/man/man1/fow-xe2hack.1.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/commands.odg" beforeDir="false" afterPath="$PROJECT_DIR$/docs/commands.odg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/fow-workflowpng.png" beforeDir="false" afterPath="$PROJECT_DIR$/docs/fow-workflowpng.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/export.py" beforeDir="false" afterPath="$PROJECT_DIR$/export.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fow_gps.py" beforeDir="false" afterPath="$PROJECT_DIR$/fow_gps.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/load.py" beforeDir="false" afterPath="$PROJECT_DIR$/load.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/make_dist" beforeDir="false" afterPath="$PROJECT_DIR$/make_dist" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/man/fow-backup.1.gz" beforeDir="false" afterPath="$PROJECT_DIR$/man/fow-backup.1.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/man/fow-config.1.gz" beforeDir="false" afterPath="$PROJECT_DIR$/man/fow-config.1.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/man/fow-export.1.gz" beforeDir="false" afterPath="$PROJECT_DIR$/man/fow-export.1.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/man/fow-gps.1.gz" beforeDir="false" afterPath="$PROJECT_DIR$/man/fow-gps.1.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/man/fow-help.1.gz" beforeDir="false" afterPath="$PROJECT_DIR$/man/fow-help.1.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/man/fow-init.1.gz" beforeDir="false" afterPath="$PROJECT_DIR$/man/fow-init.1.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/man/fow-load.1.gz" beforeDir="false" afterPath="$PROJECT_DIR$/man/fow-load.1.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/man/fow-rename.1.gz" beforeDir="false" afterPath="$PROJECT_DIR$/man/fow-rename.1.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/man/fow-show.1.gz" beforeDir="false" afterPath="$PROJECT_DIR$/man/fow-show.1.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/man/fow-task.1.gz" beforeDir="false" afterPath="$PROJECT_DIR$/man/fow-task.1.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/man/fow-xe2hack.1.gz" beforeDir="false" afterPath="$PROJECT_DIR$/man/fow-xe2hack.1.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/man_source/fow-backup" beforeDir="false" afterPath="$PROJECT_DIR$/man_source/fow-backup" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/man_source/fow-config" beforeDir="false" afterPath="$PROJECT_DIR$/man_source/fow-config" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/man_source/fow-export" beforeDir="false" afterPath="$PROJECT_DIR$/man_source/fow-export" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/man_source/fow-gps" beforeDir="false" afterPath="$PROJECT_DIR$/man_source/fow-gps" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/man_source/fow-help" beforeDir="false" afterPath="$PROJECT_DIR$/man_source/fow-help" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/man_source/fow-init" beforeDir="false" afterPath="$PROJECT_DIR$/man_source/fow-init" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/man_source/fow-load" beforeDir="false" afterPath="$PROJECT_DIR$/man_source/fow-load" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/man_source/fow-rename" beforeDir="false" afterPath="$PROJECT_DIR$/man_source/fow-rename" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/man_source/fow-show" beforeDir="false" afterPath="$PROJECT_DIR$/man_source/fow-show" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/man_source/fow-task" beforeDir="false" afterPath="$PROJECT_DIR$/man_source/fow-task" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/man_source/fow-xe2hack" beforeDir="false" afterPath="$PROJECT_DIR$/man_source/fow-xe2hack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/plump.py" beforeDir="false" afterPath="$PROJECT_DIR$/plump.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/release.info" beforeDir="false" afterPath="$PROJECT_DIR$/release.info" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rename.py" beforeDir="false" afterPath="$PROJECT_DIR$/rename.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/show.py" beforeDir="false" afterPath="$PROJECT_DIR$/show.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/task.py" beforeDir="false" afterPath="$PROJECT_DIR$/task.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/etest/20170619_gps1.gpx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/etest/IMG_20170619_073647_gps1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/etest/IMG_20170619_073647_gps1.jpg_original" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/etest/src/IMG_20170619_073647_gps1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/photo/.fow/map.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/photo/.fow/setting.pickle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/photo/.fow\map.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/photo/f" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/photo/map.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/photo/output.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/testGps/20170503.gpx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/testGps/IMG_20170503_174607.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/testGps/IMG_20170503_174654.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/tracks/20170503.gpx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/tracks/20170619_gps1.gpx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/tracks/20170619_gps2.gpx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/tracks/20170715-194402-DSCF5221.JPG" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/tracks/20170715.gpx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/tracks/20170721.gpx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/tracks/Christian_Schulzendorff_2017-06-17_12-22-23_BK.tcx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/tracks/Christian_Schulzendorff_2017-08-28_06-56-00.gpx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/tracks/Christian_Schulzendorff_2017-11-06_06-50-19.tcx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/tracks/oruxmap-2017-06-19-route.gpx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/tracks/oruxmap-2017-06-19-route.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/tracks/oruxmap-20170619-122358-route2.gpx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/xe2hack.py" beforeDir="false" afterPath="$PROJECT_DIR$/xe2hack.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
-    <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -21,11 +118,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="main.py" pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="366">
-              <caret line="193" column="0" lean-forward="false" selection-start-line="193" selection-start-column="0" selection-end-line="193" selection-end-column="0" />
+            <state relative-caret-position="137">
+              <caret line="432" selection-start-line="432" selection-end-line="432" />
               <folding>
                 <element signature="e#24#35#0" expanded="true" />
               </folding>
@@ -33,13 +130,25 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="fow_gps.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/fow_gps.py">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/fow_exif.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="484">
-              <caret line="329" column="100" lean-forward="false" selection-start-line="329" selection-start-column="100" selection-end-line="329" selection-end-column="100" />
+            <state relative-caret-position="250">
+              <caret line="178" column="39" selection-start-line="178" selection-start-column="39" selection-end-line="178" selection-end-column="39" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/plump.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="255">
+              <caret line="17" column="36" lean-forward="true" selection-start-line="17" selection-start-column="36" selection-end-line="17" selection-end-column="36" />
+              <folding>
+                <element signature="e#24#33#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -49,22 +158,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>gpx</find>
-      <find>PycharmProjects</find>
-      <find>images_get_e</find>
-      <find>images_get_exifs()</find>
-      <find>title</find>
-      <find>exifs</find>
-      <find>match</find>
-      <find>os.p</find>
-      <find>re.comp</find>
-      <find>compi</find>
-      <find>Copy()</find>
-      <find>dest=</find>
-      <find>format</find>
-      <find>{}</find>
-      <find>config -s</find>
-      <find>in range</find>
       <find>args</find>
       <find>fow d</find>
       <find>_check_option</find>
@@ -79,9 +172,31 @@
       <find>_ta</find>
       <find>cmd_task</find>
       <find>valid options</find>
+      <find>export</find>
+      <find>20171228</find>
+      <find>match</find>
+      <find>re.match</find>
+      <find>unexpected ar</find>
+      <find>title</find>
+      <find>def get_exif_status</find>
+      <find>.app</find>
+      <find>.inde</find>
+      <find>hack</find>
+      <find>JPG</find>
+      <find>'JPG'</find>
+      <find>description</find>
+      <find>'</find>
+      <find>{}&quot;</find>
+      <find>Missing ob</find>
     </findStrings>
     <replaceStrings>
       <replace>paramatrix</replace>
+      <replace>exif</replace>
+      <replace>description</replace>
+      <replace>author</replace>
+      <replace>&quot;</replace>
+      <replace>='{}'</replace>
+      <replace>='{}'&quot;</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -92,8 +207,6 @@
       <list>
         <option value="$PROJECT_DIR$/photo/.f" />
         <option value="$PROJECT_DIR$/.gitignore" />
-        <option value="$PROJECT_DIR$/make_dist" />
-        <option value="$PROJECT_DIR$/task.py" />
         <option value="$PROJECT_DIR$/photo/f" />
         <option value="$PROJECT_DIR$/rename.py" />
         <option value="$PROJECT_DIR$/README.txt" />
@@ -101,46 +214,42 @@
         <option value="$PROJECT_DIR$/release.info" />
         <option value="$PROJECT_DIR$/export.py" />
         <option value="$PROJECT_DIR$/man_source/fow-help" />
-        <option value="$PROJECT_DIR$/man_source/fow-load" />
         <option value="$PROJECT_DIR$/dist/debian/usr/lib/fow/main.py" />
-        <option value="$PROJECT_DIR$/config.py" />
         <option value="$PROJECT_DIR$/load.py" />
         <option value="$PROJECT_DIR$/man_source/fow-task" />
         <option value="$PROJECT_DIR$/man_source/fow-backup" />
-        <option value="$PROJECT_DIR$/man_source/fow-config" />
         <option value="$PROJECT_DIR$/man_source/fow-export" />
-        <option value="$PROJECT_DIR$/plump.py" />
         <option value="$PROJECT_DIR$/show.py" />
-        <option value="$PROJECT_DIR$/argument_checker.py" />
         <option value="$PROJECT_DIR$/man_source/fow-gps" />
-        <option value="$PROJECT_DIR$/main.py" />
+        <option value="$PROJECT_DIR$/man_source/fow-config" />
+        <option value="$PROJECT_DIR$/man_source/fow-load" />
+        <option value="$PROJECT_DIR$/man_source/fow-rename" />
+        <option value="$PROJECT_DIR$/man_source/fow-xe2hack" />
+        <option value="$PROJECT_DIR$/config.py" />
+        <option value="$PROJECT_DIR$/task.py" />
+        <option value="$PROJECT_DIR$/make_dist" />
         <option value="$PROJECT_DIR$/fow_gps.py" />
+        <option value="$PROJECT_DIR$/argument_checker.py" />
+        <option value="$PROJECT_DIR$/main.py" />
+        <option value="$PROJECT_DIR$/man_source/fow-exif" />
+        <option value="$PROJECT_DIR$/fow_exif.py" />
+        <option value="$PROJECT_DIR$/plump.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="39" />
-    <option name="y" value="19" />
-    <option name="width" value="1912" />
-    <option name="height" value="958" />
+    <option name="y" value="87" />
+    <option name="width" value="1902" />
+    <option name="height" value="957" />
   </component>
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
   <component name="ProjectView">
-    <navigator currentView="ProjectPane" proportions="" version="1">
-      <flattenPackages />
-      <showMembers />
-      <showModules />
-      <showLibraryContents />
-      <hideEmptyPackages />
-      <abbreviatePackageNames />
-      <autoscrollToSource />
-      <autoscrollFromSource />
-      <sortByType />
-      <manualOrder />
+    <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scratches" />
       <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
@@ -152,7 +261,7 @@
             <path>
               <item name="fow" type="b2602c69:ProjectViewProjectNode" />
               <item name="fow" type="462c0819:PsiDirectoryNode" />
-              <item name="dist" type="462c0819:PsiDirectoryNode" />
+              <item name="man_source" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -161,9 +270,10 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/argument_checker.py" />
-    <property name="settings.editor.selected.configurable" value="preferences.sourceCode.Python" />
     <property name="add_unversioned_files" value="true" />
+    <property name="last.edited.regexp" value="11" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../garmin-connect-export-pe-st/garmin-connect-export" />
+    <property name="settings.editor.selected.configurable" value="preferences.sourceCode" />
   </component>
   <component name="PyConsoleOptionsProvider">
     <option name="myPythonConsoleState">
@@ -172,6 +282,12 @@
         <option name="myModuleName" value="fow" />
       </console-settings>
     </option>
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/man_source" />
+    </key>
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -187,72 +303,61 @@
   </component>
   <component name="RunManager">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
+      <module name="fow" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
+      <option name="SDK_HOME" value="$PROJECT_DIR$/venv/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/test/photo" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="fow" />
       <option name="SCRIPT_NAME" value="" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
-      <method />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
     </configuration>
-    <configuration default="true" type="Tox" factoryName="Tox">
+    <configuration name="exif" type="PythonConfigurationType" factoryName="Python" editBeforeRun="true">
+      <module name="fow" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
-      <envs />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$PROJECT_DIR$/venv/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/test/photo" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="fow" />
-      <method />
-    </configuration>
-    <configuration default="true" type="tests" factoryName="Doctests">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="fow" />
-      <option name="SCRIPT_NAME" value="" />
-      <option name="CLASS_NAME" value="" />
-      <option name="METHOD_NAME" value="" />
-      <option name="FOLDER_NAME" value="" />
-      <option name="TEST_TYPE" value="TEST_SCRIPT" />
-      <option name="PATTERN" value="" />
-      <option name="USE_PATTERN" value="false" />
-      <method />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/fow.py" />
+      <option name="PARAMETERS" value="exif -v -f all" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
     </configuration>
     <configuration default="true" type="tests" factoryName="Unittests">
+      <module name="fow" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
-      <envs />
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="fow" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
       <option name="_new_target" value="&quot;.&quot;" />
       <option name="_new_targetType" value="&quot;PATH&quot;" />
-      <method />
+      <method v="2" />
     </configuration>
-  </component>
-  <component name="ShelveChangesManager" show_recycled="false">
-    <option name="remove_strategy" value="false" />
   </component>
   <component name="StructureViewFactory">
     <option name="ACTIVE_ACTIONS" value=",ALPHA_COMPARATOR" />
@@ -280,29 +385,51 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="39" y="19" width="1926" height="1058" extended-state="6" />
+    <frame x="0" y="0" width="1920" height="1044" extended-state="6" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.12219851" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.35441658" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="R Packages" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="R Graphics" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2910995" sideWeight="0.50208336" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32984293" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32879582" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.15741728" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.29828325" sideWeight="0.49791667" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="combo" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33583692" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32957596" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.16595517" />
+      <window_info id="Favorites" order="1" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.3313253" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32896176" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.28915662" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.35441658" />
+      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.50213444" side_tool="true" weight="0.2838428" />
+      <window_info anchor="bottom" id="Python Console" order="8" sideWeight="0.49839914" weight="0.32751092" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="9" sideWeight="0.49786553" visible="true" weight="0.34061137" />
+      <window_info anchor="bottom" id="Version Control" order="10" weight="0.32984293" />
+      <window_info anchor="right" id="R Graphics" order="0" />
+      <window_info anchor="right" id="R Packages" order="1" />
+      <window_info anchor="right" id="Commander" order="2" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="3" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="4" weight="0.25" />
+      <window_info anchor="right" id="Structure" order="5" visible="true" weight="0.18196371" />
+      <window_info anchor="right" id="Data View" order="6" weight="0.32957596" />
     </layout>
+    <layout-to-restore>
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.13874066" />
+      <window_info id="Favorites" order="1" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.33406115" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32896176" />
+      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.3995633" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.35441658" />
+      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.50208336" side_tool="true" weight="0.2910995" />
+      <window_info anchor="bottom" id="Python Console" order="8" weight="0.32786885" />
+      <window_info anchor="bottom" id="Terminal" order="9" sideWeight="0.49791667" weight="0.33842796" />
+      <window_info anchor="bottom" id="Version Control" order="10" weight="0.32984293" />
+      <window_info anchor="right" id="R Graphics" order="0" />
+      <window_info anchor="right" id="R Packages" order="1" />
+      <window_info anchor="right" id="Commander" order="2" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="3" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="4" weight="0.25" />
+      <window_info anchor="right" id="Structure" order="5" visible="true" weight="0.15741728" />
+      <window_info anchor="right" id="Data View" order="6" weight="0.32957596" />
+    </layout-to-restore>
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
@@ -329,9 +456,20 @@
         </entry>
       </map>
     </option>
-  </component>
-  <component name="VcsContentAnnotationSettings">
-    <option name="myLimit" value="2678400000" />
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list />
+          </value>
+        </entry>
+        <entry key="User">
+          <value>
+            <list />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <ignored-roots>
@@ -340,139 +478,21 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="4" />
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/argument_checker.py</url>
+          <line>191</line>
+          <option name="timeStamp" value="42" />
+        </line-breakpoint>
+      </breakpoints>
     </breakpoint-manager>
-    <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/show.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1122">
-          <caret line="70" column="36" lean-forward="false" selection-start-line="70" selection-start-column="35" selection-end-line="70" selection-end-column="36" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/load.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2414">
-          <caret line="145" column="19" lean-forward="false" selection-start-line="145" selection-start-column="19" selection-end-line="145" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/plump.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1377">
-          <caret line="85" column="25" lean-forward="false" selection-start-line="85" selection-start-column="25" selection-end-line="85" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fow_gps.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2193">
-          <caret line="129" column="32" lean-forward="false" selection-start-line="129" selection-start-column="32" selection-end-line="129" selection-end-column="32" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1156">
-          <caret line="83" column="44" lean-forward="false" selection-start-line="83" selection-start-column="44" selection-end-line="83" selection-end-column="44" />
-          <folding>
-            <element signature="e#24#35#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/man_source/fow-gps">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="544">
-          <caret line="32" column="94" lean-forward="false" selection-start-line="32" selection-start-column="94" selection-end-line="32" selection-end-column="94" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/plump.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="11628">
-          <caret line="688" column="55" lean-forward="false" selection-start-line="688" selection-start-column="55" selection-end-line="688" selection-end-column="55" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fow_gps.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/plump.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="11611">
-          <caret line="686" column="0" lean-forward="true" selection-start-line="686" selection-start-column="0" selection-end-line="686" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fow_gps.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/.gitignore">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/.gitignore">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/.gitignore">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fow_gps.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fow.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/photo/f" />
-    <entry file="file://$PROJECT_DIR$/fow_gps.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/photo/.f" />
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="102">
-          <caret line="6" column="5" lean-forward="false" selection-start-line="6" selection-start-column="5" selection-end-line="6" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/make_dist">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="11" column="57" lean-forward="false" selection-start-line="11" selection-start-column="57" selection-end-line="11" selection-end-column="57" />
+          <caret line="6" column="5" selection-start-line="6" selection-start-column="5" selection-end-line="6" selection-end-column="5" />
         </state>
       </provider>
     </entry>
@@ -480,215 +500,239 @@
     <entry file="file://$PROJECT_DIR$/rename.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="289">
-          <caret line="38" column="29" lean-forward="false" selection-start-line="38" selection-start-column="29" selection-end-line="38" selection-end-column="29" />
+          <caret line="38" column="29" selection-start-line="38" selection-start-column="29" selection-end-line="38" selection-end-column="29" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/dist/debian/usr/lib/fow/plump.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="222">
-          <caret line="868" column="13" lean-forward="false" selection-start-line="868" selection-start-column="13" selection-end-line="868" selection-end-column="13" />
+          <caret line="868" column="13" selection-start-line="868" selection-start-column="13" selection-end-line="868" selection-end-column="13" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/README.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="34">
-          <caret line="2" column="19" lean-forward="false" selection-start-line="2" selection-start-column="19" selection-end-line="2" selection-end-column="19" />
+          <caret line="2" column="19" selection-start-line="2" selection-start-column="19" selection-end-line="2" selection-end-column="19" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/dist/debian/usr/lib/fow/rename.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="495">
-          <caret line="38" column="25" lean-forward="false" selection-start-line="38" selection-start-column="25" selection-end-line="38" selection-end-column="25" />
+          <caret line="38" column="25" selection-start-line="38" selection-start-column="25" selection-end-line="38" selection-end-column="25" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/config">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="10" column="15" lean-forward="false" selection-start-line="10" selection-start-column="15" selection-end-line="10" selection-end-column="15" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharmCE2017.3/system/python_stubs/-1247971764/builtins.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="277">
-          <caret line="769" column="8" lean-forward="false" selection-start-line="769" selection-start-column="8" selection-end-line="769" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/release.info">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="1" column="11" lean-forward="false" selection-start-line="1" selection-start-column="11" selection-end-line="1" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/export.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="284">
-          <caret line="80" column="0" lean-forward="true" selection-start-line="80" selection-start-column="0" selection-end-line="80" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/../.PyCharmCE2017.3/system/python_stubs/-1247971764/builtins.py" />
     <entry file="file://$PROJECT_DIR$/fow.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="45">
-          <caret line="5" column="5" lean-forward="false" selection-start-line="5" selection-start-column="5" selection-end-line="5" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/man_source/fow-help">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" column="28" lean-forward="false" selection-start-line="2" selection-start-column="28" selection-end-line="2" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/man_source/fow-load">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" column="26" lean-forward="false" selection-start-line="2" selection-start-column="26" selection-end-line="2" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/man_source/fow-rename">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/man_source/fow-init">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/man_source/fow-show">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/man_source/fow-xe2hack">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/config.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="199">
-          <caret line="36" column="0" lean-forward="true" selection-start-line="36" selection-start-column="0" selection-end-line="36" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/load.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="395">
-          <caret line="148" column="20" lean-forward="false" selection-start-line="148" selection-start-column="20" selection-end-line="148" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/task.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="420">
-          <caret line="30" column="4" lean-forward="false" selection-start-line="30" selection-start-column="4" selection-end-line="30" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/man_source/fow-task">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="315">
-          <caret line="73" column="3" lean-forward="true" selection-start-line="73" selection-start-column="3" selection-end-line="73" selection-end-column="3" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/man_source/fow-backup">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="18" column="0" lean-forward="true" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/man_source/fow-config">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="15" column="20" lean-forward="true" selection-start-line="15" selection-start-column="20" selection-end-line="15" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/man_source/fow-export">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="600">
-          <caret line="40" column="0" lean-forward="true" selection-start-line="40" selection-start-column="0" selection-end-line="40" selection-end-column="0" />
+          <caret line="5" column="5" selection-start-line="5" selection-start-column="5" selection-end-line="5" selection-end-column="5" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/commands.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-675">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/show.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="10" column="38" lean-forward="true" selection-start-line="10" selection-start-column="38" selection-end-line="10" selection-end-column="38" />
-        </state>
+        <state relative-caret-position="-675" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/dist/debian/usr/lib/fow/main.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="197">
-          <caret line="638" column="11" lean-forward="false" selection-start-line="638" selection-start-column="11" selection-end-line="638" selection-end-column="11" />
+          <caret line="638" column="11" selection-start-line="638" selection-start-column="11" selection-end-line="638" selection-end-column="11" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/argument_checker.py">
+    <entry file="file://$PROJECT_DIR$/man_source/fow-xe2hack">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-16">
-          <caret line="13" column="0" lean-forward="false" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
+        <state relative-caret-position="60">
+          <caret line="4" column="70" lean-forward="true" selection-start-line="4" selection-start-column="70" selection-end-line="4" selection-end-column="70" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/plump.py">
+    <entry file="file://$PROJECT_DIR$/man_source/fow-show">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/man_source/fow-rename">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="900">
-          <caret line="60" column="22" lean-forward="true" selection-start-line="60" selection-start-column="22" selection-end-line="60" selection-end-column="22" />
+        <state relative-caret-position="60">
+          <caret line="4" column="58" lean-forward="true" selection-start-line="4" selection-start-column="58" selection-end-line="4" selection-end-column="58" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/man_source/fow-load">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="4" column="61" lean-forward="true" selection-start-line="4" selection-start-column="61" selection-end-line="4" selection-end-column="61" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/man_source/fow-init">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/man_source/fow-help">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="30">
+          <caret line="2" column="28" selection-start-line="2" selection-start-column="28" selection-end-line="2" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/man_source/fow-export">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="598">
+          <caret line="40" lean-forward="true" selection-start-line="40" selection-end-line="40" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/man_source/fow-config">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="3" column="8" selection-start-line="3" selection-start-column="8" selection-end-line="3" selection-end-column="8" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/man_source/fow-gps">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="60">
-          <caret line="4" column="13" lean-forward="false" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="13" />
+          <caret line="4" column="13" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="351">
+          <caret line="47" column="18" selection-start-line="47" selection-start-column="18" selection-end-line="47" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="10" column="15" selection-start-line="10" selection-start-column="15" selection-end-line="10" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/install">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/make_man">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/release.info">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="1" column="11" selection-start-line="1" selection-start-column="11" selection-end-line="1" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/make_dist">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="4" column="54" selection-start-line="4" selection-start-column="54" selection-end-line="4" selection-end-column="54" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/man_source/fow-backup">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="18" selection-start-line="18" selection-end-line="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/man_source/fow-task">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="552">
+          <caret line="67" column="3" lean-forward="true" selection-start-line="67" selection-start-column="3" selection-end-line="67" selection-end-column="3" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/show.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="167">
+          <caret line="167" column="26" selection-start-line="167" selection-start-column="26" selection-end-line="167" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/lib/python3.6/re.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="174">
+          <caret line="171" selection-start-line="171" selection-end-line="171" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/task.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="530">
+          <caret line="54" column="14" selection-start-line="54" selection-start-column="14" selection-end-line="54" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/export.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="9" column="4" selection-start-line="9" selection-start-column="4" selection-end-line="9" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/load.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1500">
+          <caret line="103" column="20" selection-start-line="103" selection-start-column="20" selection-end-line="103" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fow_gps.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="176">
+          <caret line="267" column="12" selection-start-line="267" selection-start-column="12" selection-end-line="267" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/argument_checker.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="234">
+          <caret line="160" column="92" selection-start-line="160" selection-start-column="92" selection-end-line="160" selection-end-column="92" />
+          <folding>
+            <element signature="e#978#987#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/man_source/fow-exif">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="30">
+          <caret line="2" column="30" selection-start-line="2" selection-start-column="30" selection-end-line="2" selection-end-column="30" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="366">
-          <caret line="193" column="0" lean-forward="false" selection-start-line="193" selection-start-column="0" selection-end-line="193" selection-end-column="0" />
+        <state relative-caret-position="137">
+          <caret line="432" selection-start-line="432" selection-end-line="432" />
           <folding>
             <element signature="e#24#35#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/fow_gps.py">
+    <entry file="file://$PROJECT_DIR$/fow_exif.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="484">
-          <caret line="329" column="100" lean-forward="false" selection-start-line="329" selection-start-column="100" selection-end-line="329" selection-end-column="100" />
+        <state relative-caret-position="250">
+          <caret line="178" column="39" selection-start-line="178" selection-start-column="39" selection-end-line="178" selection-end-column="39" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/plump.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="17" column="36" lean-forward="true" selection-start-line="17" selection-start-column="36" selection-end-line="17" selection-end-column="36" />
+          <folding>
+            <element signature="e#24#33#0" expanded="true" />
           </folding>
         </state>
       </provider>

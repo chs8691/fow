@@ -52,8 +52,8 @@ def check_actual():
 
     if not os.path.exists(get_task_path(get_actual()['task'])):
         print('Actual task points to invalid directory "'
-            + get_actual()['task'] +
-        '". Please set correct task with task -a <Folder/Task>.')
+              + get_actual()['task'] +
+              '". Please set correct task with task -a <Folder/Task>.')
         return False
 
     return True

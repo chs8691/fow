@@ -5,3 +5,4 @@ __*/
 .swpy
 *.pyc
 .idea
+test/

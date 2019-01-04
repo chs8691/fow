@@ -26,7 +26,7 @@
 #         dict(atom=atom_test, obligat=False)]]
 ###############################################################################
 import re
-from plump import NONE_PARAM, MANDATORY_PARAM
+from plump import NONE_PARAM, MANDATORY_PARAM, OPTIONAL_PARAM
 
 
 def check_rules(cmd_list, rules):
@@ -53,6 +53,70 @@ def check_rules(cmd_list, rules):
         print(ret['message'])
 
     return ret
+
+
+def _move_command_params(args, rule, ret):
+    """
+    Check if there is a command argument and move this one to the first place after the command in the args list
+    :param args:
+    :param rule:
+    :param ret:
+    :return: No ret
+    """
+    # command itself?
+    if len(args) < 3:
+        return
+
+    last_item_pos = None
+    # Get the position of the last option
+    for i in range(len(args)-1, 0, -1):
+        if re.match('^--\S+$', args[i]):
+            last_item_pos = i
+            break
+
+    # Nothing to do, if the last argument is not a parameter
+    if last_item_pos is None or last_item_pos == len(args)-1:
+        return
+
+    # Count the number of parameters at the argument's end (at least 1, otherwise 2)
+    nr_params = len(args)-1 - last_item_pos
+
+    # Check if command may have an parameter
+    none_item = [i for i in rule if i['atom']['name'] == '']
+    command_param_allowed = len(none_item) != 0 and none_item[0]['atom']['args'] != NONE_PARAM
+
+    # Get rule item for the last argument
+    last_item = [i for i in rule if "--{}".format(i['atom']['name']) == args[last_item_pos]]
+    last_arg_param_allowed = len(last_item) != 0 and last_item[0]['atom']['args'] != NONE_PARAM
+
+    # Let's define the number of command parameters we want to shift
+    nr = nr_params
+    if nr_params == 1:
+        if len(last_item) != 0 and last_item[0]['atom']['args'] == MANDATORY_PARAM:
+            nr = 0
+        elif len(none_item) != 0 and none_item[0]['atom']['args'] == MANDATORY_PARAM:
+            nr = 1
+        elif len(last_item) != 0 and last_item[0]['atom']['args'] == OPTIONAL_PARAM:
+            nr = 0
+        elif len(none_item) != 0 and none_item[0]['atom']['args'] == OPTIONAL_PARAM:
+            nr = 1
+        else:
+            # No parameter allowed, do nothing
+            nr = 0
+
+    # There are 2 values
+    else:
+        # One for the last option
+        nr -= 1
+
+    # Nothing to move
+    if nr < 1:
+        return
+
+    # Now let's move the command parameter to the first position
+    for i in range(nr, 0, -1):
+        args.insert(1, args[-1])
+        del args[-1]
 
 
 def _analyze_rules(args, rules):
@@ -94,7 +158,7 @@ def _analyze_rules(args, rules):
                 args.index("--{}".format(rule_item['atom']['name']))
             except ValueError:
                 # print("_analyze_rules()     ValueError={}".format(str(rule_item['atom']['name'])))
-                ret['message'] = "Missing obligatory parameter '{}'".format(rule_item['atom']['name'])
+                ret['message'] = "Constellation not valid, see 'fow help {}'.".format(args[0])
                 valid_rule = False
                 break
 
@@ -111,6 +175,7 @@ def _analyze_rules(args, rules):
             if len([i for i in rule if i['atom']['name'] == arg[2:]]) == 0:
                 # print("_analyze_rules()     not found={}".format(str(arg)))
                 ret['message'] = "Unexpected option '{}'".format(arg[2:])
+
                 valid_rule = False
                 break
 
@@ -122,6 +187,10 @@ def _analyze_rules(args, rules):
         # ----------------------------------- #
         # --- Now we have chosen the rule --- #
         # ----------------------------------- #
+
+        # Last parameter hack. We have to decide, for which option the last parameter is: The last option or the
+        _move_command_params(args, rule, ret)
+
         params_ret = _analyze_params(args, rule)
 
         if valid_rule:

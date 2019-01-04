@@ -6,6 +6,9 @@ import time
 import sys
 import re
 
+# Version nr with format <RELEASE>.<MAJOR>.<MINOR> YYYYMMDDHHmm
+VERSION = '1.1.8 Build 201901040138'
+
 DIR_00 = '00_Inbox'
 DIR_01 = '01_Import'
 DIR_02 = '02_Progress'
@@ -15,7 +18,8 @@ DIR_JPG = 'jpg'
 DIR_RAW = 'raw'
 DIR_FINAL = 'final'
 DIR_WORK = 'work'
-VERSION = '1.1.7 Build 201712282222'
+
+
 BACKUP_PATH = 'backup.path'
 TASK = 'task'
 TYPE_RAW = 'raw'
@@ -33,6 +37,10 @@ MANDATORY_PARAM = 2
 
 # Groups all exports destinations together. The have to start with 'export.'
 EXPORT_PREFIX = 'export'
+
+# Groups all exif values together. The have to start with 'exif.'
+EXIF_PREFIX = 'exif'
+
 # Groups all gpx keys together. The have to start with 'gpx.'
 GPS_PREFIX = 'gps'
 
@@ -132,7 +140,6 @@ def load_test_print(files, max_name_len, type):
     Prints info for the load analyse list of, e.g. for jpgs.
     """
     for item in files:
-        time_str = ''
         if item['exist']:
             status = 'o'
             time_str = time_readable(item['time']) + ' -> ' + \
@@ -444,7 +451,7 @@ def filename_get_type(filename):
         RAW, JPG, TIF
     Or, if other
     """
-    suffixes = ['jpg', 'JPG']
+    suffixes = ['jpg', 'JPG', 'jpeg', 'JPEG']
     for s in suffixes:
         if filename_get_suffix(filename) == s:
             return TYPE_JPG
@@ -467,7 +474,7 @@ def list_jpg(path):
     Like os.listdir, a list with jpg files will be returned.
     Supported suffixes: jpg, JPG.
     """
-    suffixes = ['jpg', 'JPG']
+    suffixes = ['jpg', 'JPG', 'jpeg', 'JPEG']
     return [f for f in os.listdir(path) for s in suffixes
             if filename_get_suffix(f) == s]
 
@@ -536,10 +543,10 @@ def get_exif_status(path):
     locations = dict()
     descriptions = dict()
 
-    jpg_exifs = images_get_exifs('{}/{}'.format(path, DIR_JPG), jpg_files)
-    raw_exifs = images_get_exifs('{}/{}'.format(path, DIR_RAW), raw_files)
-    video_exifs = images_get_exifs('{}/{}'.format(path, DIR_VIDEO), video_files)
-    final_exifs = images_get_exifs('{}/{}'.format(path, DIR_FINAL), final_files)
+    jpg_exifs = images_get_exifs('{}/{}'.format(path, DIR_JPG), jpg_files, report=True)
+    raw_exifs = images_get_exifs('{}/{}'.format(path, DIR_RAW), raw_files, report=True)
+    video_exifs = images_get_exifs('{}/{}'.format(path, DIR_VIDEO), video_files, report=True)
+    final_exifs = images_get_exifs('{}/{}'.format(path, DIR_FINAL), final_files, report=True)
     # print('get_status2() {}'.format(str(jpg_exifs)))
 
     # for each_file in jpg_files:
@@ -600,7 +607,6 @@ def get_exif_status(path):
 
 def get_exif_status_final_only(path):
     """
-    TODO Es kommen nicht die informationen aus jpg und raw/Verzeichnis
     Like get_exif_status, but only for images in final
     Example for return:
         return [dict(image='image1', final=True, jpg=True, raw=True,
@@ -625,7 +631,7 @@ def get_exif_status_final_only(path):
     locations = dict()
     descriptions = dict()
 
-    final_exifs = images_get_exifs('{}/{}'.format(path, DIR_FINAL), final_files)
+    final_exifs = images_get_exifs('{}/{}'.format(path, DIR_FINAL), final_files, report=True)
 
     jpg_images = [filename_get_name(f) for f in list_jpg(path + '/' + DIR_JPG)]
     raw_images = [filename_get_name(f) for f in list_raw(path + '/' + DIR_RAW)]
@@ -765,11 +771,12 @@ def image_write_gps(image_path, gpx_path):
     return True
 
 
-def images_get_exifs(path, file_names):
+def images_get_exifs(path, file_names, report=True):
     """
     Returns a list of dictionaries with all supported exif information for the give files.
     file_names: List with file names without a path
     path: Path to the files
+    :param report: With True, status will be printed. Default is true (silence)
     Example
         return [
         dict(name='img01.jpg', gps=dict(lon=1.0, lat=49,54.318340N), title='A huge tree',
@@ -781,14 +788,16 @@ def images_get_exifs(path, file_names):
     # print('Reading images', end='')
 
     index = 0
-    progress = progress_prepare(len(file_names), 'Reading', path)
+    if report:
+        progress = progress_prepare(len(file_names), 'Reading', path)
 
     for each in file_names:
         index += 1
-        sys.stdout.write(progress['back'] + progress['formatting'].format(str(index)))
-        sys.stdout.flush()
+        if report:
+            sys.stdout.write(progress['back'] + progress['formatting'].format(str(index)))
+            sys.stdout.flush()
 
-        cmd = 'exiftool -T -n -filename -gpslatitude -gpslongitude -title -createdate -description {}/{}'.format(path, each)
+        cmd = 'exiftool -T -n -filename -gpslatitude -gpslongitude -title -createdate -description -author {}/{}'.format(path, each)
         #     print('images_get_exifs() cmd={}'.format(cmd))
         try:
             b = subprocess.check_output(
@@ -799,7 +808,7 @@ def images_get_exifs(path, file_names):
             cmd_ret = cmd_ret[0:len(cmd_ret) - 1]
             # print('images_get_exifs() value={}'.format(str(cmd_ret)))
         except subprocess.CalledProcessError as e:
-            ret.append(dict(name=each, title=None, gps=None, createdate=None))
+            ret.append(dict(name=each, title=None, gps=None, createdate=None, author=None))
             # print(str(e))
             continue
 
@@ -807,6 +816,11 @@ def images_get_exifs(path, file_names):
         # print('images_get_exifs() value_list={}'.format(str(values)))
 
         # Not really nice and error prone but null values are set to '-', so we have to change this
+        if values[6] == '-':
+            author = None
+        else:
+            author = values[6]
+
         if values[4] == '-':
             createdate = None
         else:
@@ -827,11 +841,13 @@ def images_get_exifs(path, file_names):
         else:
             gps = dict(lat=values[1], lon=values[2])
 
-        ret.append(dict(name=values[0], title=title, description=description, gps=gps, createdate=createdate))
+        ret.append(dict(name=values[0], title=title, description=description, gps=gps, createdate=createdate,
+                        author=author))
 
     # print('Done.')
-    sys.stdout.write('\n')
-    sys.stdout.flush()
+    if report:
+        sys.stdout.write('\n')
+        sys.stdout.flush()
 
     return ret
 

@@ -3,8 +3,10 @@ import gzip
 import os
 import re
 import shutil
+from datetime import datetime
 
 import export
+import fow_exif
 import load
 import plump
 import rename
@@ -68,6 +70,7 @@ def cmd_gps(cmd_list):
     atom_none = dict(name='', short='', args=NONE_PARAM)
     atom_path = dict(name='path', short='p', args=MANDATORY_PARAM)
     atom_source = dict(name='source', short='s', args=MANDATORY_PARAM)
+    atom_write = dict(name='write', short='w', args=NONE_PARAM)
     atom_test = dict(name='test', short='t', args=NONE_PARAM)
     atom_map = dict(name='map', short='m', args=NONE_PARAM)
     atom_force = dict(name='force', short='f', args=NONE_PARAM)
@@ -78,7 +81,9 @@ def cmd_gps(cmd_list):
                           [
                               dict(atom=atom_none, obligat=True),
                               dict(atom=atom_source, obligat=False),
+                              dict(atom=atom_write, obligat=False),
                               dict(atom=atom_test, obligat=False),
+                              dict(atom=atom_write, obligat=False),
                               dict(atom=atom_verbose, obligat=False),
                               dict(atom=atom_force, obligat=False)
                           ],
@@ -113,21 +118,22 @@ def cmd_gps(cmd_list):
         # Validated absolute path to the images
         image_path = plump.get_path(ret['options'][''])
 
-    elif ret['options'][''] is not None:
-        key = 'gps.{}'.format(ret['options'][''])
-        if config.read_item(key) is None:
-            print(
-                "Value {0} not configured. Maybe you have to set it first with config -s '{0}=fow-subdir-to-images'".format(
-                    key))
-            return
-        if not os.path.exists(plump.get_path(config.read_item(key))):
-            print((("Destination points to a non existing sub dir: '{0}'. " +
-                    "Maybe the directory is temporary not available or you have to" +
-                    " change the destination with 'config -s {1}=fow-subdir-to-images'"))
-                  .format(str(config.read_item(key)), key))
-            return
-        # Validated absolute path to the images
-        image_path = plump.get_path(config.read_item(key))
+    # elif ret['options'][''] is not None:
+    #     key = 'gps.{}'.format(ret['options'][''])
+    #     if config.read_item(key) is None:
+    #         print(
+    #             "Value {0} not configured. Maybe you have to set it first with
+    # config -s '{0}=fow-subdir-to-images'".format(
+    #                 key))
+    #         return
+    #     if not os.path.exists(plump.get_path(config.read_item(key))):
+    #         print((("Destination points to a non existing sub dir: '{0}'. " +
+    #                 "Maybe the directory is temporary not available or you have to" +
+    #                 " change the destination with 'config -s {1}=fow-subdir-to-images'"))
+    #               .format(str(config.read_item(key)), key))
+    #         return
+    #     # Validated absolute path to the images
+    #     image_path = plump.get_path(config.read_item(key))
 
     # image path is the actual final
     else:
@@ -169,7 +175,17 @@ def cmd_gps(cmd_list):
         # Validated absolute path to the images
         track_path = config.read_item(plump.GPS_TRACK_PATH)
 
-    analysis = fow_gps.analyse(track_path, image_path)
+    # gps --write
+    if 'write' in ret['options']:
+        if not os.path.exists(os.path.join(task.get_actual()['path'], plump.DIR_WORK)):
+            print("Missing sub directory {}.".format(plump.DIR_WORK))
+            return
+        else:
+            write_path = os.path.join(task.get_actual()['path'], plump.DIR_WORK)
+    else:
+        write_path = None
+
+    analysis = fow_gps.analyse(track_path, image_path, write_path)
     # print('cmd_gps() analysis=' + str(analysis))
 
     # gps --verbose
@@ -180,12 +196,12 @@ def cmd_gps(cmd_list):
 
     # gps --test
     if 'test' in ret['options']:
-        fow_gps.test(analysis, verbose)
+        fow_gps.test(analysis, verbose, write_path)
         return
 
     # gps
     else:
-        fow_gps.do(analysis, True, verbose)
+        fow_gps.do(analysis, True, verbose, write_path)
 
 
 def cmd_rename(cmd_list):
@@ -313,6 +329,124 @@ def cmd_load(cmd_list):
         load.do(analysis, src, dest, processing_flags)
 
     return
+
+
+def cmd_exif(cmd_list):
+    """
+    Set exif values
+    """
+    atom_none = dict(name='', short='', args=OPTIONAL_PARAM)
+    atom_title = dict(name='title', short='t', args=MANDATORY_PARAM)
+    atom_description = dict(name='description', short='d', args=MANDATORY_PARAM)
+    atom_author = dict(name='author', short='a', args=NONE_PARAM)
+    atom_check = dict(name='check', short='c', args=NONE_PARAM)
+    atom_force = dict(name='force', short='f', args=NONE_PARAM)
+    atom_verbose = dict(name='verbose', short='v', args=NONE_PARAM)
+
+    # If none has an optional parameter, no other option in the same rule should have an optional parameter, too.
+    ret = check_rules(cmd_list,
+                      [
+                          [
+                              dict(atom=atom_none, obligat=True),
+                              dict(atom=atom_verbose, obligat=False),
+                          ],
+                          [
+                              dict(atom=atom_none, obligat=True),
+                              dict(atom=atom_title, obligat=True),
+                              dict(atom=atom_description, obligat=False),
+                              dict(atom=atom_author, obligat=False),
+                              dict(atom=atom_check, obligat=False),
+                              dict(atom=atom_force, obligat=False),
+                              dict(atom=atom_verbose, obligat=False),
+                          ],
+                          [
+                              dict(atom=atom_none, obligat=True),
+                              dict(atom=atom_title, obligat=False),
+                              dict(atom=atom_description, obligat=True),
+                              dict(atom=atom_author, obligat=False),
+                              dict(atom=atom_check, obligat=False),
+                              dict(atom=atom_force, obligat=False),
+                              dict(atom=atom_verbose, obligat=False),
+                          ],
+                          [
+                              dict(atom=atom_none, obligat=True),
+                              dict(atom=atom_title, obligat=False),
+                              dict(atom=atom_description, obligat=False),
+                              dict(atom=atom_author, obligat=True),
+                              dict(atom=atom_check, obligat=False),
+                              dict(atom=atom_force, obligat=False),
+                              dict(atom=atom_verbose, obligat=False),
+                          ]
+                      ])
+
+    if ret['message'] is not None:
+        return
+
+    # Get author
+    if 'author' in ret['options']:
+        try:
+            author = config.read_pickle()["{}.{}".format(plump.EXIF_PREFIX, 'author')]
+            if len(str(author)) == 0:
+                print("Destination value not defined. Create it with config -s '{}.author=<value>' first."
+                      .format(plump.EXIF_PREFIX))
+                return
+            # Replace year
+            author = author.replace("{YYYY}", str(datetime.now().year))
+
+        except (TypeError, KeyError):
+            print("xDestination value not defined. Create it with config -s '{}.author=<value>' first."
+                  .format(plump.EXIF_PREFIX))
+            return
+    else:
+        author = None
+
+    if not task.check_actual():
+        return
+
+    src_dir = task.get_actual()['task'] + '/' + plump.DIR_FINAL
+    src_path = task.get_task_path(src_dir)
+
+    # None, '*', 1,2,3 or a file name
+    files = fow_exif.check_images(src_path, ret['options'][''])
+    # print("cmd_exif() files={}".format(str(files)))
+    if files is None:
+        print("No images found")
+        return
+
+    if 'title' in ret['options']:
+        title = ret['options']['title']
+    else:
+        title = None
+
+    if 'description' in ret['options']:
+        description = ret['options']['description']
+    else:
+        description = None
+
+    analysis = fow_exif.analyse(src_path, files, title, description, author)
+
+    # print("cmd_exif() value=" + str(analysis))
+
+    if title is None and description is None and author is None:
+        fow_exif.show(analysis, src_dir, 'verbose' in ret['options'])
+        return
+
+    if 'check' in ret['options']:
+        fow_exif.test(analysis, src_dir, title is not None, description is not None, author is not None,
+                      'force' in ret['options'], 'verbose' in ret['options'])
+        return
+
+    # exif --force
+    if 'force' not in ret['options']:
+        overwritten_tags = [a for a in analysis if a['title']['overwrite'] or a['description']['overwrite']
+                            or a['author']['overwrite']]
+        if len(overwritten_tags) > 0:
+            print("Value(s) would be overwritten, use --force to to this.")
+            return
+
+    # Do it!
+    fow_exif.do(analysis, src_path, title is not None, description is not None, author is not None,
+                'verbose' in ret['options'])
 
 
 def cmd_export(cmd_list):
@@ -928,6 +1062,9 @@ def fow(args=None):
     elif cmds[0] == 'export':
         cmd_export(cmds)
 
+    elif cmds[0] == 'exif':
+        cmd_exif(cmds)
+
     elif cmds[0] == 'load':
         cmd_load(cmds)
 
@@ -939,9 +1076,6 @@ def fow(args=None):
 
     elif cmds[0] == 'gps':
         cmd_gps(cmds)
-
-        # elif cmds[0] == 'cd':
-        # cmd_cd(plump.toArgStruct(cmds[1:]))
 
     else:
         print('Unknown command. Use help to list all commands.')

@@ -2,7 +2,7 @@
 ." Contact christian.schulzendorff@arcor.de to correct errors or typos.
 .TH FOW-LOAD "24 September 2018" "Fow manual" "fow load"
 .SH "NAME"
-load \- Loads images from external destinations into 00_Inbox.  
+load \- Loads images from external destinations into 00_Inbox
 .SH "SYNOPSIS"	
 .TP
 load

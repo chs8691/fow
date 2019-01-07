@@ -4,5 +4,5 @@ __*/
 .~*
 .swpy
 *.pyc
-.idea
+.idea/
 test/

@@ -40,7 +40,7 @@ class Map(object):
                 }});""".format(lat=x[0], lon=x[1], name=x[2], title=x[3], description=x[4], label=x[5]) for x in self._points
             ])
         return """
-            <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+            <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&key=AIzaSyCRbHXllbvGogfT70RU1HzEPxrl1DukhCA"></script>
             <div id="map-canvas" style="height: 100%; width: 100%"></div>
             <script type="text/javascript">
                 var map;

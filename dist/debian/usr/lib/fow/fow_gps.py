@@ -31,28 +31,41 @@ class Map(object):
     def __str__(self):
         center_lat = sum(( x[0] for x in self._points)) / len(self._points)
         center_lon = sum(( x[1] for x in self._points)) / len(self._points)
-        markers_code = "\n".join(
-            [ """new google.maps.Marker({{
-                position: new google.maps.LatLng({lat}, {lon}),
-                label: '{label}',
-                map: map,
-                title: '{name} \\n {title} \\n {description}'
-                }});""".format(lat=x[0], lon=x[1], name=x[2], title=x[3], description=x[4], label=x[5]) for x in self._points
+
+        markers_code = "\n".join(["""
+                lonLat = new OpenLayers.LonLat( {lon} ,{lat} )
+                      .transform(
+                        new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
+                        map.getProjectionObject() // to Spherical Mercator Projection
+                      );
+            
+                markers.addMarker(new OpenLayers.Marker(lonLat));
+            """.format(lat=x[0], lon=x[1], name=x[2], title=x[3], description=x[4], label=x[5]) for x in self._points
             ])
+
         return """
-            <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
-            <div id="map-canvas" style="height: 100%; width: 100%"></div>
-            <script type="text/javascript">
-                var map;
-                function show_map() {{
-                    map = new google.maps.Map(document.getElementById("map-canvas"), {{
-                        zoom: 12,
-                        center: new google.maps.LatLng({centerLat}, {centerLon})
-                    }});
-                    {markersCode}
-                }}
-                google.maps.event.addDomListener(window, 'load', show_map);
-            </script>
+            <html>
+            <body>
+              <div id="mapdiv"></div>
+              <script src="http://www.openlayers.org/api/OpenLayers.js"></script>
+              <script>
+                map = new OpenLayers.Map("mapdiv");
+                map.addLayer(new OpenLayers.Layer.OSM());
+            
+                var zoom=14;
+                var markers = new OpenLayers.Layer.Markers( "Markers" );
+                var lonLat;
+                {markersCode}
+                map.addLayer(markers);
+                
+                var lonLatCenter = new OpenLayers.LonLat( {centerLon} ,{centerLat} )
+                      .transform(
+                        new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
+                        map.getProjectionObject() // to Spherical Mercator Projection
+                      );
+                map.setCenter (lonLatCenter, zoom);
+              </script>
+            </body></html>
         """.format(centerLat=center_lat, centerLon=center_lon,
                    markersCode=markers_code)
 

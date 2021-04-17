@@ -2,7 +2,16 @@ __*
 0*
 __*/
 .~*
-.swpy
+*.swp
+*.swo
 *.pyc
 .idea/
 test/
+/venv/
+00_Inbox/
+01_Import/
+02_Progress/
+.fow
+camera
+build
+

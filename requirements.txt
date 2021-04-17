@@ -1,0 +1,9 @@
+build==0.3.1.post1
+fow==1.1.8
+importlib-metadata==3.7.3
+packaging==20.9
+pep517==0.10.0
+pyparsing==2.4.7
+toml==0.10.2
+typing-extensions==3.7.4.3
+zipp==3.4.1

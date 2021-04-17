@@ -1,0 +1,23 @@
+===============================================================================
+Symbolischen Link für camera in opensuse anlegen
+===============================================================================
+Den Pfad der per USB angeschlossenen Camera für den aktuelle user herausfinden:
+
+$ find  /run/user/$(id -u)/gvfs/ -mindepth 1 -maxdepth 1 -type d 
+gphoto2:host=04cb_USB_PTP_Camera_593331303834160117576030210616
+
+Eine symbolischen Link anlegen und als load 'camera' configurieren:
+$ ln -s -T /run/user/1026/gvfs/gphoto2:host=04cb_USB_PTP_Camera_593331303834160117576030210616 camera
+
+
+===============================================================================
+How to create a rpm package for fow.
+===============================================================================
+See. https://www.admin-magazin.de/Das-Heft/2012/03/RPM-Pakete-von-und-fuer-Python/(offset)/2
+Setup
+=====
+Dowload rpmdevtools and rpmlint
+Create rpmbuild folder in home dir
+$ rpmdev-setuptree
+
+

@@ -1,0 +1,53 @@
+#!/bin/bash
+# Gather all files together into ~/rpmbuild and build the rpm package
+# Precondition is an rpmbuild folder structure and rpmbuild itself
+RPMBUILD=~/rpmbuild
+VERSION="1.8.0"
+
+if rpm -qa rpmdevtools | grep rpmdevtools; then
+  echo "Found rpmdevtools"
+else
+  echo "Missing rpmdevtools. Please install them first."
+  exit 1
+fi
+
+if [[ ! -d "$RPMBUILD" ]]; then 
+  echo "Missing $RPMBUILD. Create it now..."
+  rpmdev-setuptree
+fi
+
+if [[ ! -d "$RPMBUILD" ]]; then 
+  echo "Could not create $RPMBUILD !"
+  exit 1
+fi
+
+SOURCES=~/rpmbuild/SOURCES
+SPECS=~/rpmbuild/SPECS
+DEST=$SOURCES/fow-$VERSION
+LIB=$DEST/lib
+BIN=$DEST/bin
+MAN=$DEST/man
+
+if [[ ! -d "$SOURCES" ]]; then 
+  echo "Could not find $SOURCES"
+  exit 1
+fi
+
+if [[ -d "$DEST" ]]; then
+  echo "Remove existing $DEST"
+  rm -v -r "$DEST"
+fi
+
+mkdir -v "$DEST"
+mkdir -v "$LIB"
+mkdir -v "$BIN"
+mkdir -v "$MAN"
+
+cp -v script/fow "$BIN"
+cp -v fow/* "$LIB"
+cp -v man/* "$MAN"
+cp -v fow.spec "$SPECS"
+
+cd "$SOURCES" && tar -v -czf fow.tar.gz "fow-$VERSION"
+
+rpmbuild -v -ba "$SPECS/fow.spec"

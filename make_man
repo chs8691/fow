@@ -2,4 +2,4 @@
 rm man/*.gz
 cp man_source/* man
 gzip man/* -f -v
-rename.ul .gz .1.gz man/*.gz
+rename .gz .1.gz man/*.gz

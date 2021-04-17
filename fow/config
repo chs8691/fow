@@ -1,0 +1,11 @@
+# System specific configuration. This file was created with an editor.
+#
+# HELP_FILE_DIR Path to the man pages. Obligatory value.
+#     All help files must be in the same directory.
+# Developer's installation directory <fow-repo>/man
+# :HELP_FILE_DIR=/home/chris/dev/github/fow/man
+# Debian, Fedora, Opensuse etc.
+HELP_FILE_DIR=/usr/share/man/man1
+#
+# Set MAN_DIRECT to True, if command man should be called with option -l
+MAN_DIRECT=True

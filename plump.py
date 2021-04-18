@@ -7,10 +7,7 @@ import sys
 import re
 
 # Version nr with format <RELEASE>.<MAJOR>.<MINOR> YYYYMMDDHHmm
-# The version number will be read by scripts, so take care for the right
-# formatting. Example:
-#VERSION = '1.1.8 Build 201901040138'
-VERSION = '1.1.8 Build 20210418021700'
+VERSION = '1.1.8 Build 201901040138'
 
 DIR_00 = '00_Inbox'
 DIR_01 = '01_Import'

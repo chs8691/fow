@@ -13,13 +13,13 @@
 # published by the Open Source Initiative.
 
 Name: 		fow
-Version: 	1.8.0
+Version: 	__VERSION__	
 Release:        0 
 Summary:        Script for file based photographers workflow 
 Group: 		TecAdmin
 License:        MIT
 URL:		https://github.com/chs8691/fow
-Source0:        fow.tar.gz
+Source0:        fow-%{VERSION}.tar.gz
 
 %description
 fow

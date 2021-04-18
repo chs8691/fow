@@ -1,0 +1,4 @@
+#!/bin/bash
+# Read VERSION value from fow coding and write into file 'version'
+sed -n 's/VERSION = '\''\([[:digit:]]\.[[:digit:]]\.[[:digit:]]\) Build .*/\1/w version' fow/plump.py
+echo 'version' set to $(<version) 

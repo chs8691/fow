@@ -2,7 +2,9 @@
 # Gather all files together into ~/rpmbuild and build the rpm package
 # Precondition is an rpmbuild folder structure and rpmbuild itself
 RPMBUILD=~/rpmbuild
-VERSION="1.8.0"
+read_version
+VERSION=$(<version)
+echo Building version "$VERSION"
 
 if rpm -qa rpmdevtools | grep rpmdevtools; then
   echo "Found rpmdevtools"
@@ -35,19 +37,28 @@ fi
 
 if [[ -d "$DEST" ]]; then
   echo "Remove existing $DEST"
-  rm -v -r "$DEST"
+  rm -r "$DEST"
 fi
 
-mkdir -v "$DEST"
-mkdir -v "$LIB"
-mkdir -v "$BIN"
-mkdir -v "$MAN"
+mkdir "$DEST"
+mkdir "$LIB"
+mkdir "$BIN"
+mkdir "$MAN"
 
-cp -v script/fow "$BIN"
-cp -v fow/* "$LIB"
-cp -v man/* "$MAN"
-cp -v fow.spec "$SPECS"
+cp script/fow "$BIN"
+cp fow/* "$LIB"
+cp man/* "$MAN"
 
-cd "$SOURCES" && tar -v -czf fow.tar.gz "fow-$VERSION"
+cp fow.spec.template "$SPECS/fow.spec"
+sed -i "s/__VERSION__/${VERSION}/g" "$SPECS/fow.spec"
 
-rpmbuild -v -ba "$SPECS/fow.spec"
+cd "$SOURCES" && tar -czf fow-$VERSION.tar.gz "fow-$VERSION"
+
+rpmbuild -ba "$SPECS/fow.spec"
+
+RPM=$(find ~/rpmbuild/RPMS/ -name fow-$VERSION-*.rpm)
+
+echo Done.
+echo Now you can install th rpm on your local machine as sudo:
+echo rpm -ivh $RPM
+
